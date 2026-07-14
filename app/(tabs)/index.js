@@ -169,6 +169,7 @@ const styles = StyleSheet.create({
         borderRightColor: '#E0E0E0',
         height: 36,
         justifyContent: 'center',
+        backgroundColor:'#fff'
     },
     textInput: {
         flex: 1,
