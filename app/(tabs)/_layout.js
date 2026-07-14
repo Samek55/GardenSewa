@@ -15,7 +15,7 @@ const TabLayout = () => {
                     title: "Home",
 
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons size={24} color="black" name={focused ? 'home-outline' : 'home-outline'} />
+                        <Ionicons size={28} color="black" name={focused ? 'home-outline' : 'home-outline'} />
                     )
                 }}>
             </Tabs.Screen>
@@ -24,7 +24,7 @@ const TabLayout = () => {
                 options={{
                     title: "Services",
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons size={24} color="black" name={focused ? 'construct-outline' : 'construct-outline'} />
+                        <Ionicons size={28} color="black" name={focused ? 'construct-outline' : 'construct-outline'} />
                     )
                 }}
             />
@@ -33,7 +33,7 @@ const TabLayout = () => {
                 options={{
                     title: "Book",
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons size={24} color="black" name={focused ? 'add-circle-outline' : 'add-circle-outline'} />
+                        <Ionicons size={28} color="black" name={focused ? 'add-circle-outline' : 'add-circle-outline'} />
                     )
                 }}
             />
@@ -42,7 +42,7 @@ const TabLayout = () => {
                 options={{
                     title: "About",
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons size={24} color="black" name={focused ? 'information-circle-outline' : 'information-circle-outline'} />
+                        <Ionicons size={28} color="black" name={focused ? 'information-circle-outline' : 'information-circle-outline'} />
                     )
                 }}
             />
@@ -51,7 +51,7 @@ const TabLayout = () => {
                 options={{
                     title: "Contact",
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons size={24} color="black" name={focused ? 'call-outline' : 'call-outline'} />
+                        <Ionicons size={28} color="black" name={focused ? 'call-outline' : 'call-outline'} />
                     )
                 }}
             />

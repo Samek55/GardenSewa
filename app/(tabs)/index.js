@@ -1,16 +1,27 @@
-import { Button, Dimensions, Image, StyleSheet, Text, TextInput, View } from "react-native";
+import { Link } from 'expo-router';
+import { Button, FlatList, Image, StyleSheet, Text, TextInput, View } from "react-native";
 import Icon from 'react-native-ico-flags';
+import ServiceCard from "../../components/ServiceCard";
+import { services } from "../../data/servicesList";
 
-const { width } = Dimensions.get('window');
+
+
 
 export default function Index() {
+
+    const filteredServicesTop = services.filter(service => service.label === 'Top');
+
+    console.log(filteredServicesTop)
+
+
+
     return (
 
         <>
             <View style={styles.container}>
 
                 <Image
-                    source={require('@/assets/images/service3.jpg')}
+                    source={require('@/assets/images/garden2.jpg')}
                     style={styles.backgroundImage}
                     resizeMode="cover"
                 />
@@ -40,9 +51,9 @@ export default function Index() {
                 </View>
             </View>
 
-            <View style={[styles.container, { marginTop: 8, marginHorizontal: 8, paddingHorizontal: 8, height: '26%', width: 'auto', overflow: 'hidden', borderRadius: 18 }]}>
+            <View style={[styles.container, { marginTop: 12, marginHorizontal: 12, paddingHorizontal: 8, height: '30%', width: 'auto', overflow: 'hidden', borderRadius: 18 }]}>
                 <Image
-                    source={require('@/assets/images/service2.jpg')}
+                    source={require('@/assets/images/garden1.jpg')}
                     style={styles.backgroundImage}
                     resizeMode="cover"
                 />
@@ -58,6 +69,38 @@ export default function Index() {
                 </View>
             </View>
 
+
+            <View style={{ height: 220, marginHorizontal: 12 }}>
+                <View style={{
+                    height: 20,
+                    flex: 1,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginHorizontal: 12,
+                }}>
+                    <Text>Top Services</Text>
+                    <Link href={'/services'}>See all</Link>
+                </View>
+                <FlatList
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    data={filteredServicesTop}
+                    renderItem={({ item, index }) => (
+                        <ServiceCard
+                            key={index}
+                            title={item.title}
+                            imageSource={item.url}
+                        />
+                    )}
+                    keyExtractor={(item, index) => index.toString()}
+                    contentContainerStyle={{
+                        paddingHorizontal: 16,
+                    }}
+                    ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+                />
+            </View>
+
         </>
 
     );
@@ -66,7 +109,7 @@ export default function Index() {
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-        height: '36%',
+        height: '40%',
         position: 'relative',
         backgroundColor: '#000',
     },
