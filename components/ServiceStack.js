@@ -2,7 +2,7 @@ import { Image, StyleSheet, Text, View } from 'react-native'
 
 
 const ServiceStack = ({ imageSource, description, title }) => {
-    console.log(imageSource)
+    // console.log(imageSource)
     return (
         <View style={styles.container}>
 

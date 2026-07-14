@@ -11,7 +11,7 @@ export default function Index() {
 
     const filteredServicesTop = services.filter(service => service.label === 'Top');
 
-    console.log(filteredServicesTop)
+    // console.log(filteredServicesTop)
 
 
 

@@ -214,3 +214,24 @@ export const categories = [
     },
     
 ]
+
+export const teams =[
+    {
+        id:1,
+        name:"Yogendra",
+        position:"CEO",
+        url:"https://plus.unsplash.com/premium_photo-1682096252599-e8536cd97d2b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cG9ydHJhaXR8ZW58MHx8MHx8fDA%3D"
+    },
+    {
+        id:2,
+        name:"Pankaj",
+        position:"CFO",
+        url:"https://plus.unsplash.com/premium_photo-1682096252599-e8536cd97d2b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cG9ydHJhaXR8ZW58MHx8MHx8fDA%3D"
+    },
+    {
+        id:3,
+        name:"Raju",
+        position:"CMO",
+        url:"https://plus.unsplash.com/premium_photo-1682096252599-e8536cd97d2b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cG9ydHJhaXR8ZW58MHx8MHx8fDA%3D"
+    }
+]
