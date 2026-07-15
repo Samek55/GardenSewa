@@ -28,7 +28,7 @@ export default function RootLayout() {
           options={{
             headerShown: true,
             headerStyle: {
-              backgroundColor: "#047754",
+              backgroundColor: "#245d5a",
             },
             headerTitleAlign: 'left',
             headerTitle: () => (

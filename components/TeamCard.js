@@ -22,9 +22,8 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        // backgroundColor:'green',
         paddingBottom:8,
-        gap:3
+        gap:2
     },
     image: {
         width: 80,
@@ -36,7 +35,6 @@ const styles = StyleSheet.create({
     imageContainer: {
         width: 100,
         height: 100,
-        // borderRadius: '50%' not on the container but rather on the image style 
     }
 })
 

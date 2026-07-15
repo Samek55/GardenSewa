@@ -226,12 +226,85 @@ export const teams =[
         id:2,
         name:"Pankaj",
         position:"CFO",
-        url:"https://plus.unsplash.com/premium_photo-1682096252599-e8536cd97d2b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cG9ydHJhaXR8ZW58MHx8MHx8fDA%3D"
+        url:"https://media.istockphoto.com/id/1284027512/photo/smiling-man-with-arms-crossed-wearing-eyeglasses.webp?a=1&b=1&s=612x612&w=0&k=20&c=jnwARRevtJUvDbCOzAj_GYF-xyM_8zWZS0xhmzm07FI="
     },
     {
         id:3,
         name:"Raju",
         position:"CMO",
-        url:"https://plus.unsplash.com/premium_photo-1682096252599-e8536cd97d2b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cG9ydHJhaXR8ZW58MHx8MHx8fDA%3D"
+        url:"https://media.istockphoto.com/id/1277971635/photo/portrait-of-a-smiling-man-of-indian-ethnicity.webp?a=1&b=1&s=612x612&w=0&k=20&c=WDut88fKkZMl0aqIC7s7GmZuvnv4xN9xsqdhXtYqpqE="
     }
+]
+
+export const shiftsData=[
+    {
+        id:1,
+        name:"Morning"
+    },
+    {
+        id:2,
+        name:"Day"
+    },
+    {
+        id:3,
+        name:"Afternoon"
+    },
+    {
+        id:4,
+        name:"Night"
+    },
+]
+
+export const cityData =[
+    {
+        id:1,
+        name:"Kathmandu"
+    },
+    {
+        id:2,
+        name:"Bhaktapur"
+    },
+    {
+        id:3,
+        name:"Lalitpur"
+    },
+]
+
+export const priorityData = [
+    {
+        id:1,
+        name:"normal",
+    },
+    {
+        id:2,
+        name:"urgent",
+    }
+]
+
+export const budgetData = [
+    {
+        id:1,
+        name:"Below NPR 5000"
+    },
+    {
+        id:2,
+        name:"NPR 5000 - 10,000"
+    },
+    {
+        id:1,
+        name:"NPR 10,000 - 15,000"
+    },
+    {
+        id:1,
+        name:"NPR 15,000 - 20,000"
+    },
+    {
+        id:1,
+        name:"NPR 20,000 - 25,000"
+    },
+    {
+        id:1,
+        name:"Above NPR 25000"
+    },
+
 ]

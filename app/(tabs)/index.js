@@ -45,7 +45,7 @@ export default function Index() {
                             keyboardType="phone-pad"
                         />
                         <View style={styles.buttonWrapper}>
-                            <Button title="Help" color="#047754" />
+                            <Button title="Help" color="#245d5a" />
                         </View>
                     </View>
                 </View>
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
         top: 16,
         left: 16,
         zIndex: 10,
-        backgroundColor: '#047754',
+        backgroundColor: '#245d5a',
         paddingHorizontal: 14,
         paddingVertical: 6,
         borderRadius: 20,

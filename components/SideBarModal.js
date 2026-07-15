@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
         borderTopStartRadius: 36,
         borderBottomWidth: 1,
         borderBottomColor: '#F3F4F6',
-        backgroundColor: "#047754",
+        backgroundColor: "#245d5a",
         marginBottom: 8,
         paddingVertical: 12,
     },
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
-        backgroundColor: '#047754',
+        backgroundColor: '#245d5a',
         paddingVertical: 12,
         borderRadius: 9999, // Fully rounded capsule
         shadowColor: '#047754',
