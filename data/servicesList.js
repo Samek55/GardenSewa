@@ -212,99 +212,198 @@ export const categories = [
         title: "Maintenance & Care",
         url: 'https://images.unsplash.com/photo-1668120089662-42642838cfef?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
     },
-    
+
 ]
 
-export const teams =[
+export const teams = [
     {
-        id:1,
-        name:"Yogendra",
-        position:"CEO",
-        url:"https://plus.unsplash.com/premium_photo-1682096252599-e8536cd97d2b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cG9ydHJhaXR8ZW58MHx8MHx8fDA%3D"
+        id: 1,
+        name: "Yogendra",
+        position: "CEO",
+        url: "https://plus.unsplash.com/premium_photo-1682096252599-e8536cd97d2b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cG9ydHJhaXR8ZW58MHx8MHx8fDA%3D"
     },
     {
-        id:2,
-        name:"Pankaj",
-        position:"CFO",
-        url:"https://media.istockphoto.com/id/1284027512/photo/smiling-man-with-arms-crossed-wearing-eyeglasses.webp?a=1&b=1&s=612x612&w=0&k=20&c=jnwARRevtJUvDbCOzAj_GYF-xyM_8zWZS0xhmzm07FI="
+        id: 2,
+        name: "Pankaj",
+        position: "CFO",
+        url: "https://media.istockphoto.com/id/1284027512/photo/smiling-man-with-arms-crossed-wearing-eyeglasses.webp?a=1&b=1&s=612x612&w=0&k=20&c=jnwARRevtJUvDbCOzAj_GYF-xyM_8zWZS0xhmzm07FI="
     },
     {
-        id:3,
-        name:"Raju",
-        position:"CMO",
-        url:"https://media.istockphoto.com/id/1277971635/photo/portrait-of-a-smiling-man-of-indian-ethnicity.webp?a=1&b=1&s=612x612&w=0&k=20&c=WDut88fKkZMl0aqIC7s7GmZuvnv4xN9xsqdhXtYqpqE="
+        id: 3,
+        name: "Raju",
+        position: "CMO",
+        url: "https://media.istockphoto.com/id/1277971635/photo/portrait-of-a-smiling-man-of-indian-ethnicity.webp?a=1&b=1&s=612x612&w=0&k=20&c=WDut88fKkZMl0aqIC7s7GmZuvnv4xN9xsqdhXtYqpqE="
     }
 ]
 
-export const shiftsData=[
+export const shiftsData = [
     {
-        id:1,
-        name:"Morning"
+        id: 1,
+        name: "Morning"
     },
     {
-        id:2,
-        name:"Day"
+        id: 2,
+        name: "Day"
     },
     {
-        id:3,
-        name:"Afternoon"
+        id: 3,
+        name: "Afternoon"
     },
     {
-        id:4,
-        name:"Night"
+        id: 4,
+        name: "Night"
     },
 ]
 
-export const cityData =[
+export const cityData = [
     {
-        id:1,
-        name:"Kathmandu"
+        id: 1,
+        name: "Kathmandu"
     },
     {
-        id:2,
-        name:"Bhaktapur"
+        id: 2,
+        name: "Bhaktapur"
     },
     {
-        id:3,
-        name:"Lalitpur"
+        id: 3,
+        name: "Lalitpur"
     },
 ]
 
 export const priorityData = [
     {
-        id:1,
-        name:"normal",
+        id: 1,
+        name: "normal",
     },
     {
-        id:2,
-        name:"urgent",
+        id: 2,
+        name: "urgent",
     }
 ]
 
 export const budgetData = [
     {
+        id: 1,
+        name: "Below NPR 5000"
+    },
+    {
+        id: 2,
+        name: "NPR 5000 - 10,000"
+    },
+    {
+        id: 1,
+        name: "NPR 10,000 - 15,000"
+    },
+    {
+        id: 1,
+        name: "NPR 15,000 - 20,000"
+    },
+    {
+        id: 1,
+        name: "NPR 20,000 - 25,000"
+    },
+    {
+        id: 1,
+        name: "Above NPR 25000"
+    },
+
+]
+
+export const faqData = [
+    {
+        id: 1,
+        title: "What garden services do you provide in Nepal?",
+        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+    },
+    {
+        id: 2,
+        title: "What garden services do you provide in Nepal?",
+        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+    },
+    {
+        id: 3,
+        title: "What garden services do you provide in Nepal?",
+        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+    },
+    {
+        id: 4,
+        title: "What garden services do you provide in Nepal?",
+        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+    },
+    {
+        id: 5,
+        title: "What garden services do you provide in Nepal?",
+        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+    },
+    {
+        id: 6,
+        title: "What garden services do you provide in Nepal?",
+        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+    },
+    {
+        id: 7,
+        title: "What garden services do you provide in Nepal?",
+        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+    },
+    {
+        id: 8,
+        title: "What garden services do you provide in Nepal?",
+        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+    },
+    {
+        id: 9,
+        title: "What garden services do you provide in Nepal?",
+        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+    },
+    {
+        id: 10,
+        title: "What garden services do you provide in Nepal?",
+        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+    },
+
+]
+
+
+export const notificationsData = [
+    {
         id:1,
-        name:"Below NPR 5000"
+        message:"Service booked for lawn maintenance"
     },
     {
         id:2,
-        name:"NPR 5000 - 10,000"
+        message:"Profile Updated"
     },
     {
-        id:1,
-        name:"NPR 10,000 - 15,000"
+        id:3,
+        message:"Response from professional"
     },
     {
-        id:1,
-        name:"NPR 15,000 - 20,000"
+        id:4,
+        message:"Service booked for lawn maintenance"
     },
     {
-        id:1,
-        name:"NPR 20,000 - 25,000"
+        id:5,
+        message:"Profile Updated"
     },
     {
-        id:1,
-        name:"Above NPR 25000"
+        id:6,
+        message:"Response from professional"
+    },
+    {
+        id:7,
+        message:"Response from professional"
+    },
+    {
+        id:8,
+        message:"Response from professional"
+    },
+    {
+        id:9,
+        message:"Response from professional"
+    },
+    {
+        id:10,
+        message:"Response from professional"
     },
 
 ]

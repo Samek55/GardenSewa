@@ -6,7 +6,10 @@ const TabLayout = () => {
         <Tabs screenOptions={{
             tabBarActiveTintColor: '#245d5a',
             tabBarInactiveTintColor: '#a3a1a1',
-            headerShown: false
+            headerShown: false,
+            tabBarItemStyle: {
+                flex: 1
+            }
 
         }}>
             <Tabs.Screen
@@ -55,7 +58,29 @@ const TabLayout = () => {
                     )
                 }}
             />
+            <Tabs.Screen
+                name="faq"
+                options={{
+                    title: "Faq",
+                    href: null
+                }}
+            />
 
+            <Tabs.Screen
+                name="notifications"
+                options={{
+                    title: "Notification",
+                    href: null
+                }}
+            />
+
+            <Tabs.Screen
+                name="joinasaprofessional"
+                options={{
+                    title: "Join as a Professional",
+                    href: null
+                }}
+            />
 
         </Tabs>
     )

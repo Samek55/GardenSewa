@@ -1,18 +1,35 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Calendar } from 'react-native-calendars';
 import Icon from 'react-native-ico-flags';
-import launchImageLibrary from 'react-native-image-picker';
 import { budgetData, categories, cityData, priorityData, shiftsData } from "../../data/servicesList";
+
+import * as ImagePicker from 'expo-image-picker';
 
 export default function Book() {
 
+    const [selectedImages, setSelectedImages] = useState('')
+    console.log(selectedImages)
+
     async function handleImagePick() {
         try {
-            const result = await launchImageLibrary();
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                allowsMultipleSelection: true,
+                allowsEditing: false,
+                quality: 1
 
+            });
             console.log(result)
+
+            if (!result.canceled) {
+
+                setSelectedImages(result.assets)
+                console.log(result)
+            } else {
+                alert("You did not select any image")
+            }
 
         } catch (error) {
             console.log(error)
@@ -20,7 +37,6 @@ export default function Book() {
         }
 
     }
-
 
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
@@ -95,6 +111,11 @@ export default function Book() {
         setSearchBudgetQuery('');
         setIsOpenDropdownBudget(false);
     }
+    const handleImageDelete = (indexToDelete) => {
+        setSelectedImages((prevImages) =>
+            prevImages.filter((_, index) => index !== indexToDelete)
+        );
+    }
 
     return (
         <ScrollView style={styles.scrollview} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
@@ -126,8 +147,6 @@ export default function Book() {
                             onChangeText={setPhone}
                             keyboardType="phone-pad"
                             numberOfLines={8}
-
-
                         />
                     </View>
                 </View>
@@ -498,11 +517,75 @@ export default function Book() {
                     )}
                 </View>
                 <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Photos upto 5 section - requires study</Text>
                 </View>
-                
-                <View>
-                    
+                <Text style={styles.label}>Upload Photos</Text>
+
+                <View style={[
+                    styles.individualContainer,
+                    {
+                        borderStyle: selectedImages && selectedImages.length > 0 ? 'solid' : 'dashed',
+                        borderWidth: 1.5,
+                        borderColor: 'black',
+                        alignItems: 'center',
+                        justifyContent: 'flex-start',
+                        height: 140,
+                        borderRadius: 4,
+                        flexDirection: 'row',
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        gap: 10
+                    }
+                ]}>
+
+                    {selectedImages && selectedImages.length > 0 ? (
+                        selectedImages.map((selectedImage, index) => (
+                            <View
+                                key={index}
+                                style={{
+                                    width: 45,
+                                    height: '100%',
+                                    position: 'relative',
+                                    borderRadius: 4,
+                                    overflow: 'hidden'
+                                }}
+                            >
+                                <Image
+                                    source={{ uri: selectedImage.uri }}
+                                    style={{ width: '100%', height: '100%', borderRadius: 4 }}
+                                    resizeMode="cover"
+                                />
+
+                                <Pressable
+                                    onPress={() => handleImageDelete(index)}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 4,
+                                        right: 4,
+                                        backgroundColor: 'rgba(0,0,0,0.6)',
+                                        borderRadius: 12,
+                                        padding: 4,
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    <Ionicons name='trash' size={16} color="white" />
+                                </Pressable>
+                            </View>
+                        ))
+                    ) : (
+                        <Pressable
+                            onPress={handleImagePick}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <Ionicons name='arrow-down-circle-outline' size={32} color="black" />
+                            <Text style={{ marginTop: 4 }}>Drop file/photos here</Text>
+                        </Pressable>
+                    )}
                 </View>
 
                 <View style={styles.individualContainer}>
@@ -514,8 +597,6 @@ export default function Book() {
                             borderColor: '#ecdbdb',
                             borderWidth: 1,
                             padding: 8
-
-
                         }}
                         multiline={true}
                         autoFocus={true}

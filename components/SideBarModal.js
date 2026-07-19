@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const SideBarModal = () => {
+const SideBarModal = ({ onClose }) => {
+    const router = useRouter()
     return (
         <View style={styles.container}>
             <View style={styles.profileContainer}>
@@ -20,44 +22,85 @@ const SideBarModal = () => {
             <View style={styles.primaryLinks}>
                 <Text style={styles.sectionTitle}>Menu</Text>
 
-                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}>
+                <TouchableOpacity
+                    style={styles.linkRow}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                        onClose()
+                        router.push('./')
+                    }}
+                >
                     <Ionicons name="home-outline" size={20} color="#374151" />
                     <Text style={styles.linkItem}>Home</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}>
+                <TouchableOpacity
+                    style={styles.linkRow}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                        onClose()
+                        router.push('./services')
+                    }}
+                >
                     <Ionicons name="grid-outline" size={20} color="#374151" />
                     <Text style={styles.linkItem}>Services</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}>
+                <TouchableOpacity
+                    style={styles.linkRow}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                        onClose()
+                        router.push('./notifications')
+                    }}>
                     <Ionicons name="notifications-outline" size={20} color="#374151" />
                     <Text style={styles.linkItem}>Notifications</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}>
+                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}
+                    onPress={() => {
+                        onClose()
+                        router.push('./book')
+                    }}>
                     <Ionicons name="calendar-outline" size={20} color="#374151" />
                     <Text style={styles.linkItem}>Book a Service</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}>
-                    <Ionicons name="person-add-outline" size={20} color="#374151" />
+                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}
+                >
+                    <Ionicons name="person-add-outline" size={20} color="#374151"
+                        onPress={() => {
+                            onClose()
+                            router.push('./joinasaprofessional')
+                        }}/>
+                    
                     <Text style={styles.linkItem}>Join as a Professional</Text>
                 </TouchableOpacity>
             </View>
 
             <View style={styles.secondaryLinks}>
-                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}>
+                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}
+                    onPress={() => {
+                        onClose()
+                        router.push('./about')
+                    }}>
                     <Ionicons name="information-circle-outline" size={18} color="#6B7280" />
                     <Text style={styles.linkItemSecondary}>About Us</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}>
+                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}
+                    onPress={() => {
+                        onClose()
+                        router.push('./contact')
+                    }}>
                     <Ionicons name="mail-outline" size={18} color="#6B7280" />
                     <Text style={styles.linkItemSecondary}>Contact</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}>
+                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => {
+                    onClose()
+                    router.push('./faq')
+                }}>
                     <Ionicons name="help-circle-outline" size={18} color="#6B7280" />
                     <Text style={styles.linkItemSecondary}>FAQs</Text>
                 </TouchableOpacity>
@@ -109,7 +152,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
     },
     avatarPlaceholder: {
-        width: 64, 
+        width: 64,
         height: 64,
         borderRadius: 32,
         backgroundColor: '#E5E7EB',
@@ -121,11 +164,11 @@ const styles = StyleSheet.create({
     profileName: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#FFFFFF', 
+        color: '#FFFFFF',
     },
     profileEmail: {
         fontSize: 13,
-        color: '#E0F2FE', 
+        color: '#E0F2FE',
         marginTop: 2,
     },
     primaryLinks: {
