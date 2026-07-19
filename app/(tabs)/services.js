@@ -1,111 +1,105 @@
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import ServiceCard from "../../components/ServiceCard";
 import ServiceStack from "../../components/ServiceStack";
 import { categories, services } from "../../data/servicesList";
 
+const { width } = Dimensions.get('window');
+
+const TRENDING_CARD_WIDTH = (width - 36 - 12) / 2;
+
+const CATEGORY_CARD_WIDTH = (width - 36 - 2 - 24 - 10) / 2;
+
 export default function Services() {
     return (
-        <ScrollView>
-            <View style={styles.container}>
+        <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
+            <View style={styles.heroContainer}>
                 <Image
                     source={require('@/assets/images/garden2.jpg')}
                     style={styles.backgroundImage}
                     resizeMode="cover"
                 />
                 <View style={styles.overlay}>
-                    <Text style={styles.title}>
-                        Explore Gardening Services
-                    </Text>
-                    <Text style={styles.subTitle}>
-                        Superfast service at your home
-                    </Text>
+                    <Text style={styles.title}>SuperFast Services</Text>
+                    <Text style={styles.subTitle}>Express Gardening Service</Text>
                 </View>
             </View>
 
-            <View style={styles.containerForStack}>
-                <Text style={{ fontSize: 20 }}>Top Services</Text>
-                {
-                    services?.filter((service) => service.label === "Top").slice(0, 2).map((service, key) => {
-                        return (
-                            <View key={key}>
-                                <ServiceStack
-                                    description={service.description}
-                                    title={service.title}
-                                    imageSource={service.url}
-                                />
-                            </View>
-                        )
-                    })
-                }
+            <View style={styles.sectionContainer}>
+                <Text style={styles.sectionHeading}>Top Services</Text>
+                <View style={styles.stackList}>
+                    {services?.filter((service) => service.label === "Top").slice(0, 2).map((service, key) => (
+                        <ServiceStack
+                            key={key}
+                            description={service.description}
+                            title={service.title}
+                            imageSource={service.url}
+                        />
+                    ))}
+                </View>
             </View>
 
-            <Text style={{ fontSize: 20, margin: 12 }}>Trending Services</Text>
-
-            <View style={styles.containerForFlex}>
-                {
-                    services?.filter((service) => service.label === "Trending").slice(0, 4).map((service, key) => {
-                        return (
-                            <View key={key}>
-                                <ServiceCard
-                                    description={service.description}
-                                    title={service.title}
-                                    imageSource={service.url}
-                                />
-                            </View>
-                        )
-                    })
-                }
+            <View style={styles.sectionContainer}>
+                <Text style={styles.sectionHeading}>Trending Services</Text>
+                <View style={styles.gridContainer}>
+                    {services?.filter((service) => service.label === "Trending").slice(0, 4).map((service, key) => (
+                        <ServiceCard
+                            key={key}
+                            cardWidth={TRENDING_CARD_WIDTH}
+                            description={service.description}
+                            title={service.title}
+                            imageSource={service.url}
+                        />
+                    ))}
+                </View>
             </View>
 
-            {
-                categories?.map((category, key) => {
-                    const categoryServices = services?.filter((service) =>
-                        service.category === category.title
-                    );
+            {categories?.map((category, key) => {
+                const categoryServices = services?.filter((service) =>
+                    service.category === category.title
+                );
 
-                    return (
-                        <View key={key} style={styles.categoryContainer}>
-                            <View style={styles.categoryHeader}>
-                                <Image
-                                    source={{ uri: category.url }}
-                                    style={styles.categoryImage}
-                                />
-                                <View style={styles.categoryOverlay}>
-                                    <Text style={styles.categoryTitle}>
-                                        {category.title} 
-                                    </Text>
-                                </View>
-                            </View>
-
-                            <View style={styles.categoryServices}>
-                                {
-                                    categoryServices?.length > 0 ? (
-                                        categoryServices.map((service, serviceKey) => (
-                                            <View key={serviceKey} style={styles.serviceItem}>
-                                                <ServiceCard
-                                                    title={service.title}
-                                                    imageSource={service.url}
-                                                    description={service.description}
-                                                />
-                                            </View>
-                                        ))
-                                    ) : (
-                                        <Text style={styles.noServices}>No services available in this category</Text>
-                                    )
-                                }
+                return (
+                    <View key={key} style={styles.categoryContainer}>
+                        <View style={styles.categoryHeader}>
+                            <Image
+                                source={{ uri: category.url }}
+                                style={styles.categoryImage}
+                            />
+                            <View style={styles.categoryOverlay}>
+                                <Text style={styles.categoryTitle}>{category.title}</Text>
                             </View>
                         </View>
-                    )
-                })
-            }
+
+                        <View style={styles.categoryGridContainer}>
+                            {categoryServices?.length > 0 ? (
+                                categoryServices.map((service, serviceKey) => (
+                                    <ServiceCard
+                                        key={serviceKey}
+                                        cardWidth={CATEGORY_CARD_WIDTH}
+                                        title={service.title}
+                                        imageSource={service.url}
+                                        description={service.description}
+                                    />
+                                ))
+                            ) : (
+                                <Text style={styles.noServices}>No services available in this category</Text>
+                            )}
+                        </View>
+                    </View>
+                );
+            })}
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    screen: {
+        flex: 1,
+        backgroundColor: '#F8F9FA',
+    },
+    heroContainer: {
         width: '100%',
-        height: 180,
+        aspectRatio: 16 / 9,
         position: 'relative',
         backgroundColor: '#000',
     },
@@ -116,60 +110,50 @@ const styles = StyleSheet.create({
     },
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(7, 5, 5, 0.35)',
-        justifyContent: 'flex-start',
-        paddingHorizontal: 20,
-        paddingTop: 40,
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        justifyContent: 'flex-end',
+        paddingHorizontal: 18,
+        paddingBottom: 28,
+        gap:4
     },
     title: {
         color: '#FFFFFF',
-        fontWeight: '700',
-        fontSize: 28,
-        letterSpacing: 0.5,
-        textShadowColor: 'rgba(0,0,0,0.5)',
-        textShadowOffset: { width: 0, height: 2 },
-        textShadowRadius: 6,
-        marginTop: 50,
+        fontWeight: 'bold',
+        fontSize: width * 0.08,
     },
     subTitle: {
-        color: '#FFFFFF',
-        fontWeight: '400',
+        color: '#E2E8F0',
+        fontWeight: '500',
+        fontSize: 16,
+        marginTop: 4,
+    },
+    sectionContainer: {
+        marginTop: 20,
+        paddingHorizontal: 18,
+    },
+    sectionHeading: {
         fontSize: 20,
-        letterSpacing: 0.5,
-        textShadowColor: 'rgba(0,0,0,0.5)',
-        textShadowOffset: { width: 0, height: 2 },
-        textShadowRadius: 6,
-        marginTop: 10,
+        fontWeight: 'bold',
+        color: '#1E3A3A',
+        marginBottom: 12,
     },
-    containerForStack: {
-        flex: 1,
-        flexDirection: 'column',
-        gap: 12,
-        marginVertical: 12,
-        marginHorizontal: 12,
-        padding: 2
+    stackList: {
+        gap: 8,
     },
-    containerForFlex: {
-        width: '90%',
-        marginHorizontal: 12,
-        padding: 4,
+    gridContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 10,
-        alignItems: 'center',
-        justifyContent: 'start'
+        gap: 12,
+        justifyContent: 'flex-start',
     },
     categoryContainer: {
-        marginVertical: 10,
-        marginHorizontal: 12,
-        backgroundColor: '#fff',
-        borderRadius: 10,
+        marginTop: 24,
+        marginHorizontal: 18,
+        borderRadius: 20,
         overflow: 'hidden',
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        borderWidth: 1,
+        borderColor: '#E2E8F0',
+        marginBottom: 12,
     },
     categoryHeader: {
         position: 'relative',
@@ -179,7 +163,6 @@ const styles = StyleSheet.create({
     categoryImage: {
         width: '100%',
         height: '100%',
-        resizeMode: 'cover',
     },
     categoryOverlay: {
         position: 'absolute',
@@ -187,32 +170,25 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.4)',
+        backgroundColor: 'rgba(0,0,0,0.35)',
         justifyContent: 'center',
         paddingHorizontal: 20,
     },
     categoryTitle: {
         color: '#FFFFFF',
-        fontSize: 24,
-        fontWeight: '700',
-        textShadowColor: 'rgba(0,0,0,0.5)',
-        textShadowOffset: { width: 0, height: 2 },
-        textShadowRadius: 4,
+        fontSize: 22,
+        fontWeight: 'bold',
     },
-    categoryServices: {
-        padding: 10,
+    categoryGridContainer: {
+        padding: 12,
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: 10,
         justifyContent: 'flex-start',
     },
-    serviceItem: {
-        width: '30.33%', 
-        marginBottom: 10,
-    },
     noServices: {
-        padding: 10,
-        color: '#666',
+        paddingVertical: 16,
+        color: '#64748B',
         fontSize: 14,
         textAlign: 'center',
         width: '100%',

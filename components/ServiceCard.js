@@ -1,47 +1,55 @@
-import { Image, StyleSheet, Text, View } from 'react-native'
+import { Image, StyleSheet, Text, View } from 'react-native';
 
-const ServiceCard = ({ imageSource, title }) => {
+const ServiceCard = ({ imageSource, title, description, cardWidth }) => {
     return (
-        <View style={styles.container}>
-            <Image 
-                source={{ uri: imageSource }}  
+        <View style={[styles.container, cardWidth ? { width: cardWidth } : null]}>
+            <Image
+                source={{ uri: imageSource }}
                 style={styles.image}
+                resizeMode="cover"
             />
-            <Text style={styles.text}>{title}</Text>
+            <View style={styles.textContainer}>
+                <Text style={styles.title} numberOfLines={1}>
+                    {title}
+                </Text>
+                {description ? (
+                    <Text style={styles.description} numberOfLines={1}>
+                        {description}
+                    </Text>
+                ) : null}
+            </View>
         </View>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
-        width: 104,       
-        height: 104,       
         backgroundColor: '#fff',
-        borderRadius: 12,
+        borderRadius: 16,
         overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        borderWidth: 1,
+        borderColor: '#E2E8F0',
+        marginBottom: 4,
     },
     image: {
         width: '100%',
-        height: '66%',    
-        resizeMode: 'cover',
+        height: 110,
     },
-    text: {
-        height: '34%',     
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        fontSize: 12,
-        fontWeight: '600',
+    textContainer: {
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        backgroundColor: '#fff',
+        gap: 2,
+    },
+    title: {
+        fontSize: 14,
+        fontWeight: '700',
         color: '#1A1A1A',
-        textAlign: 'center',
-    }
-})
+    },
+    description: {
+        fontSize: 12,
+        color: '#64748B',
+    },
+});
 
-export default ServiceCard
+export default ServiceCard;

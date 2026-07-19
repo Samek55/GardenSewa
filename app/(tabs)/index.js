@@ -1,115 +1,110 @@
 import { Link } from 'expo-router';
-import { Button, FlatList, Image, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+    Dimensions,
+    FlatList,
+    Image,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextInput,
+    View
+} from "react-native";
 import Icon from 'react-native-ico-flags';
+
 import ServiceCard from "../../components/ServiceCard";
 import { services } from "../../data/servicesList";
 
+const { width } = Dimensions.get('window');
+const TOP_CARD_WIDTH = (width - 36 - 2 - 24 - 10) / 3;
 
 
 
 export default function Index() {
-
     const filteredServicesTop = services.filter(service => service.label === 'Top');
 
-    // console.log(filteredServicesTop)
-
-
-
     return (
+        <View style={styles.screenContainer}>
 
-        <>
-            <View style={styles.container}>
-
+            <View style={styles.heroContainer}>
                 <Image
                     source={require('@/assets/images/garden2.jpg')}
                     style={styles.backgroundImage}
                     resizeMode="cover"
                 />
-
                 <View style={styles.overlay}>
-                    <Text style={styles.title}>
-                        Explore Gardening Services
-                    </Text>
-                    <Text style={styles.subTitle}>
-                        Superfast service at your home
-                    </Text>
+                    <Text style={styles.title}>Express{"\n"}Gardening Service</Text>
+                    <Text style={styles.subTitle}>SuperFast gardening Service at your Home.</Text>
 
                     <View style={styles.inputContainer}>
                         <View style={styles.iconWrapper}>
-                            <Icon name="nepal" width={30} height={30} />
+                            <Icon name="nepal" width={24} height={24} />
                         </View>
                         <TextInput
                             style={styles.textInput}
-                            placeholder="Enter your phone number"
+                            placeholder="98520 24 365"
                             placeholderTextColor="#999"
                             keyboardType="phone-pad"
                         />
-                        <View style={styles.buttonWrapper}>
-                            <Button title="Help" color="#245d5a" />
-                        </View>
+                        <Pressable style={styles.helpButton}>
+                            <Text style={styles.helpButtonText}>Help</Text>
+                        </Pressable>
                     </View>
                 </View>
             </View>
 
-            <View style={[styles.container, { marginTop: 12, marginHorizontal: 12, paddingHorizontal: 8, height: '30%', width: 'auto', overflow: 'hidden', borderRadius: 18 }]}>
+            <View style={styles.popularCardContainer}>
                 <Image
                     source={require('@/assets/images/garden1.jpg')}
                     style={styles.backgroundImage}
                     resizeMode="cover"
                 />
-
-                <View style={styles.tagContainer}>
-                    <Text style={styles.tagText}>Most popular</Text>
-                </View>
-
                 <View style={styles.cardOverlay}>
-                    <Text style={styles.cardTitle}>
-                        Lawn Care, Planting and Garden Maintenance
-                    </Text>
+                    <View style={styles.tagContainer}>
+                        <Text style={styles.tagText}>Most Popular</Text>
+                    </View>
+                    <Text style={styles.cardTitle}>Lawn Maintenance</Text>
+                    <Text style={styles.cardSubTitle}>Professional lawn maintenance service</Text>
                 </View>
             </View>
 
+            <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Top Services</Text>
+                <Link href={'/services'} asChild>
+                    <Pressable>
+                        <Text style={styles.seeAllText}>See All</Text>
+                    </Pressable>
+                </Link>
+            </View>
 
-            <View style={{ height: 220, marginHorizontal: 12 }}>
-                <View style={{
-                    height: 20,
-                    flex: 1,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginHorizontal: 12,
-                }}>
-                    <Text>Top Services</Text>
-                    <Link href={'/services'}>See all</Link>
-                </View>
+            <View style={styles.listContainer}>
                 <FlatList
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     data={filteredServicesTop}
-                    renderItem={({ item, index }) => (
+                    keyExtractor={(item, index) => index.toString()}
+                    contentContainerStyle={styles.horizontalListPadding}
+                    ItemSeparatorComponent={() => <View style={{ width: 14 }} />}
+                    renderItem={({ item }) => (
                         <ServiceCard
-                            key={index}
                             title={item.title}
                             imageSource={item.url}
+                            cardWidth={TOP_CARD_WIDTH}
                         />
                     )}
-                    keyExtractor={(item, index) => index.toString()}
-                    contentContainerStyle={{
-                        paddingHorizontal: 16,
-                    }}
-                    ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
                 />
             </View>
-
-        </>
-
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    screenContainer: {
+        flex: 1,
+        backgroundColor: '#F8F9FA',
+    },
+    heroContainer: {
         width: '100%',
-        height: '40%',
+        aspectRatio: 16 / 10,
         position: 'relative',
         backgroundColor: '#000',
     },
@@ -120,56 +115,38 @@ const styles = StyleSheet.create({
     },
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.35)',
-        justifyContent: 'flex-start',
+        backgroundColor: 'rgba(0,0,0,0.45)',
+        justifyContent: 'center',
         paddingHorizontal: 20,
-        paddingTop: 40,
     },
     title: {
         color: '#FFFFFF',
-        fontWeight: '700',
-        fontSize: 28,
-        letterSpacing: 0.5,
-        textShadowColor: 'rgba(0,0,0,0.5)',
-        textShadowOffset: { width: 0, height: 2 },
-        textShadowRadius: 6,
-        marginTop: 20,
+        fontWeight: 'bold',
+        fontSize: width * 0.08,
+        lineHeight: width * 0.095,
     },
     subTitle: {
-        color: '#FFFFFF',
+        color: '#E0E0E0',
         fontWeight: '400',
-        fontSize: 20,
-        letterSpacing: 0.5,
-        textShadowColor: 'rgba(0,0,0,0.5)',
-        textShadowOffset: { width: 0, height: 2 },
-        textShadowRadius: 6,
-        marginTop: 12,
+        fontSize: 14,
+        marginTop: 6,
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 20,
+        marginTop: 18,
         backgroundColor: 'white',
-        borderRadius: 12,
-        paddingHorizontal: 4,
-        paddingVertical: 4,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 4,
-        },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
-        height: 56,
+        borderRadius: 8,
+        overflow: 'hidden',
+        height: 48,
+        width: '100%',
     },
     iconWrapper: {
-        paddingHorizontal: 12,
+        paddingHorizontal: 14,
         borderRightWidth: 1,
         borderRightColor: '#E0E0E0',
-        height: 36,
+        height: '60%',
         justifyContent: 'center',
-        backgroundColor:'#fff'
     },
     textInput: {
         flex: 1,
@@ -179,53 +156,80 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         fontWeight: '500',
     },
-    buttonWrapper: {
-        borderRadius: 8,
-        overflow: 'hidden',
-        marginRight: 4,
+    helpButton: {
+        backgroundColor: '#225754',
+        height: '100%',
+        justifyContent: 'center',
+        paddingHorizontal: 22,
     },
-    // New styles for the card
+    helpButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 15,
+    },
+    popularCardContainer: {
+        flex: 1,
+        marginHorizontal: 16,
+        marginTop: 14,
+        borderRadius: 24,
+        overflow: 'hidden',
+        position: 'relative',
+        minHeight: 140,
+    },
+    cardOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.38)',
+        justifyContent: 'flex-end',
+        padding: 16,
+    },
     tagContainer: {
-        position: 'absolute',
-        top: 16,
-        left: 16,
-        zIndex: 10,
-        backgroundColor: '#245d5a',
-        paddingHorizontal: 14,
-        paddingVertical: 6,
-        borderRadius: 20,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+        alignSelf: 'flex-start',
+        backgroundColor: '#225754',
+        paddingHorizontal: 12,
+        paddingVertical: 5,
+        borderRadius: 12,
+        marginBottom: 6,
     },
     tagText: {
         color: '#FFFFFF',
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: '700',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
-    },
-    cardOverlay: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        padding: 16,
-        backgroundColor: 'rgba(0,0,0,0.4)',
-        borderBottomLeftRadius: 18,
-        borderBottomRightRadius: 18,
     },
     cardTitle: {
         color: '#FFFFFF',
+        fontWeight: 'bold',
+        fontSize: 20,
+    },
+    cardSubTitle: {
+        color: '#F0F0F0',
+        fontSize: 12,
+        marginTop: 2,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginHorizontal: 16,
+        marginTop: 16,
+        marginBottom: 10,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#1A1A1A',
+    },
+    seeAllText: {
+        fontSize: 14,
+        color: '#225754',
         fontWeight: '600',
-        fontSize: 16,
-        textShadowColor: 'rgba(0,0,0,0.5)',
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 4,
-    }
+    },
+    listContainer: {
+        height: ((width - 60) / 3) * 1.35 + 10,
+        marginBottom: 16,
+        backgroundColor:'#fff',
+        paddingHorizontal:16,
+    },
+    horizontalListPadding: {
+        paddingHorizontal: 8,
+    },
 });

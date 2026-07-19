@@ -1,53 +1,65 @@
-import { Image, StyleSheet, Text, View } from 'react-native'
-
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 const ServiceStack = ({ imageSource, description, title }) => {
-    // console.log(imageSource)
     return (
         <View style={styles.container}>
-
             <View style={styles.imageContainer}>
                 <Image
                     source={{ uri: imageSource }}
-                    width={100}
-                    height={100}
+                    style={styles.image}
+                    resizeMode="cover"
                 />
             </View>
             <View style={styles.textContainer}>
-                <Text style={{
-                    fontSize:18,
-                }}>{title}</Text>
-                <Text>{description}</Text>
+                <Text style={styles.titleText} numberOfLines={1}>
+                    {title}
+                </Text>
+                <Text style={styles.descriptionText} numberOfLines={2}>
+                    {description}
+                </Text>
             </View>
-
         </View>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
-
-    textContainer: {
-        flex: 3,
-        gap: 2
-
-    },
-
-    imageContainer: {
-        width: 100,
-        height: 100,
-    },
     container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
         flexDirection: 'row',
-        gap: 8,
-        padding :2,
-        margin:'auto',
+        alignItems: 'center',
         backgroundColor: '#ffffff',
-        borderBlockColor: '#828181',
-        borderWidth: 0.5
-    }
-})
+        borderWidth: 1,
+        borderColor: '#E2E8F0',
+        borderRadius: 16,
+        padding: 12,
+        marginVertical: 4,
+        gap: 16,
+    },
+    imageContainer: {
+        width: 90,
+        height: 90,
+        borderRadius: 12,
+        overflow: 'hidden',
+        backgroundColor: '#F1F5F9',
+    },
+    image: {
+        width: '100%',
+        height: '100%',
+    },
+    textContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        gap: 4,
+    },
+    titleText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#1A1A1A',
+    },
+    descriptionText: {
+        fontSize: 13,
+        color: '#64748B',
+        lineHeight: 18,
+    },
+});
 
-export default ServiceStack
+export default ServiceStack;
