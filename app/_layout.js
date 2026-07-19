@@ -33,8 +33,8 @@ export default function RootLayout() {
             headerTitleAlign: 'left',
             headerTitle: () => (
               <View style={{ marginLeft: 8, paddingLeft: 8 }}>
-                <Text style={{ color: "#fff", fontWeight: '600', fontSize: 16 }}>
-                  Garden Sewa
+                <Text style={{ color: "#fff", fontWeight: '600', fontSize: 18 }}>
+                  GardenSewa
                 </Text>
               </View>
             ),

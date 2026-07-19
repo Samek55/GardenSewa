@@ -1,10 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+const SIDEBAR_WIDTH = Math.min(width * 0.75, 300);
 
 const SideBarModal = ({ onClose }) => {
-    const router = useRouter()
+    const router = useRouter();
+
+    const handleNavigation = (path) => {
+        onClose();
+        router.push(path);
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.profileContainer}>
@@ -19,97 +29,61 @@ const SideBarModal = ({ onClose }) => {
                 </View>
             </View>
 
-            <View style={styles.primaryLinks}>
-                <Text style={styles.sectionTitle}>Menu</Text>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+            >
+                <View style={styles.primaryLinks}>
+                    <Text style={styles.sectionTitle}>Menu</Text>
 
-                <TouchableOpacity
-                    style={styles.linkRow}
-                    activeOpacity={0.7}
-                    onPress={() => {
-                        onClose()
-                        router.push('./')
-                    }}
-                >
-                    <Ionicons name="home-outline" size={20} color="#374151" />
-                    <Text style={styles.linkItem}>Home</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./')}>
+                        <Ionicons name="home-outline" size={20} color="#374151" />
+                        <Text style={styles.linkItem}>Home</Text>
+                    </TouchableOpacity>
 
-                <TouchableOpacity
-                    style={styles.linkRow}
-                    activeOpacity={0.7}
-                    onPress={() => {
-                        onClose()
-                        router.push('./services')
-                    }}
-                >
-                    <Ionicons name="grid-outline" size={20} color="#374151" />
-                    <Text style={styles.linkItem}>Services</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./services')}>
+                        <Ionicons name="grid-outline" size={20} color="#374151" />
+                        <Text style={styles.linkItem}>Services</Text>
+                    </TouchableOpacity>
 
-                <TouchableOpacity
-                    style={styles.linkRow}
-                    activeOpacity={0.7}
-                    onPress={() => {
-                        onClose()
-                        router.push('./notifications')
-                    }}>
-                    <Ionicons name="notifications-outline" size={20} color="#374151" />
-                    <Text style={styles.linkItem}>Notifications</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./notifications')}>
+                        <Ionicons name="notifications-outline" size={20} color="#374151" />
+                        <Text style={styles.linkItem}>Notifications</Text>
+                    </TouchableOpacity>
 
-                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}
-                    onPress={() => {
-                        onClose()
-                        router.push('./book')
-                    }}>
-                    <Ionicons name="calendar-outline" size={20} color="#374151" />
-                    <Text style={styles.linkItem}>Book a Service</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./book')}>
+                        <Ionicons name="calendar-outline" size={20} color="#374151" />
+                        <Text style={styles.linkItem}>Book a Service</Text>
+                    </TouchableOpacity>
 
-                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}
-                >
-                    <Ionicons name="person-add-outline" size={20} color="#374151"
-                        onPress={() => {
-                            onClose()
-                            router.push('./joinasaprofessional')
-                        }}/>
-                    
-                    <Text style={styles.linkItem}>Join as a Professional</Text>
-                </TouchableOpacity>
-            </View>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./joinasaprofessional')}>
+                        <Ionicons name="person-add-outline" size={20} color="#374151" />
+                        <Text style={styles.linkItem}>Join as a Professional</Text>
+                    </TouchableOpacity>
+                </View>
 
-            <View style={styles.secondaryLinks}>
-                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}
-                    onPress={() => {
-                        onClose()
-                        router.push('./about')
-                    }}>
-                    <Ionicons name="information-circle-outline" size={18} color="#6B7280" />
-                    <Text style={styles.linkItemSecondary}>About Us</Text>
-                </TouchableOpacity>
+                <View style={styles.secondaryLinks}>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./about')}>
+                        <Ionicons name="information-circle-outline" size={18} color="#6B7280" />
+                        <Text style={styles.linkItemSecondary}>About Us</Text>
+                    </TouchableOpacity>
 
-                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}
-                    onPress={() => {
-                        onClose()
-                        router.push('./contact')
-                    }}>
-                    <Ionicons name="mail-outline" size={18} color="#6B7280" />
-                    <Text style={styles.linkItemSecondary}>Contact</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./contact')}>
+                        <Ionicons name="mail-outline" size={18} color="#6B7280" />
+                        <Text style={styles.linkItemSecondary}>Contact</Text>
+                    </TouchableOpacity>
 
-                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => {
-                    onClose()
-                    router.push('./faq')
-                }}>
-                    <Ionicons name="help-circle-outline" size={18} color="#6B7280" />
-                    <Text style={styles.linkItemSecondary}>FAQs</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./faq')}>
+                        <Ionicons name="help-circle-outline" size={18} color="#6B7280" />
+                        <Text style={styles.linkItemSecondary}>FAQs</Text>
+                    </TouchableOpacity>
 
-                <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}>
-                    <Ionicons name="shield-checkmark-outline" size={18} color="#6B7280" />
-                    <Text style={styles.linkItemSecondary}>Become a Handler</Text>
-                </TouchableOpacity>
-            </View>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}>
+                        <Ionicons name="shield-checkmark-outline" size={18} color="#6B7280" />
+                        <Text style={styles.linkItemSecondary}>Become a Handler</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
 
             <View style={styles.adminButtonWrapper}>
                 <TouchableOpacity style={styles.adminLoginButton} activeOpacity={0.8}>
@@ -124,57 +98,56 @@ const SideBarModal = ({ onClose }) => {
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        top: 90,
-        left: 12,
-        bottom: 80,
-        width: 280,
+        top: 80, 
+        left: 16,
+        bottom: 30, 
+        width: SIDEBAR_WIDTH,
         backgroundColor: 'white',
-        borderRadius: 36,
+        borderRadius: 28,
         shadowColor: '#000',
-        shadowOffset: { width: 4, height: 0 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 12,
         elevation: 16,
-        justifyContent: 'space-between',
-        paddingBottom: 30,
-        zIndex: 1,
+        zIndex: 10,
+        overflow: 'hidden',
     },
     profileContainer: {
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 12,
-        borderTopEndRadius: 36,
-        borderTopStartRadius: 36,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F3F4F6',
+        gap: 10,
         backgroundColor: "#245d5a",
-        marginBottom: 8,
-        paddingVertical: 12,
+        paddingVertical: 20,
+        paddingHorizontal: 16,
     },
     avatarPlaceholder: {
         width: 64,
         height: 64,
         borderRadius: 32,
         backgroundColor: '#E5E7EB',
+        borderWidth: 2,
+        borderColor: 'rgba(255,255,255,0.2)',
     },
     profileDetails: {
         alignItems: 'center',
         width: '100%',
     },
     profileName: {
-        fontSize: 18,
-        fontWeight: '600',
+        fontSize: 16,
+        fontWeight: '700',
         color: '#FFFFFF',
     },
     profileEmail: {
-        fontSize: 13,
+        fontSize: 12,
         color: '#E0F2FE',
         marginTop: 2,
     },
+    scrollContent: {
+        paddingVertical: 16,
+    },
     primaryLinks: {
-        flex: 1,
         gap: 12,
-        paddingHorizontal: 24,
+        paddingHorizontal: 20,
     },
     sectionTitle: {
         fontSize: 11,
@@ -182,13 +155,13 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
         color: '#9CA3AF',
         fontWeight: '700',
-        marginBottom: 8,
+        marginBottom: 4,
     },
     linkRow: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
-        paddingVertical: 6,
+        paddingVertical: 8,
     },
     linkItem: {
         fontSize: 15,
@@ -200,16 +173,18 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#F3F4F6',
         paddingTop: 16,
-        paddingHorizontal: 24,
-        marginBottom: 20,
+        paddingHorizontal: 20,
+        marginTop: 16,
     },
     linkItemSecondary: {
         fontSize: 14,
         color: '#6B7280',
     },
     adminButtonWrapper: {
-        paddingHorizontal: 24,
-        marginTop: 'auto',
+        paddingHorizontal: 20,
+        paddingBottom: 20,
+        paddingTop: 10,
+        backgroundColor: '#white',
     },
     adminLoginButton: {
         flexDirection: 'row',
@@ -218,12 +193,7 @@ const styles = StyleSheet.create({
         gap: 8,
         backgroundColor: '#245d5a',
         paddingVertical: 12,
-        borderRadius: 9999, // Fully rounded capsule
-        shadowColor: '#047754',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 5,
-        elevation: 3,
+        borderRadius: 14,
     },
     adminButtonText: {
         color: '#FFFFFF',

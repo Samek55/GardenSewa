@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         paddingHorizontal: 18,
         paddingBottom: 28,
-        gap:4
+        gap: 4
     },
     title: {
         color: '#FFFFFF',
