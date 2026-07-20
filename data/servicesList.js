@@ -215,6 +215,31 @@ export const categories = [
 
 ]
 
+
+export const serviceOfferedData = [
+    { id: 1, title: "Landscape Design" },
+    { id: 2, title: "Rooftop Gardening" },
+    { id: 3, title: "Hardscaping" },
+    { id: 4, title: "Landscape Lighting" },
+    { id: 5, title: "Artificial Gardening" },
+    { id: 6, title: "Turfing Service" },
+    { id: 7, title: "Garden Maintenance" },
+    { id: 8, title: "Yearly Garden Maintenance" },
+    { id: 9, title: "Lawn Care" },
+    { id: 10, title: "Flower Maintenance" },
+    { id: 11, title: "Tree Pruning & Removal" },
+    { id: 12, title: "Temporary Gardening" },
+    { id: 13, title: "Seasonal Services" },
+    { id: 14, title: "Planting and Transplanting" },
+    { id: 15, title: "Soil Improvement" },
+    { id: 16, title: "Soil and Fertilizers" },
+    { id: 17, title: "Irrigation Services" },
+    { id: 18, title: "Pest and Disease Control" },
+    { id: 19, title: "Plant Propagation" },
+    { id: 20, title: "Tree Sales" },
+    { id: 21, title: "Consultation Services" }
+];
+
 export const teams = [
     {
         id: 1,
@@ -366,44 +391,105 @@ export const faqData = [
 
 export const notificationsData = [
     {
-        id:1,
-        message:"Service booked for lawn maintenance"
+        id: 1,
+        message: "Service booked for lawn maintenance"
     },
     {
-        id:2,
-        message:"Profile Updated"
+        id: 2,
+        message: "Profile Updated"
     },
     {
-        id:3,
-        message:"Response from professional"
+        id: 3,
+        message: "Response from professional"
     },
     {
-        id:4,
-        message:"Service booked for lawn maintenance"
+        id: 4,
+        message: "Service booked for lawn maintenance"
     },
     {
-        id:5,
-        message:"Profile Updated"
+        id: 5,
+        message: "Profile Updated"
     },
     {
-        id:6,
-        message:"Response from professional"
+        id: 6,
+        message: "Response from professional"
     },
     {
-        id:7,
-        message:"Response from professional"
+        id: 7,
+        message: "Response from professional"
     },
     {
-        id:8,
-        message:"Response from professional"
+        id: 8,
+        message: "Response from professional"
     },
     {
-        id:9,
-        message:"Response from professional"
+        id: 9,
+        message: "Response from professional"
     },
     {
-        id:10,
-        message:"Response from professional"
+        id: 10,
+        message: "Response from professional"
     },
 
 ]
+
+
+export const partnershipData=[
+    {
+        id:1,
+        title:"Short Term"
+    },
+    {
+        id:2,
+        title:"Long Term"
+    },
+    {
+        id:2,
+        title:"Other"
+    },
+]
+
+export const sourceData=[
+    {
+        id:1,
+        title:"Google Search"
+    },
+    {
+        id:2,
+        title:"WhatsApp"
+    },
+    {
+        id:3,
+        title:"Friends/Family"
+    },
+    {
+        id:4,
+        title:"Local Newspaper"
+    },
+    {
+        id:5,
+        title:"Word of Mouth"
+    },
+    {
+        id:6,
+        title:"Previous Customer"
+    },
+    {
+        id:7,
+        title:"Flyer/Pamphlet"
+    },
+    {
+        id:8,
+        title:"Others"
+    },
+
+]
+
+
+// export const glossaryData=[
+//     {
+//         id:1,
+//         title:"",
+//         description:""
+//     }
+// ]

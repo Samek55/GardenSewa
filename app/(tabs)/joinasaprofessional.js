@@ -5,6 +5,7 @@ import Icon from 'react-native-ico-flags';
 import { categories, cityData } from "../../data/servicesList";
 
 import * as ImagePicker from 'expo-image-picker';
+import { router } from 'expo-router';
 
 export default function JoinProfessional() {
 
@@ -62,11 +63,17 @@ export default function JoinProfessional() {
 
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
+    const [gender, setGender] = useState('');
+
     const [area, setArea] = useState('');
     const [email, setEmail] = useState('');
+    const [message, setMessage] = useState('');
     const [referralPhone, setReferralPhone] = useState('');
     const [emergencyPhone, setEmergencyPhone] = useState('');
     const [yearsExperience, setYearsOfExperience] = useState('');
+
+    const [isAccepted, setIsAccepted] = useState(false);
+
 
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
@@ -101,6 +108,23 @@ export default function JoinProfessional() {
     const handleImageDelete = (indexToDelete) => {
         setSelectedImage('');
     }
+
+    const handleClearForm = () => {
+        setEmail('');
+        setName('')
+        setPhone('')
+        setMessage('')
+        setArea('')
+        setEmergencyPhone('')
+        setReferralPhone('')
+        setSelectedCategory('')
+        setSelectedCity('')
+        setSelectedIdentificationPicture('')
+        setSelectedImage('')
+        setIsAccepted(false)
+        setGender('')
+    }
+
 
     return (
         <ScrollView style={styles.scrollview} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
@@ -137,7 +161,21 @@ export default function JoinProfessional() {
                 </View>
 
                 <View style={styles.individualContainer}>
-                    <Text>Gender</Text>
+                    <Text style={styles.label}>Gender</Text>
+                    <View style={styles.radioGroup}>
+                        {['Male', 'Female'].map((option) => (
+                            <TouchableOpacity
+                                key={option}
+                                style={styles.radioButtonContainer}
+                                onPress={() => setGender(option)}
+                            >
+                                <View style={styles.radioOuterCircle}>
+                                    {gender === option && <View style={styles.radioInnerCircle} />}
+                                </View>
+                                <Text style={styles.radioText}>{option}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
                 </View>
 
                 <Text style={styles.label}>Headshot/Profile picture</Text>
@@ -487,22 +525,56 @@ export default function JoinProfessional() {
                         }}
                         multiline={true}
                         autoFocus={true}
+                        placeholder="Enter your message"
+                        value={message}
+                        onChangeText={setMessage}
                     />
                 </View>
+
+
+                {/* Accept Terms  */}
+                <View style={styles.checkboxContainer}>
+                    <Pressable
+                        onPress={() => setIsAccepted(!isAccepted)}
+                        style={styles.checkbox}
+                    >
+                        {isAccepted ? (
+                            <Ionicons name="checkbox" size={24} color="#245d5a" />
+                        ) : (
+                            <Ionicons name="square-outline" size={24} color="#666" />
+                        )}
+                    </Pressable>
+                    <Text style={styles.checkboxLabel}>
+                        I accept the{' '}
+                        <Text
+                            style={styles.hyperlink}
+                            onPress={() => router.push('./terms')}
+                        >
+                            Terms and Conditions
+                        </Text>
+                    </Text>
+                </View>
+
+                {/* Buttons */}
                 <View style={styles.bottomContainer}>
                     <View style={{
                         flexDirection: "row",
                         alignItems: 'center',
-                        justifyContent: 'start',
+                        justifyContent: 'flex-start',
                         width: '50%',
-                        gap: 2
-                    }}>
+                        gap: 2,
+
+                    }}
+
+                    >
                         <Ionicons name='refresh' style={{
                             width: "16%",
                             height: 'auto',
                             paddingVertical: 12
                         }} />
-                        <Text style={[styles.label], { width: '50%' }}>Clear Form</Text>
+                        <Pressable onPress={handleClearForm}>
+                            <Text style={[styles.label]}>Clear Form</Text>
+                        </Pressable>
                     </View>
                     <View
                         style={{
@@ -513,9 +585,11 @@ export default function JoinProfessional() {
                             gap: 2,
                             width: '50%',
                             marginHorizontal: 'auto',
-                            borderRadius: 12
+                            borderRadius: 12,
+                            height: 44
                         }}
                     >
+
                         <Text style={[styles.label], {
                             color: '#fff',
 
@@ -582,6 +656,33 @@ const styles = StyleSheet.create({
         flex: 1,
         height: '100%',
         paddingVertical: 0,
+    },
+    radioGroup: {
+        flexDirection: 'row',
+        gap: 20,
+    },
+    radioButtonContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    radioOuterCircle: {
+        height: 16,
+        width: 16,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: '#245d5a',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 8,
+    },
+    radioInnerCircle: {
+        height: 8,
+        width: 8,
+        borderRadius: 5,
+        backgroundColor: '#245d5a',
+    },
+    radioText: {
+        fontSize: 16,
     },
 
     dropdownTrigger: {
@@ -658,8 +759,32 @@ const styles = StyleSheet.create({
         color: '#999',
         fontSize: 14,
     },
-    bottomContainer: {
+
+    checkboxContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 8,
+        gap: 10,
+
+    },
+    checkbox: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    checkboxLabel: {
+        fontSize: 14,
+        color: '#333',
         flex: 1,
-        flexDirection: 'row'
+    },
+    hyperlink: {
+        color: '#245d5a',
+        textDecorationLine: 'underline',
+        fontWeight: '600',
+    },
+    bottomContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginTop: 10,
     }
 });

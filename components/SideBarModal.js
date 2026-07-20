@@ -78,15 +78,19 @@ const SideBarModal = ({ onClose }) => {
                         <Text style={styles.linkItemSecondary}>FAQs</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./glossary')}>
+                        <Ionicons name="book-outline" size={18} color="#6B7280" />
+                        <Text style={styles.linkItemSecondary}>Glossary</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./becomeAPartner')}>
                         <Ionicons name="shield-checkmark-outline" size={18} color="#6B7280" />
-                        <Text style={styles.linkItemSecondary}>Become a Handler</Text>
+                        <Text style={styles.linkItemSecondary}>Become a Partner</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
 
             <View style={styles.adminButtonWrapper}>
-                <TouchableOpacity style={styles.adminLoginButton} activeOpacity={0.8}>
+                <TouchableOpacity style={styles.adminLoginButton} activeOpacity={0.8} onPress={() => handleNavigation('./adminLogin')}>
                     <Ionicons name="lock-closed-outline" size={18} color="#FFFFFF" />
                     <Text style={styles.adminButtonText}>Admin Login</Text>
                 </TouchableOpacity>
@@ -98,9 +102,9 @@ const SideBarModal = ({ onClose }) => {
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        top: 80, 
+        top: 80,
         left: 16,
-        bottom: 30, 
+        bottom: 30,
         width: SIDEBAR_WIDTH,
         backgroundColor: 'white',
         borderRadius: 28,
@@ -115,7 +119,7 @@ const styles = StyleSheet.create({
     profileContainer: {
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 10,
+        gap: 4,
         backgroundColor: "#245d5a",
         paddingVertical: 20,
         paddingHorizontal: 16,
@@ -146,7 +150,7 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
     },
     primaryLinks: {
-        gap: 12,
+        gap: 8,
         paddingHorizontal: 20,
     },
     sectionTitle: {
@@ -169,7 +173,7 @@ const styles = StyleSheet.create({
         color: '#374151',
     },
     secondaryLinks: {
-        gap: 10,
+        gap: 8,
         borderTopWidth: 1,
         borderTopColor: '#F3F4F6',
         paddingTop: 16,

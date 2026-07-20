@@ -1,9 +1,11 @@
 import { Link } from 'expo-router';
 import {
+    Alert,
     Dimensions,
     FlatList,
     Image,
     Pressable,
+    ScrollView,
     StyleSheet,
     Text,
     TextInput,
@@ -11,6 +13,7 @@ import {
 } from "react-native";
 import Icon from 'react-native-ico-flags';
 
+import { useState } from 'react';
 import ServiceCard from "../../components/ServiceCard";
 import { services } from "../../data/servicesList";
 
@@ -20,80 +23,99 @@ const TOP_CARD_WIDTH = (width - 36 - 2 - 24 - 10) / 3;
 
 
 export default function Index() {
+
+    const [phone, setPhone] = useState('')
     const filteredServicesTop = services.filter(service => service.label === 'Top');
 
     return (
-        <View style={styles.screenContainer}>
+        <ScrollView>
+            <View style={styles.screenContainer}>
 
-            <View style={styles.heroContainer}>
-                <Image
-                    source={require('@/assets/images/garden2.jpg')}
-                    style={styles.backgroundImage}
-                    resizeMode="cover"
-                />
-                <View style={styles.overlay}>
-                    <Text style={styles.title}>Express{"\n"}Gardening Service</Text>
-                    <Text style={styles.subTitle}>SuperFast gardening Service at your Home.</Text>
+                <View style={styles.heroContainer}>
+                    <Image
+                        source={require('@/assets/images/garden2.jpg')}
+                        style={styles.backgroundImage}
+                        resizeMode="cover"
+                    />
+                    <View style={styles.overlay}>
+                        <Text style={styles.title}>Express{"\n"}Gardening Service</Text>
+                        <Text style={styles.subTitle}>SuperFast gardening Service at your Home.</Text>
 
-                    <View style={styles.inputContainer}>
-                        <View style={styles.iconWrapper}>
-                            <Icon name="nepal" width={24} height={24} />
+                        <View style={styles.inputContainer}>
+                            <View style={styles.iconWrapper}>
+                                <Icon name="nepal" width={24} height={24} />
+                            </View>
+                            <TextInput
+                                style={styles.textInput}
+                                placeholder="Enter your phone number"
+                                placeholderTextColor="#999"
+                                keyboardType="phone-pad"
+                                value={phone}
+                                onChangeText={setPhone}
+                            />
+                            <Pressable
+                                style={styles.helpButton}
+                                onPress={() => {
+                                    Alert.alert('Confirm Help Request', `Send a help request from +977 ${phone}?Our team will contact you shortly`, [
+                                        {
+                                            text: 'CANCEL',
+                                            onPress: () => console.log('Cancel Pressed'),
+                                            style: 'cancel',
+                                        },
+                                        { text: 'CONFIRM', onPress: () => console.log('OK Pressed') },
+                                    ])
+                                }}
+                            >
+                                <Text style={styles.helpButtonText}>Help</Text>
+                            </Pressable>
                         </View>
-                        <TextInput
-                            style={styles.textInput}
-                            placeholder="98520 24 365"
-                            placeholderTextColor="#999"
-                            keyboardType="phone-pad"
-                        />
-                        <Pressable style={styles.helpButton}>
-                            <Text style={styles.helpButtonText}>Help</Text>
+                    </View>
+                </View>
+
+                <View style={styles.popularCardContainer}>
+                    <Image
+                        source={require('@/assets/images/garden1.jpg')}
+                        style={styles.backgroundImage}
+                        resizeMode="cover"
+                    />
+                    <View style={styles.cardOverlay}>
+                        <View style={styles.tagContainer}>
+                            <Text style={styles.tagText}>Most Popular</Text>
+                        </View>
+                        <Text style={styles.cardTitle}>Lawn Maintenance</Text>
+                        <Text style={styles.cardSubTitle}>Professional lawn maintenance service</Text>
+                    </View>
+                </View>
+
+                <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>Top Services</Text>
+                    <Link href={'/services'} asChild>
+                        <Pressable>
+                            <Text style={styles.seeAllText}>See All</Text>
                         </Pressable>
-                    </View>
+                    </Link>
+                </View>
+
+                <View style={styles.listContainer}>
+                    <FlatList
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        data={filteredServicesTop}
+                        keyExtractor={(item, index) => index.toString()}
+                        contentContainerStyle={styles.horizontalListPadding}
+                        ItemSeparatorComponent={() => <View style={{ width: 14 }} />}
+                        renderItem={({ item }) => (
+                            <ServiceCard
+                                title={item.title}
+                                imageSource={item.url}
+                                cardWidth={TOP_CARD_WIDTH}
+                            />
+                        )}
+                    />
                 </View>
             </View>
+        </ScrollView>
 
-            <View style={styles.popularCardContainer}>
-                <Image
-                    source={require('@/assets/images/garden1.jpg')}
-                    style={styles.backgroundImage}
-                    resizeMode="cover"
-                />
-                <View style={styles.cardOverlay}>
-                    <View style={styles.tagContainer}>
-                        <Text style={styles.tagText}>Most Popular</Text>
-                    </View>
-                    <Text style={styles.cardTitle}>Lawn Maintenance</Text>
-                    <Text style={styles.cardSubTitle}>Professional lawn maintenance service</Text>
-                </View>
-            </View>
-
-            <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Top Services</Text>
-                <Link href={'/services'} asChild>
-                    <Pressable>
-                        <Text style={styles.seeAllText}>See All</Text>
-                    </Pressable>
-                </Link>
-            </View>
-
-            <View style={styles.listContainer}>
-                <FlatList
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    data={filteredServicesTop}
-                    keyExtractor={(item, index) => index.toString()}
-                    contentContainerStyle={styles.horizontalListPadding}
-                    ItemSeparatorComponent={() => <View style={{ width: 14 }} />}
-                    renderItem={({ item }) => (
-                        <ServiceCard
-                            title={item.title}
-                            imageSource={item.url}
-                            cardWidth={TOP_CARD_WIDTH}
-                        />
-                    )}
-                />
-            </View>
-        </View>
     );
 }
 
@@ -168,13 +190,13 @@ const styles = StyleSheet.create({
         fontSize: 15,
     },
     popularCardContainer: {
-        flex: 1,
+        flex: 2,
         marginHorizontal: 16,
         marginTop: 14,
         borderRadius: 24,
         overflow: 'hidden',
         position: 'relative',
-        minHeight: 140,
+        minHeight: 180,
     },
     cardOverlay: {
         flex: 1,
@@ -226,8 +248,8 @@ const styles = StyleSheet.create({
     listContainer: {
         height: ((width - 60) / 3) * 1.35 + 10,
         marginBottom: 16,
-        backgroundColor:'#fff',
-        paddingHorizontal:16,
+        backgroundColor: '#fff',
+        paddingHorizontal: 16,
     },
     horizontalListPadding: {
         paddingHorizontal: 8,

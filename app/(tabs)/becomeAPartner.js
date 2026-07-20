@@ -1,17 +1,17 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { Calendar } from 'react-native-calendars';
 import Icon from 'react-native-ico-flags';
-import { budgetData, categories, cityData, priorityData, shiftsData } from "../../data/servicesList";
+import { categories as businessType, cityData, partnershipData, serviceOfferedData, sourceData } from "../../data/servicesList";
 
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 
 export default function Book() {
 
-    const [selectedImages, setSelectedImages] = useState('')
-    console.log(selectedImages)
+    const [selectedCompanyImages, setSelectedCompanyImages] = useState('');
+    const [selectedCertificates, setSelectedCertificates] = useState('');
+    const [isAccepted, setIsAccepted] = useState(false);
 
     async function handleImagePick() {
         try {
@@ -20,128 +20,140 @@ export default function Book() {
                 allowsMultipleSelection: true,
                 allowsEditing: false,
                 quality: 1
-
             });
-            console.log(result)
+            console.log(result);
 
             if (!result.canceled) {
-
-                setSelectedImages(result.assets)
-                console.log(result)
+                setSelectedCompanyImages(result.assets);
+                console.log(result);
             } else {
-                alert("You did not select any image")
+                alert("You did not select any image");
             }
-
         } catch (error) {
-            console.log(error)
-
+            console.log(error);
         }
+    }
 
+    async function handleImageCertificatePick() {
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                allowsMultipleSelection: true,
+                allowsEditing: false,
+                quality: 1
+            });
+            console.log(result);
+
+            if (!result.canceled) {
+                setSelectedCertificates(result.assets);
+                console.log(result);
+            } else {
+                alert("You did not select any image");
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
-    const [area, setArea] = useState('');
+    const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
+    const [organization, setOrganization] = useState('');
+    const [noOfEmployees, setNoOfEmployees] = useState('');
 
-    const [isAccepted, setIsAccepted] = useState(false);
+    const [selectedBusinessType, setSelectedBusinessType] = useState('');
+    const [selectedServiceType, setSelectedServiceType] = useState('');
+    const [selectedPartnership, setSelectedPartnership] = useState('');
+    const [selectedSource, setSelectedSource] = useState('');
+    const [selectedArea, setSelectedArea] = useState('');
 
-    const [selectedCategory, setSelectedCategory] = useState('');
-    const [selectedShift, setSelectedShift] = useState('');
-    const [selectedCity, setSelectedCity] = useState('');
-    const [selectedPriority, setSelectedPriority] = useState('');
-    const [selectedBudget, setSelectedBudget] = useState('');
-
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchShiftQuery, setSearchShiftQuery] = useState('')
-    const [searchCityQuery, setSearchCityQuery] = useState('')
-    const [searchPriorityQuery, setSearchPriorityQuery] = useState('')
-    const [searchBudgetQuery, setSearchBudgetQuery] = useState('')
+    const [searchBusinessTypeQuery, setSearchBusinessTypeQuery] = useState('');
+    const [searchAreaQuery, setSearchAreaQuery] = useState('');
+    const [searchServiceOfferedQuery, setSearchServiceOfferedQuery] = useState('');
+    const [searchSourceQuery, setSearchSourceQuery] = useState('');
+    const [searchPartnershipQuery, setSearchPartnershipQuery] = useState('');
 
     const [isOpenDropdown, setIsOpenDropdown] = useState(false);
-    const [isOpenDropDownShift, setIsOpenDropdownShift] = useState(false);
-    const [isOpenDropdownCity, setIsOpenDropdownCity] = useState(false);
-    const [isOpenDropdownPriority, setIsOpenDropdownPriority] = useState(false);
-    const [isOpenDropdownBudget, setIsOpenDropdownBudget] = useState(false);
+    const [isOpenDropdownArea, setIsOpenDropdownArea] = useState(false);
+    const [isOpenDropdownSource, setIsOpenDropdownSource] = useState(false);
+    const [isOpenDropdownService, setIsOpenDropdownService] = useState(false);
+    const [isOpenDropdownPartnership, setIsOpenDropdownPartnership] = useState(false);
 
-    const [isOpenStartCalendar, setIsOpenStartCalendar] = useState(false);
-    const [isOpenEndCalendar, setIsOpenEndCalendar] = useState(false);
-
-    const [startDate, setStartDate] = useState('')
-    const [endDate, setEndDate] = useState('')
-
-    const filteredCategories = categories?.filter(service =>
-        service.title.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredBusinessType = businessType?.filter(service =>
+        service.title.toLowerCase().includes(searchBusinessTypeQuery.toLowerCase())
+    ) || [];
+    const filteredtSourceData = sourceData?.filter(service =>
+        service.title.toLowerCase().includes(searchSourceQuery.toLowerCase())
     ) || [];
 
-    const filteredShiftsData = shiftsData?.filter(shift =>
-        shift.name.toLowerCase().includes(searchShiftQuery?.toLowerCase())
-    )
+    const filteredPartnershipData = partnershipData?.filter(service =>
+        service.title.toLowerCase().includes(searchPartnershipQuery.toLowerCase())
+    ) || [];
 
-    const filteredCityData = cityData.filter(city => city.name.toLowerCase().includes(searchCityQuery.toLowerCase()))
+    const filteredServiceType = serviceOfferedData?.filter(service =>
+        service.title.toLowerCase().includes(searchServiceOfferedQuery.toLowerCase())
+    ) || [];
 
-    const filteredPriorityData = priorityData.filter(priority => priority.name.toLowerCase().includes(searchPriorityQuery.toLowerCase()))
+    const filteredAreaQuery = cityData.filter(city => city.name.toLowerCase().includes(searchAreaQuery.toLowerCase()));
 
-    const filteredBudgetData = budgetData.filter(budget => budget.name.toLowerCase().includes(searchPriorityQuery.toLowerCase()))
-
-    console.log(filteredShiftsData)
-
-    const handleSelectCategory = (title) => {
-        setSelectedCategory(title);
-        setSearchQuery('');
+    const handleSelectBusinessType = (title) => {
+        setSelectedBusinessType(title);
+        setSearchBusinessTypeQuery('');
         setIsOpenDropdown(false);
     };
-
-    const handleSelectShift = (name) => {
-        setSelectedShift(name);
-        setSearchShiftQuery('');
-        setIsOpenDropdownShift(false);
+    const handleSelectSource = (title) => {
+        setSelectedSource(title);
+        setSearchSourceQuery('');
+        setIsOpenDropdownSource(false);
+    };
+    const handleSelectServiceType = (title) => {
+        setSelectedServiceType(title);
+        setSearchServiceOfferedQuery('');
+        setIsOpenDropdownService(false);
     };
 
-    const handleSelectCity = (name) => {
-        setSelectedCity(name);
-        setSearchCityQuery('');
-        setIsOpenDropdownCity(false);
+    const handleSelectPartnership = (title) => {
+        setSelectedPartnership(title);
+        setSearchPartnershipQuery('');
+        setIsOpenDropdownPartnership(false);
     };
 
-    const handleSelectPriority = (name) => {
-        setSelectedPriority(name);
-        setSearchPriorityQuery('');
-        setIsOpenDropdownPriority(false);
-    }
+    const handleSelectArea = (name) => {
+        setSelectedArea(name);
+        setSearchAreaQuery('');
+        setIsOpenDropdownArea(false);
+    };
 
-    const handleSelectBudget = (name) => {
-        setSelectedBudget(name);
-        setSearchBudgetQuery('');
-        setIsOpenDropdownBudget(false);
-    }
     const handleImageDelete = (indexToDelete) => {
-        setSelectedImages((prevImages) =>
+        setSelectedCompanyImages((prevImages) =>
             prevImages.filter((_, index) => index !== indexToDelete)
         );
-    }
+    };
 
     const handleClearForm = () => {
-        setArea('');
-        setEndDate('');
-        setStartDate('')
-        setIsAccepted(false)
+        setEmail('');
+        setIsAccepted('');
         setName('')
+        setNoOfEmployees('')
         setPhone('')
         setMessage('')
-        setSelectedBudget('')
-        setSelectedCategory('')
-        setSelectedCity('')
-        setSelectedImages('')
-        setSelectedPriority('')
-        setSelectedShift('')
+        setOrganization('')
+        setSelectedArea('')
+        setSelectedBusinessType('')
+        setSelectedCertificates('')
+        setSelectedCompanyImages('')
+        setSelectedPartnership('')
+        setSelectedServiceType('')
+        setSelectedSource('')
 
     }
 
     return (
         <ScrollView style={styles.scrollview} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-            <Text style={styles.headerText}>Book Service</Text>
+            <Text style={styles.headerText}>Become a Partner</Text>
             <View style={styles.formContainer}>
+                {/* Name  */}
                 <View style={styles.individualContainer}>
                     <Text style={styles.label}>Full name</Text>
                     <TextInput
@@ -151,7 +163,17 @@ export default function Book() {
                         onChangeText={setName}
                     />
                 </View>
-
+                {/* Organization */}
+                <View style={styles.individualContainer}>
+                    <Text style={styles.label}>Name of Organization</Text>
+                    <TextInput
+                        style={styles.textInput}
+                        placeholder="Enter your Name of your Organization"
+                        value={organization}
+                        onChangeText={setOrganization}
+                    />
+                </View>
+                {/* Phone Number */}
                 <View style={styles.individualContainer}>
                     <Text style={styles.label}>Phone Number</Text>
                     <View style={styles.phoneInputContainer}>
@@ -167,384 +189,26 @@ export default function Book() {
                             value={phone}
                             onChangeText={setPhone}
                             keyboardType="phone-pad"
-                            numberOfLines={8}
                         />
                     </View>
                 </View>
-
+                {/* Email */}
                 <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Select Service</Text>
-
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenDropdown(!isOpenDropdown)}
-                    >
-                        <Text style={[styles.triggerText, !selectedCategory && styles.placeholderText]}>
-                            {selectedCategory || "Select a service"}
-                        </Text>
-                        <Ionicons
-                            name={isOpenDropdown ? "chevron-up" : "chevron-down"}
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenDropdown && (
-                        <View style={styles.dropdownContainer}>
-                            <View style={styles.searchBarContainer}>
-                                <TextInput
-                                    style={styles.searchInput}
-                                    placeholder="Search for services..."
-                                    value={searchQuery}
-                                    onChangeText={setSearchQuery}
-                                    autoFocus={true}
-                                />
-                                {searchQuery?.length > 0 && (
-                                    <TouchableOpacity onPress={() => setSearchQuery('')}>
-                                        <Ionicons name="close-circle" size={18} color="#999" />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-
-                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
-                                {filteredCategories?.length > 0 ? (
-                                    filteredCategories?.map((service, index) => (
-                                        <TouchableOpacity
-                                            key={service.id || index}
-                                            style={styles.dropdownItem}
-                                            onPress={() => handleSelectCategory(service.title)}
-                                        >
-                                            <Text style={styles.dropdownItemText}>{service.title}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                ) : (
-                                    <View style={styles.noResultsContainer}>
-                                        <Text style={styles.noResultsText}>No services found</Text>
-                                    </View>
-                                )}
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Choose Date</Text>
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenStartCalendar(!isOpenStartCalendar)}
-                    >
-                        <Text style={[styles.triggerText, !startDate && styles.placeholderText]}>
-                            {startDate || "Select Date"}
-                        </Text>
-                        <Ionicons
-                            name="calendar-clear-outline"
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenStartCalendar && (
-                        <Calendar
-                            onDayPress={day => {
-                                setStartDate(day.dateString);
-                                setIsOpenStartCalendar(false);
-                            }}
-                            markedDates={{
-                                [startDate]: { selected: true, selectedColor: '#245d5a' }
-                            }}
-                            theme={{
-                                todayTextColor: '#245d5a',
-                                arrowColor: '#245d5a',
-                            }}
-                        />
-                    )}
-                </View>
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Service Ending Date</Text>
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenEndCalendar(!isOpenEndCalendar)}
-                    >
-                        <Text style={[styles.triggerText, !endDate && styles.placeholderText]}>
-                            {endDate || "Select Date"}
-                        </Text>
-                        <Ionicons
-                            name="calendar-clear-outline"
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenEndCalendar && (
-                        <Calendar
-                            onDayPress={day => {
-                                setEndDate(day.dateString);
-                                setIsOpenEndCalendar(false);
-                            }}
-                            markedDates={{
-                                [endDate]: { selected: true, selectedColor: '#245d5a' }
-                            }}
-                            theme={{
-                                todayTextColor: '#245d5a',
-                                arrowColor: '#245d5a',
-                            }}
-                        />
-                    )}
-                </View>
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Preferred Time</Text>
-
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenDropdownShift(!isOpenDropDownShift)}
-                    >
-                        <Text style={[styles.triggerText, !selectedShift && styles.placeholderText]}>
-                            {selectedShift || "Choose a shift"}
-                        </Text>
-                        <Ionicons
-                            name={isOpenDropDownShift ? "time-outline" : "time-sharp"}
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenDropDownShift && (
-                        <View style={styles.dropdownContainer}>
-                            <View style={styles.searchBarContainer}>
-                                <TextInput
-                                    style={styles.searchInput}
-                                    placeholder="Search for shifts..."
-                                    value={searchShiftQuery}
-                                    onChangeText={setSearchShiftQuery}
-                                    autoFocus={true}
-                                />
-                                {searchShiftQuery?.length > 0 && (
-                                    <TouchableOpacity onPress={() => setSearchShiftQuery('')}>
-                                        <Ionicons name="close-circle" size={18} color="#999" />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-
-                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
-                                {filteredShiftsData?.length > 0 ? (
-                                    filteredShiftsData?.map((shift, index) => (
-                                        <TouchableOpacity
-                                            key={shift.id || index}
-                                            style={styles.dropdownItem}
-                                            onPress={() => handleSelectShift(shift.name)}
-
-                                        >
-                                            <Text style={styles.dropdownItemText}>{shift.name}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                ) : (
-                                    <View style={styles.noResultsContainer}>
-                                        <Text style={styles.noResultsText}>No shifts found</Text>
-                                    </View>
-                                )}
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>City</Text>
-
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenDropdownCity(!isOpenDropdownCity)}
-                    >
-                        <Text style={[styles.triggerText, !selectedCity && styles.placeholderText]}>
-                            {selectedCity || "Choose a city"}
-                        </Text>
-                        <Ionicons
-                            name={isOpenDropdownCity ? "chevron-up" : "chevron-down"}
-
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenDropdownCity && (
-                        <View style={styles.dropdownContainer}>
-                            <View style={styles.searchBarContainer}>
-                                <TextInput
-                                    style={styles.searchInput}
-                                    placeholder="Search for cities..."
-                                    value={searchCityQuery}
-                                    onChangeText={setSearchCityQuery}
-                                    autoFocus={true}
-                                />
-                                {searchCityQuery?.length > 0 && (
-                                    <TouchableOpacity onPress={() => setSearchCityQuery('')}>
-                                        <Ionicons name="close-circle" size={18} color="#999" />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-
-                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
-                                {filteredCityData?.length > 0 ? (
-                                    filteredCityData?.map((city, index) => (
-                                        <TouchableOpacity
-                                            key={city.id || index}
-                                            style={styles.dropdownItem}
-                                            onPress={() => handleSelectCity(city.name)}
-
-                                        >
-                                            <Text style={styles.dropdownItemText}>{city.name}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                ) : (
-                                    <View style={styles.noResultsContainer}>
-                                        <Text style={styles.noResultsText}>No cities found</Text>
-                                    </View>
-                                )}
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Area</Text>
-                    {selectedCity ? <TextInput
+                    <Text style={styles.label}>Email</Text>
+                    <TextInput
                         style={styles.textInput}
-                        placeholder="Enter your area"
-                        value={area}
-                        onChangeText={setArea}
-                    /> : <TextInput
-                        style={styles.textInput}
-                        placeholder="Please select a city first"
-                        editable={false}
+                        placeholder="Enter your Email Address"
+                        value={email}
+                        onChangeText={setEmail}
                     />
-                    }
                 </View>
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Priority</Text>
-
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenDropdownPriority(!isOpenDropdownPriority)}
-                    >
-                        <Text style={[styles.triggerText, !selectedPriority && styles.placeholderText]}>
-                            {selectedPriority || "Choose a Priority"}
-                        </Text>
-                        <Ionicons
-                            name={isOpenDropdownPriority ? "chevron-up" : "chevron-down"}
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenDropdownPriority && (
-                        <View style={styles.dropdownContainer}>
-                            <View style={styles.searchBarContainer}>
-                                <TextInput
-                                    style={styles.searchInput}
-                                    placeholder="Search for priorities..."
-                                    value={searchPriorityQuery}
-                                    onChangeText={setSearchPriorityQuery}
-                                    autoFocus={true}
-                                />
-                                {searchBudgetQuery?.length > 0 && (
-                                    <TouchableOpacity onPress={() => setSearchPriorityQuery('')}>
-                                        <Ionicons name="close-circle" size={18} color="#999" />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-
-                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
-                                {filteredPriorityData?.length > 0 ? (
-                                    filteredPriorityData?.map((priority, index) => (
-                                        <TouchableOpacity
-                                            key={priority.id || index}
-                                            style={styles.dropdownItem}
-                                            onPress={() => handleSelectPriority(priority.name)}
-
-                                        >
-                                            <Text style={styles.dropdownItemText}>{priority.name}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                ) : (
-                                    <View style={styles.noResultsContainer}>
-                                        <Text style={styles.noResultsText}>No priority found</Text>
-                                    </View>
-                                )}
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Budget</Text>
-
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenDropdownBudget(!isOpenDropdownBudget)}
-                    >
-                        <Text style={[styles.triggerText, !selectedBudget && styles.placeholderText]}>
-                            {selectedBudget || "Choose a Budget"}
-                        </Text>
-                        <Ionicons
-                            name={isOpenDropdownBudget ? "chevron-up" : "chevron-down"}
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenDropdownBudget && (
-                        <View style={styles.dropdownContainer}>
-                            <View style={styles.searchBarContainer}>
-                                <TextInput
-                                    style={styles.searchInput}
-                                    placeholder="Search for budgets..."
-                                    value={searchBudgetQuery}
-                                    onChangeText={setSearchBudgetQuery}
-                                    autoFocus={true}
-                                />
-                                {searchBudgetQuery?.length > 0 && (
-                                    <TouchableOpacity onPress={() => setSearchBudgetQuery('')}>
-                                        <Ionicons name="close-circle" size={18} color="#999" />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-
-                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
-                                {filteredBudgetData?.length > 0 ? (
-                                    filteredBudgetData?.map((budget, index) => (
-                                        <TouchableOpacity
-                                            key={budget.id || index}
-                                            style={styles.dropdownItem}
-                                            onPress={() => handleSelectBudget(budget.name)}
-
-                                        >
-                                            <Text style={styles.dropdownItemText}>{budget.name}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                ) : (
-                                    <View style={styles.noResultsContainer}>
-                                        <Text style={styles.noResultsText}>No budget found</Text>
-                                    </View>
-                                )}
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-                <View style={styles.individualContainer}>
-                </View>
-                <Text style={styles.label}>Upload Photos</Text>
+                {/* Company Photos */}
+                <Text style={styles.label}>Company Photos</Text>
 
                 <View style={[
                     styles.individualContainer,
                     {
-                        borderStyle: selectedImages && selectedImages.length > 0 ? 'solid' : 'dashed',
+                        borderStyle: selectedCompanyImages && selectedCompanyImages.length > 0 ? 'solid' : 'dashed',
                         borderWidth: 1.5,
                         borderColor: 'black',
                         alignItems: 'center',
@@ -558,8 +222,8 @@ export default function Book() {
                     }
                 ]}>
 
-                    {selectedImages && selectedImages.length > 0 ? (
-                        selectedImages.map((selectedImage, index) => (
+                    {selectedCompanyImages && selectedCompanyImages.length > 0 ? (
+                        selectedCompanyImages.map((selectedImage, index) => (
                             <View
                                 key={index}
                                 style={{
@@ -609,6 +273,376 @@ export default function Book() {
                     )}
                 </View>
 
+                {/* Area */}
+
+                <View style={styles.individualContainer}>
+                    <Text style={styles.label}>Area</Text>
+
+                    <TouchableOpacity
+                        style={styles.dropdownTrigger}
+                        activeOpacity={0.8}
+                        onPress={() => setIsOpenDropdownArea(!isOpenDropdownArea)}
+                    >
+                        <Text style={[styles.triggerText, !selectedArea && styles.placeholderText]}>
+                            {selectedArea || "Choose your area"}
+                        </Text>
+                        <Ionicons
+                            name={isOpenDropdownArea ? "chevron-up" : "chevron-down"}
+                            size={20}
+                            color="#666"
+                        />
+                    </TouchableOpacity>
+
+                    {isOpenDropdownArea && (
+                        <View style={styles.dropdownContainer}>
+                            <View style={styles.searchBarContainer}>
+                                <TextInput
+                                    style={styles.searchInput}
+                                    placeholder="Search for cities..."
+                                    value={searchAreaQuery}
+                                    onChangeText={setSearchAreaQuery}
+                                    autoFocus={true}
+                                />
+                                {searchAreaQuery?.length > 0 && (
+                                    <TouchableOpacity onPress={() => setSearchAreaQuery('')}>
+                                        <Ionicons name="close-circle" size={18} color="#999" />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+
+                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
+                                {filteredAreaQuery?.length > 0 ? (
+                                    filteredAreaQuery?.map((city, index) => (
+                                        <TouchableOpacity
+                                            key={city.id || index}
+                                            style={styles.dropdownItem}
+                                            onPress={() => handleSelectArea(city.name)}
+                                        >
+                                            <Text style={styles.dropdownItemText}>{city.name}</Text>
+                                        </TouchableOpacity>
+                                    ))
+                                ) : (
+                                    <View style={styles.noResultsContainer}>
+                                        <Text style={styles.noResultsText}>No cities found</Text>
+                                    </View>
+                                )}
+                            </ScrollView>
+                        </View>
+                    )}
+                </View>
+
+                {/* Number of employees */}
+                <View style={styles.individualContainer}>
+                    <Text style={styles.label}>Number of employees</Text>
+                    <TextInput
+                        style={styles.textInput}
+                        placeholder="Enter the number of employees"
+                        value={noOfEmployees}
+                        onChangeText={setNoOfEmployees}
+                    />
+                </View>
+
+                {/* Business Type */}
+                <View style={styles.individualContainer}>
+                    <Text style={styles.label}>Business Type</Text>
+
+                    <TouchableOpacity
+                        style={styles.dropdownTrigger}
+                        activeOpacity={0.8}
+                        onPress={() => setIsOpenDropdown(!isOpenDropdown)}
+                    >
+                        <Text style={[styles.triggerText, !selectedBusinessType && styles.placeholderText]}>
+                            {selectedBusinessType || "Select a business type"}
+                        </Text>
+                        <Ionicons
+                            name={isOpenDropdown ? "chevron-up" : "chevron-down"}
+                            size={20}
+                            color="#666"
+                        />
+                    </TouchableOpacity>
+
+                    {isOpenDropdown && (
+                        <View style={styles.dropdownContainer}>
+                            <View style={styles.searchBarContainer}>
+                                <TextInput
+                                    style={styles.searchInput}
+                                    placeholder="Search for services..."
+                                    value={searchBusinessTypeQuery}
+                                    onChangeText={setSearchBusinessTypeQuery}
+                                    autoFocus={true}
+                                />
+                                {searchBusinessTypeQuery?.length > 0 && (
+                                    <TouchableOpacity onPress={() => setSearchBusinessTypeQuery('')}>
+                                        <Ionicons name="close-circle" size={18} color="#999" />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+
+                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
+                                {filteredBusinessType?.length > 0 ? (
+                                    filteredBusinessType?.map((service, index) => (
+                                        <TouchableOpacity
+                                            key={service.id || index}
+                                            style={styles.dropdownItem}
+                                            onPress={() => handleSelectBusinessType(service.title)}
+                                        >
+                                            <Text style={styles.dropdownItemText}>{service.title}</Text>
+                                        </TouchableOpacity>
+                                    ))
+                                ) : (
+                                    <View style={styles.noResultsContainer}>
+                                        <Text style={styles.noResultsText}>No business type found</Text>
+                                    </View>
+                                )}
+                            </ScrollView>
+                        </View>
+                    )}
+                </View>
+
+                {/* Services Offered */}
+                <View style={styles.individualContainer}>
+                    <Text style={styles.label}>Services Offered</Text>
+
+                    <TouchableOpacity
+                        style={styles.dropdownTrigger}
+                        activeOpacity={0.8}
+                        onPress={() => setIsOpenDropdownService(!isOpenDropdownService)}
+                    >
+                        <Text style={[styles.triggerText, !selectedServiceType && styles.placeholderText]}>
+                            {selectedServiceType || "Select the services you offer"}
+                        </Text>
+                        <Ionicons
+                            name={isOpenDropdownService ? "chevron-up" : "chevron-down"}
+                            size={20}
+                            color="#666"
+                        />
+                    </TouchableOpacity>
+
+                    {isOpenDropdownService && (
+                        <View style={styles.dropdownContainer}>
+                            <View style={styles.searchBarContainer}>
+                                <TextInput
+                                    style={styles.searchInput}
+                                    placeholder="Search the services you offer"
+                                    value={searchServiceOfferedQuery}
+                                    onChangeText={setSearchServiceOfferedQuery}
+                                    autoFocus={true}
+                                />
+                                {searchServiceOfferedQuery?.length > 0 && (
+                                    <TouchableOpacity onPress={() => setSearchServiceOfferedQuery('')}>
+                                        <Ionicons name="close-circle" size={18} color="#999" />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+
+                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
+                                {filteredServiceType?.length > 0 ? (
+                                    filteredServiceType?.map((service, index) => (
+                                        <TouchableOpacity
+                                            key={service.id || index}
+                                            style={styles.dropdownItem}
+                                            onPress={() => handleSelectServiceType(service.title)}
+                                        >
+                                            <Text style={styles.dropdownItemText}>{service.title}</Text>
+                                        </TouchableOpacity>
+                                    ))
+                                ) : (
+                                    <View style={styles.noResultsContainer}>
+                                        <Text style={styles.noResultsText}>No service found</Text>
+                                    </View>
+                                )}
+                            </ScrollView>
+                        </View>
+                    )}
+                </View>
+
+                {/* Partnership Interest */}
+                <View style={styles.individualContainer}>
+                    <Text style={styles.label}>Partnership Interest</Text>
+
+                    <TouchableOpacity
+                        style={styles.dropdownTrigger}
+                        activeOpacity={0.8}
+                        onPress={() => setIsOpenDropdownPartnership(!isOpenDropdownPartnership)}
+                    >
+                        <Text style={[styles.triggerText, !selectedPartnership && styles.placeholderText]}>
+                            {selectedPartnership || "Select the partnership interest"}
+                        </Text>
+                        <Ionicons
+                            name={isOpenDropdownPartnership ? "chevron-up" : "chevron-down"}
+                            size={20}
+                            color="#666"
+                        />
+                    </TouchableOpacity>
+
+                    {isOpenDropdownPartnership && (
+                        <View style={styles.dropdownContainer}>
+                            <View style={styles.searchBarContainer}>
+                                <TextInput
+                                    style={styles.searchInput}
+                                    placeholder="Search Partnership Interest"
+                                    value={searchPartnershipQuery}
+                                    onChangeText={setSearchPartnershipQuery}
+                                    autoFocus={true}
+                                />
+                                {searchPartnershipQuery?.length > 0 && (
+                                    <TouchableOpacity onPress={() => setSearchPartnershipQuery('')}>
+                                        <Ionicons name="close-circle" size={18} color="#999" />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+
+                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
+                                {filteredPartnershipData?.length > 0 ? (
+                                    filteredPartnershipData?.map((service, index) => (
+                                        <TouchableOpacity
+                                            key={service.id || index}
+                                            style={styles.dropdownItem}
+                                            onPress={() => handleSelectPartnership(service.title)}
+                                        >
+                                            <Text style={styles.dropdownItemText}>{service.title}</Text>
+                                        </TouchableOpacity>
+                                    ))
+                                ) : (
+                                    <View style={styles.noResultsContainer}>
+                                        <Text style={styles.noResultsText}>No partnership interest found</Text>
+                                    </View>
+                                )}
+                            </ScrollView>
+                        </View>
+                    )}
+                </View>
+
+                {/* Company Registration Certificate */}
+
+                <Text style={styles.label}>Company Registration Certificate</Text>
+
+                <View style={[
+                    styles.individualContainer,
+                    {
+                        borderStyle: selectedCertificates && selectedCertificates.length > 0 ? 'solid' : 'dashed',
+                        borderWidth: 1.5,
+                        borderColor: 'black',
+                        alignItems: 'center',
+                        justifyContent: 'flex-start',
+                        height: 140,
+                        borderRadius: 4,
+                        flexDirection: 'row',
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        gap: 10
+                    }
+                ]}>
+
+                    {selectedCertificates && selectedCertificates.length > 0 ? (
+                        selectedCertificates.map((selectedImage, index) => (
+                            <View
+                                key={index}
+                                style={{
+                                    width: 45,
+                                    height: '100%',
+                                    position: 'relative',
+                                    borderRadius: 4,
+                                    overflow: 'hidden'
+                                }}
+                            >
+                                <Image
+                                    source={{ uri: selectedImage.uri }}
+                                    style={{ width: '100%', height: '100%', borderRadius: 4 }}
+                                    resizeMode="cover"
+                                />
+
+                                <Pressable
+                                    onPress={() => handleImageDelete(index)}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 4,
+                                        right: 4,
+                                        backgroundColor: 'rgba(0,0,0,0.6)',
+                                        borderRadius: 12,
+                                        padding: 4,
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    <Ionicons name='trash' size={16} color="white" />
+                                </Pressable>
+                            </View>
+                        ))
+                    ) : (
+                        <Pressable
+                            onPress={handleImageCertificatePick}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <Ionicons name='arrow-down-circle-outline' size={32} color="black" />
+                            <Text style={{ marginTop: 4 }}>Drop file/photos here</Text>
+                        </Pressable>
+                    )}
+                </View>
+
+                {/* How did you hear about us? */}
+                <View style={styles.individualContainer}>
+                    <Text style={styles.label}>How did you hear about us?</Text>
+
+                    <TouchableOpacity
+                        style={styles.dropdownTrigger}
+                        activeOpacity={0.8}
+                        onPress={() => setIsOpenDropdownSource(!isOpenDropdownSource)}
+                    >
+                        <Text style={[styles.triggerText, !selectedSource && styles.placeholderText]}>
+                            {selectedSource || "Select the source"}
+                        </Text>
+                        <Ionicons
+                            name={isOpenDropdownSource ? "chevron-up" : "chevron-down"}
+                            size={20}
+                            color="#666"
+                        />
+                    </TouchableOpacity>
+
+                    {isOpenDropdownSource && (
+                        <View style={styles.dropdownContainer}>
+                            <View style={styles.searchBarContainer}>
+                                <TextInput
+                                    style={styles.searchInput}
+                                    placeholder="Search Partnership Interest"
+                                    value={searchSourceQuery}
+                                    onChangeText={setSearchSourceQuery}
+                                    autoFocus={true}
+                                />
+                                {searchSourceQuery?.length > 0 && (
+                                    <TouchableOpacity onPress={() => setSearchSourceQuery('')}>
+                                        <Ionicons name="close-circle" size={18} color="#999" />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+
+                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
+                                {filteredtSourceData?.length > 0 ? (
+                                    filteredtSourceData?.map((source, index) => (
+                                        <TouchableOpacity
+                                            key={source.id || index}
+                                            style={styles.dropdownItem}
+                                            onPress={() => handleSelectSource(source.title)}
+                                        >
+                                            <Text style={styles.dropdownItemText}>{source.title}</Text>
+                                        </TouchableOpacity>
+                                    ))
+                                ) : (
+                                    <View style={styles.noResultsContainer}>
+                                        <Text style={styles.noResultsText}>No sources found</Text>
+                                    </View>
+                                )}
+                            </ScrollView>
+                        </View>
+                    )}
+                </View>
+
+                {/* Message */}
                 <View style={styles.individualContainer}>
                     <Text style={styles.label}>Message</Text>
 
@@ -691,6 +725,7 @@ export default function Book() {
                         }}>Submit</Text>
                     </View>
                 </View>
+
             </View>
         </ScrollView>
     );
@@ -752,7 +787,6 @@ const styles = StyleSheet.create({
         height: '100%',
         paddingVertical: 0,
     },
-
     dropdownTrigger: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -794,9 +828,6 @@ const styles = StyleSheet.create({
         height: 40,
         backgroundColor: '#f9f9f9',
     },
-    searchIcon: {
-        marginRight: 6,
-    },
     searchInput: {
         flex: 1,
         height: '100%',
@@ -827,10 +858,6 @@ const styles = StyleSheet.create({
         color: '#999',
         fontSize: 14,
     },
-    bottomContainer: {
-        flex: 1,
-        flexDirection: 'row'
-    },
     checkboxContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -851,10 +878,10 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
         fontWeight: '600',
     },
-    // bottomContainer: {
-    //     flexDirection: 'row',
-    //     alignItems: 'center',
-    //     justifyContent: 'space-between',
-    //     marginTop: 10,
-    // }
+    bottomContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginTop: 10,
+    }
 });

@@ -81,6 +81,34 @@ const TabLayout = () => {
                     href: null
                 }}
             />
+            <Tabs.Screen
+                name="adminLogin"
+                options={{
+                    title: "Admin Login",
+                    href: null
+                }}
+            />
+            <Tabs.Screen
+                name="becomeAPartner"
+                options={{
+                    title: "Become a Partner",
+                    href: null
+                }}
+            />
+            <Tabs.Screen
+                name="glossary"
+                options={{
+                    title: "Glossary",
+                    href: null
+                }}
+            />
+            <Tabs.Screen
+                name="terms"
+                options={{
+                    title: "Terms and Conditions",
+                    href: null
+                }}
+            />
 
         </Tabs>
     )
