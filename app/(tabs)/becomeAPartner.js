@@ -125,10 +125,20 @@ export default function Book() {
         setIsOpenDropdownArea(false);
     };
 
-    const handleImageDelete = (indexToDelete) => {
-        setSelectedCompanyImages((prevImages) =>
-            prevImages.filter((_, index) => index !== indexToDelete)
-        );
+    const handleImageDelete = (indexToDelete, source) => {
+        if (source === "company") {
+            setSelectedCompanyImages((prevImages) =>
+                prevImages.filter((_, index) => index !== indexToDelete)
+            );
+        }
+        if (source === "certificate") {
+            setSelectedCertificates((prevImages) =>
+                prevImages.filter((_, index) => index !== indexToDelete)
+            );
+        }else{
+            console.log("no matching image criteria")
+        }
+
     };
 
     const handleClearForm = () => {
@@ -241,7 +251,7 @@ export default function Book() {
                                 />
 
                                 <Pressable
-                                    onPress={() => handleImageDelete(index)}
+                                    onPress={() => handleImageDelete(index, "company")}
                                     style={{
                                         position: 'absolute',
                                         top: 4,
@@ -553,7 +563,7 @@ export default function Book() {
                                 />
 
                                 <Pressable
-                                    onPress={() => handleImageDelete(index)}
+                                    onPress={() => handleImageDelete(index, "certificate")}
                                     style={{
                                         position: 'absolute',
                                         top: 4,

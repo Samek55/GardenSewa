@@ -19,7 +19,9 @@ export default function Book() {
                 mediaTypes: ['images'],
                 allowsMultipleSelection: true,
                 allowsEditing: false,
-                quality: 1
+                quality: 1,
+                selectionLimit:5
+                
 
             });
             console.log(result)
@@ -539,7 +541,7 @@ export default function Book() {
                 </View>
                 <View style={styles.individualContainer}>
                 </View>
-                <Text style={styles.label}>Upload Photos</Text>
+                <Text style={styles.label}>Upload Photos (up to 5)</Text>
 
                 <View style={[
                     styles.individualContainer,

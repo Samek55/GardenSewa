@@ -133,7 +133,7 @@ const AdminLogin = () => {
                         <View style={[styles.horizontalDivider, { marginVertical: screenHeight * 0.03 }]} />
 
                         <View style={styles.panelFooterActionContainer}>
-                            <TouchableOpacity style={styles.footerLinkAction} onPress={()=>router.push('./terms')}>
+                            <TouchableOpacity style={styles.footerLinkAction} onPress={()=>router.push('./joinasaprofessional')}>
                                 <Text style={styles.professionalJoinText}>Join as Professional : Join Now</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.footerLinkAction}>

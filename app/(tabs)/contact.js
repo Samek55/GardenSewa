@@ -1,7 +1,25 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
+import { Alert, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 const Contact = () => {
+
+    const onWhatsAppOpen = async () => {
+
+        const phoneNumber = "9852024365";
+        const message = "Hello! I am looking for a gardening service"
+        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        try {
+            const supported = await Linking.canOpenURL(url);
+            if (supported) {
+                await Linking.openURL(url);
+            } else {
+                Alert.alert("Error", "WhatsApp is not installed on this device");
+            }
+        } catch (error) {
+            console.error("An error occurred", error);
+        }
+
+    }
+
     return (
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.container}>
 
@@ -42,7 +60,7 @@ const Contact = () => {
                     </View>
                 </View>
 
-                <TouchableOpacity style={styles.cardContainer} activeOpacity={0.7}>
+                <TouchableOpacity style={styles.cardContainer} activeOpacity={0.7} onPress={()=>onWhatsAppOpen()}>
                     <View style={styles.iconWrapper}>
                         <Ionicons name="call-outline" size={22} color="#245d5a" />
                     </View>
@@ -50,7 +68,7 @@ const Contact = () => {
                         <Text style={styles.cardTitle}>Call / WhatsApp</Text>
                         <Text style={styles.cardText}>+977 - 98520 24 365</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#666" style={styles.arrowIcon} />
+                    {/* <Ionicons name="chevron-forward" size={20} color="#666" style={styles.arrowIcon} /> */}
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.cardContainer} activeOpacity={0.7}>
@@ -61,7 +79,7 @@ const Contact = () => {
                         <Text style={styles.cardTitle}>eMail Us</Text>
                         <Text style={styles.cardText}>gardensewa@sriyog.com</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#666" style={styles.arrowIcon} />
+                    {/* <Ionicons name="chevron-forward" size={20} color="#666" style={styles.arrowIcon} /> */}
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.cardContainer} activeOpacity={0.7}>
@@ -72,7 +90,7 @@ const Contact = () => {
                         <Text style={styles.cardTitle}>Website</Text>
                         <Text style={styles.cardText}>www.gardensewa.com</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#666" style={styles.arrowIcon} />
+                    {/* <Ionicons name="chevron-forward" size={20} color="#666" style={styles.arrowIcon} /> */}
                 </TouchableOpacity>
 
             </View>
@@ -83,7 +101,7 @@ const Contact = () => {
 const styles = StyleSheet.create({
     scrollView: {
         flex: 1,
-        backgroundColor: '#f7f9f9', 
+        backgroundColor: '#f7f9f9',
     },
     container: {
         paddingHorizontal: 16,
@@ -118,7 +136,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#245d5a', 
+        backgroundColor: '#245d5a',
         paddingVertical: 14,
         gap: 8,
     },
@@ -156,7 +174,7 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 10,
-        backgroundColor: '#e6f0f0', 
+        backgroundColor: '#e6f0f0',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 14,

@@ -298,11 +298,11 @@ export const cityData = [
 export const priorityData = [
     {
         id: 1,
-        name: "normal",
+        name: "Normal",
     },
     {
         id: 2,
-        name: "urgent",
+        name: "Urgent",
     }
 ]
 
@@ -313,23 +313,19 @@ export const budgetData = [
     },
     {
         id: 2,
-        name: "NPR 5000 - 10,000"
+        name: "Below NPR 10,000"
     },
     {
-        id: 1,
-        name: "NPR 10,000 - 15,000"
+        id: 3,
+        name: "NPR 10,000 - 25,000"
     },
     {
-        id: 1,
-        name: "NPR 15,000 - 20,000"
+        id: 4,
+        name: "NPR 25,000 - 50,000"
     },
     {
-        id: 1,
-        name: "NPR 20,000 - 25,000"
-    },
-    {
-        id: 1,
-        name: "Above NPR 25000"
+        id: 6,
+        name: "Above NPR 50,000"
     },
 
 ]

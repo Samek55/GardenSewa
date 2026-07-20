@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     categoryImage: {
         width: '100%',
         height: '100%',
-        borderRadius: 24
+        borderRadius: 12
     },
     categoryOverlay: {
         position: 'absolute',
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.35)',
         justifyContent: 'center',
         paddingHorizontal: 20,
-        borderRadius: 24,
+        borderRadius: 12,
         padding: 8
     },
     categoryTitle: {

@@ -38,8 +38,8 @@ export default function Index() {
                     resizeMode="cover"
                 />
                 <View style={styles.overlay}>
-                    <Text style={styles.title}>Express{"\n"}Gardening Service</Text>
-                    <Text style={styles.subTitle}>SuperFast gardening Service at your Home.</Text>
+                    <Text style={styles.title}>Professional{"\n"}Gardening Service</Text>
+                    {/* <Text style={styles.subTitle}>SuperFast gardening Service at your Home.</Text> */}
 
                     <View style={styles.inputContainer}>
                         <View style={styles.iconWrapper}>
@@ -176,16 +176,16 @@ const styles = StyleSheet.create({
     textInput: {
         flex: 1,
         height: '100%',
-        fontSize: 16,
+        fontSize: 12,
         color: '#1A1A1A',
         paddingHorizontal: 12,
-        fontWeight: '500',
+        fontWeight: '400',
     },
     helpButton: {
         backgroundColor: '#225754',
         height: '100%',
         justifyContent: 'center',
-        paddingHorizontal: 22,
+        paddingHorizontal: 16,
     },
     helpButtonText: {
         color: '#fff',

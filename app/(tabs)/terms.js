@@ -110,7 +110,7 @@ const TermsAndConditions = () => {
             <View style={styles.paragraphTextContainer}>
                 <Text style={styles.paragraphTitle}>Contact Information</Text>
                 <Text style={styles.paragraphText}>
-                    For questions or concerns about our Terms and Conditions, please contact: <Text style={styles.emailHighlight}>Garden Sewa@sriyog.com</Text>
+                    For questions or concerns about our Terms and Conditions, please contact: <Text style={styles.emailHighlight}>gardensewa@sriyog.com</Text>
                 </Text>
             </View>
         </ScrollView>

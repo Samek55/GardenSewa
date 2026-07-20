@@ -17,7 +17,8 @@ export default function JoinProfessional() {
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ['images'],
                 allowsEditing: false,
-                quality: 1
+                quality: 1,
+                selectionLimit:1
 
             });
             console.log(result)
@@ -25,7 +26,8 @@ export default function JoinProfessional() {
             if (!result.canceled) {
 
                 setSelectedImage(result.assets[0])
-                console.log(result)
+                console.log(selectedImage)
+                console.log(selectedImage.length() , "length", selectedImage.uri, "uri")
             } else {
                 alert("You did not select any image")
             }
@@ -41,7 +43,8 @@ export default function JoinProfessional() {
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ['images'],
                 allowsEditing: false,
-                quality: 1
+                quality: 1,
+                selectionLimit:1
 
             });
             console.log(result)
@@ -105,8 +108,12 @@ export default function JoinProfessional() {
     };
 
 
-    const handleImageDelete = (indexToDelete) => {
-        setSelectedImage('');
+    const handleImageDelete = (source) => {
+        if(source === "identity"){
+            setSelectedIdentificationPicture('')
+        }else{
+            setSelectedImage('')
+        }
     }
 
     const handleClearForm = () => {
@@ -183,7 +190,7 @@ export default function JoinProfessional() {
                 <View style={[
                     styles.individualContainer,
                     {
-                        borderStyle: selectedImage && selectedImage.length > 0 ? 'solid' : 'dashed',
+                        borderStyle: selectedIdentificationPicture ? 'solid' : 'dashed',
                         borderWidth: 1.5,
                         borderColor: 'black',
                         alignItems: 'center',
@@ -197,10 +204,10 @@ export default function JoinProfessional() {
                     }
                 ]}>
 
-                    {selectedImage && selectedImage.length > 0 ? (
+                    {selectedIdentificationPicture ? (
 
                         <View
-                            key={selectedImage.uri}
+                            key={selectedIdentificationPicture.uri}
                             style={{
                                 width: 45,
                                 height: '100%',
@@ -210,13 +217,13 @@ export default function JoinProfessional() {
                             }}
                         >
                             <Image
-                                source={{ uri: selectedImage.uri }}
+                                source={{ uri: selectedIdentificationPicture.uri }}
                                 style={{ width: '100%', height: '100%', borderRadius: 4 }}
                                 resizeMode="cover"
                             />
 
                             <Pressable
-                                onPress={() => handleImageDelete()}
+                                onPress={() => handleImageDelete("identity")}
                                 style={{
                                     position: 'absolute',
                                     top: 4,
@@ -234,7 +241,7 @@ export default function JoinProfessional() {
                     )
                         : (
                             <Pressable
-                                onPress={handleImagePick}
+                                onPress={handleIdentityPick}
                                 style={{
                                     width: '100%',
                                     height: '100%',
@@ -328,12 +335,12 @@ export default function JoinProfessional() {
                 </View>
 
 
-                <Text style={styles.label}>Citizenship/Driving license/NID</Text>
+                <Text style={styles.label}>Citizenship/ Driving License/ NID</Text>
 
                 <View style={[
                     styles.individualContainer,
                     {
-                        borderStyle: selectedIdentificationPicture && selectedIdentificationPicture.length > 0 ? 'solid' : 'dashed',
+                        borderStyle: selectedImage ? 'solid' : 'dashed',
                         borderWidth: 1.5,
                         borderColor: 'black',
                         alignItems: 'center',
@@ -347,10 +354,10 @@ export default function JoinProfessional() {
                     }
                 ]}>
 
-                    {selectedIdentificationPicture && selectedIdentificationPicture.length > 0 ? (
+                    {selectedImage ? (
 
                         <View
-                            key={selectedIdentificationPicture.uri}
+                            key={selectedImage.uri}
                             style={{
                                 width: 45,
                                 height: '100%',
@@ -360,7 +367,7 @@ export default function JoinProfessional() {
                             }}
                         >
                             <Image
-                                source={{ uri: selectedIdentificationPicture.uri }}
+                                source={{ uri: selectedImage.uri }}
                                 style={{ width: '100%', height: '100%', borderRadius: 4 }}
                                 resizeMode="cover"
                             />
@@ -384,7 +391,7 @@ export default function JoinProfessional() {
                     )
                         : (
                             <Pressable
-                                onPress={handleIdentityPick}
+                                onPress={handleImagePick}
                                 style={{
                                     width: '100%',
                                     height: '100%',
