@@ -6,13 +6,13 @@ const TermsAndConditions = () => {
 
             <View style={styles.headerTextContainer}>
                 <Text style={styles.headerTitle}>Terms and Conditions</Text>
-                <Text style={styles.headerSubtitle}>Understand the rules and guidelines of using GardenSewa services</Text>
+                <Text style={styles.headerSubtitle}>Understand the rules and guidelines of using Garden Sewa services</Text>
             </View>
 
             <View style={styles.paragraphTextContainer}>
                 <Text style={styles.paragraphTitle}>Introduction</Text>
                 <Text style={styles.paragraphText}>
-                    These Terms and Conditions govern your access and use of GardenSewa app and services. By booking a service or browsing our app, you agree to comply with these terms.
+                    These Terms and Conditions govern your access and use of Garden Sewa app and services. By booking a service or browsing our app, you agree to comply with these terms.
                 </Text>
             </View>
 
@@ -21,7 +21,7 @@ const TermsAndConditions = () => {
                 <View style={styles.bulletListContainer}>
                     <View style={styles.bulletItem}>
                         <Text style={styles.bulletPoint}>•</Text>
-                        <Text style={styles.bulletText}>GardenSewa provides gardening, landscaping, plant delivery, and maintenance services.</Text>
+                        <Text style={styles.bulletText}>Garden Sewa provides gardening, landscaping, plant delivery, and maintenance services.</Text>
                     </View>
                     <View style={styles.bulletItem}>
                         <Text style={styles.bulletPoint}>•</Text>
@@ -51,7 +51,7 @@ const TermsAndConditions = () => {
                     </View>
                     <View style={styles.bulletItem}>
                         <Text style={styles.bulletPoint}>•</Text>
-                        <Text style={styles.bulletText}>If GardenSewa cancels a service due to weather or unforeseen issues, you will receive a full refund or rescheduling option.</Text>
+                        <Text style={styles.bulletText}>If Garden Sewa cancels a service due to weather or unforeseen issues, you will receive a full refund or rescheduling option.</Text>
                     </View>
                 </View>
             </View>
@@ -69,7 +69,7 @@ const TermsAndConditions = () => {
                     </View>
                     <View style={styles.bulletItem}>
                         <Text style={styles.bulletPoint}>•</Text>
-                        <Text style={styles.bulletText}>Avoid any behavior that might endanger GardenSewa staff or damage tools/equipment.</Text>
+                        <Text style={styles.bulletText}>Avoid any behavior that might endanger Garden Sewa staff or damage tools/equipment.</Text>
                     </View>
                 </View>
             </View>
@@ -77,13 +77,13 @@ const TermsAndConditions = () => {
             <View style={styles.paragraphTextContainer}>
                 <Text style={styles.paragraphTitle}>Intellectual Property</Text>
                 <Text style={styles.paragraphText}>
-                    All content, images, and branding on this website are the property of GardenSewa. Reuse or reproduction without permission is prohibited.
+                    All content, images, and branding on this website are the property of Garden Sewa. Reuse or reproduction without permission is prohibited.
                 </Text>
             </View>
 
             <View style={styles.paragraphTextContainer}>
                 <Text style={styles.paragraphTitle}>Limitation of Liability</Text>
-                <Text style={styles.paragraphText}>GardenSewa is not responsible for:</Text>
+                <Text style={styles.paragraphText}>Garden Sewa is not responsible for:</Text>
                 <View style={styles.bulletListContainer}>
                     <View style={styles.bulletItem}>
                         <Text style={styles.bulletPoint}>•</Text>
@@ -103,14 +103,14 @@ const TermsAndConditions = () => {
             <View style={styles.paragraphTextContainer}>
                 <Text style={styles.paragraphTitle}>Changes to Terms</Text>
                 <Text style={styles.paragraphText}>
-                    GardenSewa reserves the right to modify these Terms at any time. Updates will be posted on this page, and continued use of the website implies acceptance.
+                    Garden Sewa reserves the right to modify these Terms at any time. Updates will be posted on this page, and continued use of the website implies acceptance.
                 </Text>
             </View>
 
             <View style={styles.paragraphTextContainer}>
                 <Text style={styles.paragraphTitle}>Contact Information</Text>
                 <Text style={styles.paragraphText}>
-                    For questions or concerns about our Terms and Conditions, please contact: <Text style={styles.emailHighlight}>gardensewa@sriyog.com</Text>
+                    For questions or concerns about our Terms and Conditions, please contact: <Text style={styles.emailHighlight}>Garden Sewa@sriyog.com</Text>
                 </Text>
             </View>
         </ScrollView>

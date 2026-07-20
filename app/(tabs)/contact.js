@@ -23,7 +23,7 @@ const Contact = () => {
             </View>
 
             <View style={styles.sectionTextContainer}>
-                <Text style={styles.sectionTitle}>GardenSewa</Text>
+                <Text style={styles.sectionTitle}>Garden Sewa</Text>
                 <Text style={styles.sectionSubtitle}>Express Garden Service</Text>
             </View>
 
@@ -36,7 +36,8 @@ const Contact = () => {
                     <View style={styles.textWithinCardContainer}>
                         <Text style={styles.cardTitle}>Visit Us</Text>
                         <Text style={styles.cardText}>
-                            Rem.Work, Kamalpokhari, Kathmandu, Nepal
+                            Rem.Work, Kamalpokhari{"\n"}
+                            Kathmandu, Nepal
                         </Text>
                     </View>
                 </View>
@@ -57,8 +58,8 @@ const Contact = () => {
                         <Ionicons name="mail-outline" size={22} color="#245d5a" />
                     </View>
                     <View style={styles.textWithinCardContainer}>
-                        <Text style={styles.cardTitle}>Email Us</Text>
-                        <Text style={styles.cardText}>GardenSewa@sriyog.com</Text>
+                        <Text style={styles.cardTitle}>eMail Us</Text>
+                        <Text style={styles.cardText}>gardensewa@sriyog.com</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={20} color="#666" style={styles.arrowIcon} />
                 </TouchableOpacity>

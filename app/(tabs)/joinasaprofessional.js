@@ -250,10 +250,10 @@ export default function JoinProfessional() {
                 </View>
 
                 <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Email address</Text>
+                    <Text style={styles.label}>eMail address</Text>
                     <TextInput
                         style={styles.textInput}
-                        placeholder="Enter your email "
+                        placeholder="Enter your eMail "
                         value={email}
                         onChangeText={setEmail}
                     />

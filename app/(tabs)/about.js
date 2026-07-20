@@ -1,12 +1,10 @@
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
-import TeamCard from "../../components/TeamCard";
-import { teams } from "../../data/servicesList";
 
 export default function About() {
     return (
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.container}>
             <Image
-                source={{ uri: 'https://plus.unsplash.com/premium_photo-1689530775582-83b8abdb5020?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cmFuZG9tJTIwcGVyc29ufGVufDB8fDB8fHww' }}
+                source={{ uri: 'https://images.unsplash.com/photo-1724500941193-f1f2541b6228?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }}
                 style={styles.bannerImage}
                 resizeMode="cover"
             />
@@ -14,7 +12,7 @@ export default function About() {
             <View style={styles.sectionContainer}>
                 <Text style={styles.sectionTitle}>About Us</Text>
                 <Text style={styles.bodyText}>
-                    GardenSewa is a technology driven home service marketplace designed to connect customers with nearby professionals through real-time location-based marketing.
+                    Garden Sewa is a technology driven home service marketplace designed to connect customers with nearby professionals through real-time location-based marketing.
                 </Text>
                 <Text style={styles.bodyText}>
                     The platform aims to simplify the preocess of finding the trusted service providers while helping skilled professionals generate business opportunities within their local communities
@@ -23,11 +21,11 @@ export default function About() {
                     With increasing urbanization and growing demand for on demand services, customers often struggle to find reliable professionals quickly, while service providers face challanges in acquiring quality leads.
                 </Text>
                 <Text style={styles.bodyText}>
-                    GardenSewa bridges this gap by enabling instant service requests, AI powered matching and real-time notifications.
+                    Garden Sewa bridges this gap by enabling instant service requests, AI powered matching and real-time notifications.
                 </Text>
             </View>
 
-            <View style={styles.sectionContainer}>
+            {/* <View style={styles.sectionContainer}>
                 <Text style={styles.sectionTitle}>Our Team</Text>
                 <View style={styles.teamsGrid}>
                     {teams?.map((team, index) => (
@@ -40,7 +38,29 @@ export default function About() {
                         </View>
                     ))}
                 </View>
+            </View> */}
+
+            <View style={styles.sectionContainer}>
+                <Text style={styles.sectionTitle}>Our Mission</Text>
+                <Text style={styles.bodyText}>
+                    To reconnect people with nature one plant, one garden, one moment at a time. We provide high-quality plants, gardening resources, and expert support to every corner of Nepal.
+                </Text>
             </View>
+
+            <View style={styles.sectionContainer}>
+                <Text style={styles.sectionTitle}>Our Motive</Text>
+                <Text style={styles.bodyText}>
+                    We aim to be the go-to place for all gardening needs, offering easy access to plants and expert advice for every gardener and farmer.
+                </Text>
+            </View>
+
+            <View style={styles.sectionContainer}>
+                <Text style={styles.sectionTitle}>Our Vision</Text>
+                <Text style={styles.bodyText}>
+                    To cultivate a greener Nepal by promoting responsible gardening practices and reconnecting people with nature.
+                </Text>
+            </View>
+
         </ScrollView>
     );
 }
@@ -58,16 +78,16 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 200,
         borderRadius: 16,
-        marginBottom: 24,
+        marginBottom: 20,
     },
     sectionContainer: {
-        marginBottom: 24,
+        marginBottom: 16,
     },
     sectionTitle: {
         fontSize: 24,
         fontWeight: 'bold',
         color: '#111',
-        marginBottom: 10,
+        marginBottom: 8,
     },
     bodyText: {
         fontSize: 15,
@@ -82,7 +102,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     teamCardWrapper: {
-        width: '25%', 
+        width: '25%',
         marginBottom: 16,
     }
 });

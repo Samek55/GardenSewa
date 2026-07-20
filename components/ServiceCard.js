@@ -25,7 +25,7 @@ const ServiceCard = ({ imageSource, title, description, cardWidth }) => {
 const styles = StyleSheet.create({
     container: {
         backgroundColor: '#fff',
-        borderRadius: 16,
+        borderRadius: 12,
         overflow: 'hidden',
         borderWidth: 1,
         borderColor: '#E2E8F0',
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     },
     image: {
         width: '100%',
-        height: 110,
+        aspectRatio:16/9
     },
     textContainer: {
         paddingHorizontal: 12,
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
         gap: 2,
     },
     title: {
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: '700',
         color: '#1A1A1A',
     },

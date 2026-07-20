@@ -67,7 +67,7 @@ const AdminLogin = () => {
                                 <Ionicons name="lock-closed" size={38} color="#FFD54F" />
                             </View>
                         </View>
-                        <Text style={styles.brandTitleText}>GardenSewa</Text>
+                        <Text style={styles.brandTitleText}>Garden Sewa</Text>
                         <Text style={styles.adminLoginText}>ADMIN LOGIN</Text>
                     </View>
 
@@ -245,12 +245,12 @@ const styles = StyleSheet.create({
     singlePinBox: {
         flex: 1,
         backgroundColor: "#FFF",
-        borderRadius: 14,
+        // borderRadius: 14,
         fontSize: 20,
         fontWeight: "700",
         color: "#000",
         borderWidth: 1,
-        borderColor: "#5da49b",
+        borderColor: "#e2edeb",
         paddingVertical: 0,
     },
     loginSubmitButton: {

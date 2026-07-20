@@ -13,7 +13,7 @@ const FAQ = () => {
     return (
         <ScrollView style={styles.scrollview} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
             <Text style={styles.faqHeader}>FAQs</Text>
-            <Text style={styles.subHeaderText}>Everything you need to know about GardenSewa</Text>
+            <Text style={styles.subHeaderText}>Everything you need to know about Garden Sewa</Text>
 
             <View style={styles.fullContainer}>
                 {
@@ -37,7 +37,7 @@ const FAQ = () => {
                                     <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: 12 }}>
                                         <View style={[styles.numberBadge, isOpen && styles.numberBadgeOpen]}>
                                             <Text style={[styles.faqNumber, isOpen && styles.faqNumberOpen]}>
-                                                {faq.id}
+                                                
                                             </Text>
                                         </View>
                                         <Text style={styles.faqTitle}>{faq.title}</Text>

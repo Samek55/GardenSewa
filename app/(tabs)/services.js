@@ -149,30 +149,35 @@ const styles = StyleSheet.create({
     categoryContainer: {
         marginTop: 24,
         marginHorizontal: 18,
-        borderRadius: 20,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: '#E2E8F0',
+        // borderRadius: 24,
+        // overflow: 'hidden',
+        // borderWidth: 1,
+        // borderColor: '#E2E8F0',
         marginBottom: 12,
+        // backgroundColor:'red'
     },
     categoryHeader: {
         position: 'relative',
-        height: 120,
+        height: 160,
         width: '100%',
+        padding: 8
     },
     categoryImage: {
         width: '100%',
         height: '100%',
+        borderRadius: 24
     },
     categoryOverlay: {
         position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        top: 8,
+        left: 8,
+        right: 8,
+        bottom: 8,
         backgroundColor: 'rgba(0,0,0,0.35)',
         justifyContent: 'center',
         paddingHorizontal: 20,
+        borderRadius: 24,
+        padding: 8
     },
     categoryTitle: {
         color: '#FFFFFF',

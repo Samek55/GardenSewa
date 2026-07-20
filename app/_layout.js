@@ -33,8 +33,8 @@ export default function RootLayout() {
             headerTitleAlign: 'left',
             headerTitle: () => (
               <View style={{ marginLeft: 8, paddingLeft: 8 }}>
-                <Text style={{ color: "#fff", fontWeight: '600', fontSize: 18 }}>
-                  GardenSewa
+                <Text style={{ color: "#fff", fontWeight: '600', fontSize: 24 }}>
+                  Garden Sewa
                 </Text>
               </View>
             ),
@@ -73,7 +73,7 @@ export default function RootLayout() {
                   <Ionicons name="logo-whatsapp" size={24} color="white" />
                 </Pressable>
                 <Pressable onPress={onMenuOpen}>
-                  <Ionicons name="menu" size={26} color="white" />
+                  <Ionicons name="menu" size={24} color="white" />
                 </Pressable>
               </View>
             )

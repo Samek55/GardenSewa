@@ -5,7 +5,6 @@ import {
     FlatList,
     Image,
     Pressable,
-    ScrollView,
     StyleSheet,
     Text,
     TextInput,
@@ -18,7 +17,7 @@ import ServiceCard from "../../components/ServiceCard";
 import { services } from "../../data/servicesList";
 
 const { width } = Dimensions.get('window');
-const TOP_CARD_WIDTH = (width - 36 - 2 - 24 - 10) / 3;
+const TOP_CARD_WIDTH = (width - 36 - 2 - 24 - 10) / 2.6;
 
 
 
@@ -28,93 +27,95 @@ export default function Index() {
     const filteredServicesTop = services.filter(service => service.label === 'Top');
 
     return (
-        <ScrollView>
-            <View style={styles.screenContainer}>
+        <View style={styles.screenContainer}>
 
-                <View style={styles.heroContainer}>
-                    <Image
-                        source={require('@/assets/images/garden2.jpg')}
-                        style={styles.backgroundImage}
-                        resizeMode="cover"
-                    />
-                    <View style={styles.overlay}>
-                        <Text style={styles.title}>Express{"\n"}Gardening Service</Text>
-                        <Text style={styles.subTitle}>SuperFast gardening Service at your Home.</Text>
+            <View style={styles.heroContainer}>
+                <Image
+                    source={{
+                        uri:'https://www.gardensewa.com/home/slider/1.jpg'
+                    }}
+                    style={styles.backgroundImage}
+                    resizeMode="cover"
+                />
+                <View style={styles.overlay}>
+                    <Text style={styles.title}>Express{"\n"}Gardening Service</Text>
+                    <Text style={styles.subTitle}>SuperFast gardening Service at your Home.</Text>
 
-                        <View style={styles.inputContainer}>
-                            <View style={styles.iconWrapper}>
-                                <Icon name="nepal" width={24} height={24} />
-                            </View>
-                            <TextInput
-                                style={styles.textInput}
-                                placeholder="Enter your phone number"
-                                placeholderTextColor="#999"
-                                keyboardType="phone-pad"
-                                value={phone}
-                                onChangeText={setPhone}
-                            />
-                            <Pressable
-                                style={styles.helpButton}
-                                onPress={() => {
-                                    Alert.alert('Confirm Help Request', `Send a help request from +977 ${phone}?Our team will contact you shortly`, [
-                                        {
-                                            text: 'CANCEL',
-                                            onPress: () => console.log('Cancel Pressed'),
-                                            style: 'cancel',
-                                        },
-                                        { text: 'CONFIRM', onPress: () => console.log('OK Pressed') },
-                                    ])
-                                }}
-                            >
-                                <Text style={styles.helpButtonText}>Help</Text>
-                            </Pressable>
+                    <View style={styles.inputContainer}>
+                        <View style={styles.iconWrapper}>
+                            <Icon name="nepal" width={24} height={24} />
                         </View>
-                    </View>
-                </View>
-
-                <View style={styles.popularCardContainer}>
-                    <Image
-                        source={require('@/assets/images/garden1.jpg')}
-                        style={styles.backgroundImage}
-                        resizeMode="cover"
-                    />
-                    <View style={styles.cardOverlay}>
-                        <View style={styles.tagContainer}>
-                            <Text style={styles.tagText}>Most Popular</Text>
-                        </View>
-                        <Text style={styles.cardTitle}>Lawn Maintenance</Text>
-                        <Text style={styles.cardSubTitle}>Professional lawn maintenance service</Text>
-                    </View>
-                </View>
-
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Top Services</Text>
-                    <Link href={'/services'} asChild>
-                        <Pressable>
-                            <Text style={styles.seeAllText}>See All</Text>
+                        <TextInput
+                            style={styles.textInput}
+                            placeholder="Enter your phone number"
+                            placeholderTextColor="#999"
+                            keyboardType="phone-pad"
+                            value={phone}
+                            onChangeText={setPhone}
+                        />
+                        <Pressable
+                            style={styles.helpButton}
+                            onPress={() => {
+                                Alert.alert('Confirm Help Request', `Send a help request from +977 ${phone}?Our team will contact you shortly`, [
+                                    {
+                                        text: 'CANCEL',
+                                        onPress: () => console.log('Cancel Pressed'),
+                                        style: 'cancel',
+                                    },
+                                    { text: 'CONFIRM', onPress: () => console.log('OK Pressed') },
+                                ])
+                            }}
+                        >
+                            <Text style={styles.helpButtonText}>Help</Text>
                         </Pressable>
-                    </Link>
-                </View>
-
-                <View style={styles.listContainer}>
-                    <FlatList
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        data={filteredServicesTop}
-                        keyExtractor={(item, index) => index.toString()}
-                        contentContainerStyle={styles.horizontalListPadding}
-                        ItemSeparatorComponent={() => <View style={{ width: 14 }} />}
-                        renderItem={({ item }) => (
-                            <ServiceCard
-                                title={item.title}
-                                imageSource={item.url}
-                                cardWidth={TOP_CARD_WIDTH}
-                            />
-                        )}
-                    />
+                    </View>
                 </View>
             </View>
-        </ScrollView>
+
+            <View style={styles.popularCardContainer}>
+                <Image
+                    source={require('@/assets/images/garden1.jpg')}
+                    style={styles.backgroundImage}
+                    resizeMode="cover"
+                />
+                <View style={styles.cardOverlay}>
+                    <View style={styles.tagContainer}>
+                        <Text style={styles.tagText}>Most Popular</Text>
+                    </View>
+                    <Text style={styles.cardTitle}>Lawn Maintenance</Text>
+                    <Text style={styles.cardSubTitle}>Professional lawn maintenance service</Text>
+                </View>
+            </View>
+
+            <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Top Services</Text>
+                <Link href={'/services'} asChild>
+                    <Pressable>
+                        <Text style={styles.seeAllText}>See All</Text>
+                    </Pressable>
+                </Link>
+            </View>
+
+            <View style={styles.listContainer}>
+                <FlatList
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    data={filteredServicesTop}
+                    keyExtractor={(item, index) => index.toString()}
+                    contentContainerStyle={styles.horizontalListPadding}
+                    ItemSeparatorComponent={() => <View style={{ width: 14 }} />}
+                    renderItem={({ item }) => (
+                        <ServiceCard
+                            title={item.title}
+                            imageSource={item.url}
+                            cardWidth={TOP_CARD_WIDTH}
+                        />
+                    )}
+                />
+            </View>
+
+
+        </View>
 
     );
 }
@@ -122,11 +123,11 @@ export default function Index() {
 const styles = StyleSheet.create({
     screenContainer: {
         flex: 1,
-        backgroundColor: '#F8F9FA',
+        backgroundColor: 'white',
     },
     heroContainer: {
         width: '100%',
-        aspectRatio: 16 / 10,
+        aspectRatio: 16 / 12,
         position: 'relative',
         backgroundColor: '#000',
     },
@@ -138,8 +139,10 @@ const styles = StyleSheet.create({
     overlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.45)',
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         paddingHorizontal: 20,
+        paddingBottom: 20
+
     },
     title: {
         color: '#FFFFFF',
@@ -158,7 +161,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 18,
         backgroundColor: 'white',
-        borderRadius: 8,
+        borderRadius: 12,
         overflow: 'hidden',
         height: 48,
         width: '100%',
@@ -193,10 +196,10 @@ const styles = StyleSheet.create({
         flex: 2,
         marginHorizontal: 16,
         marginTop: 14,
-        borderRadius: 24,
+        borderRadius: 12,
         overflow: 'hidden',
         position: 'relative',
-        minHeight: 180,
+        minHeight: 160,
     },
     cardOverlay: {
         flex: 1,
@@ -211,6 +214,7 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         borderRadius: 12,
         marginBottom: 6,
+
     },
     tagText: {
         color: '#FFFFFF',
@@ -246,12 +250,10 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     listContainer: {
-        height: ((width - 60) / 3) * 1.35 + 10,
-        marginBottom: 16,
-        backgroundColor: '#fff',
         paddingHorizontal: 16,
     },
     horizontalListPadding: {
         paddingHorizontal: 8,
+        paddingVertical: 16
     },
 });

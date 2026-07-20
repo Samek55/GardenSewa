@@ -24,8 +24,8 @@ const SideBarModal = ({ onClose }) => {
                     resizeMode="cover"
                 />
                 <View style={styles.profileDetails}>
-                    <Text style={styles.profileName}>John Doe</Text>
-                    <Text style={styles.profileEmail}>john.doe@example.com</Text>
+                    <Text style={styles.profileName}>Garden Sewa</Text>
+                    <Text style={styles.profileEmail}>gardensewa@sriyog.com</Text>
                 </View>
             </View>
 

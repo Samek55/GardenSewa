@@ -194,10 +194,10 @@ export default function Book() {
                 </View>
                 {/* Email */}
                 <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Email</Text>
+                    <Text style={styles.label}>eMail</Text>
                     <TextInput
                         style={styles.textInput}
-                        placeholder="Enter your Email Address"
+                        placeholder="Enter your eMail Address"
                         value={email}
                         onChangeText={setEmail}
                     />
