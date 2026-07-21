@@ -13,7 +13,7 @@ import {
     useWindowDimensions,
     View
 } from "react-native";
-import Icon from "react-native-ico-flags";
+import { NP } from "react-native-country-flag-icons";
 
 const AdminLogin = () => {
     const [phone, setPhone] = useState("");
@@ -87,7 +87,7 @@ const AdminLogin = () => {
                         <Text style={styles.signInTitle}>Sign In</Text>
 
                         <View style={styles.phoneInputRow}>
-                            <Icon name="nepal" width={26} height={18} style={styles.nepalFlag} />
+                            <NP  width={26} height={18} style={styles.nepalFlag} />
                             <TextInput
                                 style={styles.phoneTextInput}
                                 value={phone}

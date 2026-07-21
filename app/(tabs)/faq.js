@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons'
 import { useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { faqData } from '../../data/servicesList'
 
 const FAQ = () => {
@@ -36,9 +36,11 @@ const FAQ = () => {
                                 >
                                     <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: 12 }}>
                                         <View style={[styles.numberBadge, isOpen && styles.numberBadgeOpen]}>
-                                            <Text style={[styles.faqNumber, isOpen && styles.faqNumberOpen]}>
-                                                
-                                            </Text>
+                                            <Image
+                                                source={require('@/assets/images/splash-icon-actual.png')}
+                                                style={[styles.bulletImage, isOpen && styles.bulletImageOpen]}
+                                                resizeMode="contain"
+                                            />
                                         </View>
                                         <Text style={styles.faqTitle}>{faq.title}</Text>
                                     </View>
@@ -46,7 +48,7 @@ const FAQ = () => {
                                     <Ionicons
                                         name={isOpen ? 'chevron-up' : 'chevron-down'}
                                         size={20}
-                                        color="black"
+                                        color={isOpen ? '#245d5a' : '#000'}
                                     />
                                 </Pressable>
 
@@ -79,11 +81,12 @@ const styles = StyleSheet.create({
     faqHeader: {
         fontSize: 32,
         color: '#000',
-        marginBottom: 8
+        marginBottom: 8,
+        fontWeight: 'bold'
     },
     subHeaderText: {
         fontSize: 14,
-        color: '#000',
+        color: '#64748b',
         fontWeight: '400',
         marginBottom: 24
     },
@@ -109,23 +112,25 @@ const styles = StyleSheet.create({
         backgroundColor: '#edf2f7',
         alignItems: 'center',
         justifyContent: 'center',
+        overflow: 'hidden',
+        padding: 6,
     },
     numberBadgeOpen: {
         backgroundColor: '#245d5a',
     },
-    faqNumber: {
-        color: '#4a5568',
-        fontSize: 14
+    bulletImage: {
+        width: 26,
+        height: 26,
+        tintColor: '#245d5a',
     },
-    faqNumberOpen: {
-        color: '#fff',
-        fontSize: 12,
+    bulletImageOpen: {
+        tintColor: '#ffffff',
     },
     faqTitle: {
         fontSize: 15,
         color: '#000',
         flex: 1,
-        fontWeight:'bold'
+        fontWeight: 'bold'
     },
     descriptionWrapper: {
         flexDirection: 'row',
@@ -142,14 +147,11 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     descriptionText: {
-        color: '#000',
+        color: '#334155',
         lineHeight: 22,
         fontSize: 13,
-        fontWeight: 'semibold',
-        
+        fontWeight: '500',
     }
-}
+});
 
-)
-
-export default FAQ
+export default FAQ;

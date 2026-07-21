@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
         gap: 16,
     },
     imageContainer: {
-        width: 90,
+        width: 140,
         height: 90,
         borderRadius: 12,
         overflow: 'hidden',

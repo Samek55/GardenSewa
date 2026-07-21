@@ -317,11 +317,11 @@ export const budgetData = [
     },
     {
         id: 3,
-        name: "NPR 10,000 - 25,000"
+        name: "Between NPR 10,000 - 25,000"
     },
     {
         id: 4,
-        name: "NPR 25,000 - 50,000"
+        name: "Between NPR 25,000 - 50,000"
     },
     {
         id: 6,
@@ -334,55 +334,84 @@ export const faqData = [
     {
         id: 1,
         title: "What garden services do you provide in Nepal?",
-        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+        description: "We provide comprehensive garden solutions across Nepal including landscape design, garden consultation, lawn care and turfing, tree sales, plant propagation, pest and disease control, irrigation setup, soil improvement, and routine maintenance."
     },
     {
         id: 2,
-        title: "What garden services do you provide in Nepal?",
-        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+        title: "What is lawn care and why is it important?",
+        description: "Lawn care involves regular mowing, soil aeration, fertilization, weed control, and watering. Proper maintenance keeps your lawn green, lush, and disease-free while enhancing overall curb appeal and outdoor air quality."
     },
     {
         id: 3,
-        title: "What garden services do you provide in Nepal?",
-        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+        title: "Do you provide lawn care and garden maintenance for all property sizes?",
+        description: "Yes, we cater to properties of all sizes—ranging from small residential rooftop and balcony gardens to large commercial landscapes, hotels, resorts, and public grounds."
     },
     {
         id: 4,
-        title: "What garden services do you provide in Nepal?",
-        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+        title: "What services are included in standard garden maintenance?",
+        description: "Our garden maintenance packages typically cover plant pruning and trimming, lawn mowing, weed removal, soil fertilizing, pest control, seasonal planting, and general garden cleanup."
     },
     {
         id: 5,
-        title: "What garden services do you provide in Nepal?",
-        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+        title: "Do you offer eco-friendly and organic gardening solutions?",
+        description: "Yes, we prioritize sustainability by utilizing organic fertilizers, eco-friendly pest control methods, water-efficient irrigation, and soil-enriching compost to protect your plants and the environment."
     },
     {
         id: 6,
-        title: "What garden services do you provide in Nepal?",
-        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+        title: "Can I customize a maintenance plan for my garden?",
+        description: "Absolutely! We offer flexible and fully customized care plans—whether you need one-time cleanup services, weekly visits, monthly maintenance, or seasonal overhauls based on your garden's needs."
     },
     {
         id: 7,
-        title: "What garden services do you provide in Nepal?",
-        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+        title: "What is turfing service, and when should I get it?",
+        description: "Turfing involves laying high-quality natural grass turf or instant lawn rolls for instant green coverage. It is ideal for new lawn installations, replacing damaged grass patches, or renovating worn-out lawns."
     },
     {
         id: 8,
-        title: "What garden services do you provide in Nepal?",
-        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+        title: "How do your soil improvement services help my plants?",
+        description: "Our soil improvement services enhance soil fertility, pH balance, organic content, and drainage using natural compost and conditioners, ensuring strong root development and healthy plant growth."
     },
     {
         id: 9,
-        title: "What garden services do you provide in Nepal?",
-        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+        title: "Do you offer rooftop and balcony gardening services in urban areas?",
+        description: "Yes, we specialize in urban space transformation, including rooftop gardens, container gardening, vertical gardens, and balcony plant setups tailored for city living in Kathmandu and other urban centers."
     },
     {
         id: 10,
-        title: "What garden services do you provide in Nepal?",
-        description: "We provide landscape design, consultation services, tree sales, plant propagation, pest and disease control,irrigation services, soil and fertilizers services across Nepal."
+        title: "How do I book a consultation or gardening service with Garden Sewa?",
+        description: "You can easily book a service or schedule a consultation by visiting our website, contacting us via WhatsApp or phone (+977-9852025735), or filling out our online booking form."
     },
-
-]
+    {
+        id: 11,
+        title: "Who is Garden Sewa designed for?",
+        description: "Garden Sewa caters to homeowners with backyard or rooftop gardens, apartment residents with balcony plants, offices, commercial spaces, and hospitality venues looking for effortless, professional greenery management."
+    },
+    {
+        id: 12,
+        title: "What is the core mission and story behind Garden Sewa?",
+        description: "Garden Sewa was created to solve urban space constraints and busy lifestyles by making plant care and landscaping accessible, convenient, and eco-sustainable across Nepal."
+    },
+    {
+        id: 13,
+        title: "Are Garden Sewa services cost-effective for long-term care?",
+        description: "Yes, hiring professionals saves money over time by preventing costly plant loss, reducing unnecessary chemical usage, and offering flexible, budget-friendly one-time or subscription packages."
+    },
+    {
+        id: 14,
+        title: "Does Garden Sewa handle seasonal garden preparations?",
+        description: "Yes, we offer tailored seasonal maintenance programs that prepare your garden and lawn for weather changes, heavy monsoons, and shifting plant dormant cycles."
+    },
+    {
+        id: 15,
+        title: "What values drive Garden Sewa's approach to landscaping and care?",
+        description: "Garden Sewa operates as a one-stop destination for plants, services, and green lifestyle essentials in Nepal. We focus on environmental stewardship, using safe and organic treatment methods to foster healthier urban ecosystems."
+    },
+    {
+        id: 16,
+        title: "How does Garden Sewa help urban residents lacking time or gardening expertise?",
+        description: "By managing everything from daily maintenance to heavy landscaping and soil health, Garden Sewa allows busy property owners to enjoy clean, thriving outdoor and indoor green spaces without investing heavy personal time and effort."
+    }
+];
 
 
 export const notificationsData = [
@@ -499,3 +528,212 @@ export const sourceData = [
 
 ]
 
+export const gardeningTerms = [
+    // A
+    { id: 'a1', title: 'Acidic Soil', description: 'Soil with a pH lower than 7.0, favored by plants like azaleas and blueberries.' },
+    { id: 'a2', title: 'Aeration', description: 'The process of perforating soil with small holes to allow air, water, and nutrients to penetrate roots.' },
+    { id: 'a3', title: 'Alkaline Soil', description: 'Soil with a pH higher than 7.0, often rich in calcium carbonate.' },
+    { id: 'a4', title: 'Annual', description: 'A plant that completes its life cycle—from germination to seed production—in one growing season.' },
+    { id: 'a5', title: 'Aphids', description: 'Small, soft-bodied insects that suck sap from plants, causing leaf curling and damage.' },
+    { id: 'a6', title: 'Arbor', description: 'A shelter of vines or branches, or a lattice structure serving as a garden entrance or shaded seating area.' },
+
+    // B
+    { id: 'b1', title: 'Balled and Burlapped', description: 'Trees or shrubs harvested with their root ball intact and wrapped in burlap fabric.' },
+    { id: 'b2', title: 'Bare Root', description: 'Dormant plants sold without soil around their roots, usually shipped in late winter or early spring.' },
+    { id: 'b3', title: 'Biennial', description: 'A plant that takes two years to complete its biological lifecycle, flowering in the second year.' },
+    { id: 'b4', title: 'Biological Control', description: 'Using natural predators or beneficial organisms to manage garden pests.' },
+    { id: 'b5', title: 'Bolting', description: 'The rapid production of flowering stems on agricultural or horticultural crops before harvest.' },
+    { id: 'b6', title: 'Bone Meal', description: 'A slow-release organic fertilizer rich in phosphorus and calcium, made from crushed animal bones.' },
+
+    // C
+    { id: 'c1', title: 'Cloche', description: 'A small, translucent cover used to protect young or tender plants from cold weather.' },
+    { id: 'c2', title: 'Cold Frame', description: 'A transparent-roofed enclosure built low to the ground, used to protect plants from cold weather.' },
+    { id: 'c3', title: 'Companion Planting', description: 'The practice of growing different crops close together to enhance growth, deter pests, or attract pollinators.' },
+    { id: 'c4', title: 'Compost', description: 'Decayed organic matter used as a rich fertilizer to enrich soil structure and nutrition.' },
+    { id: 'c5', title: 'Cover Crop', description: 'A crop grown primarily for the benefit of the soil rather than for harvest, preventing erosion and restoring nutrients.' },
+    { id: 'c6', title: 'Crown', description: 'The point where a plant\'s roots meet its stem, typically located right at soil level.' },
+
+    // D
+    { id: 'd1', title: 'Damping Off', description: 'A fungal disease that causes young seedlings to rot at soil level and collapse.' },
+    { id: 'd2', title: 'Deadheading', description: 'The removal of faded or dead flowers from plants to encourage further blooming.' },
+    { id: 'd3', title: 'Deciduous', description: 'Trees or shrubs that shed their leaves annually in autumn or during dry seasons.' },
+    { id: 'd4', title: 'Determinate', description: 'Varieties of plants (like bush tomatoes) that grow to a set size and produce fruit all at once.' },
+    { id: 'd5', title: 'Dividing', description: 'Separating dense clumps of perennial plants into multiple smaller plants to renew vigor.' },
+    { id: 'd6', title: 'Drip Irrigation', description: 'A low-pressure watering method that delivers water directly to the base of plants, minimizing waste.' },
+
+    // E
+    { id: 'e1', title: 'Espalier', description: 'The technique of training fruit trees or shrubs to grow flat against a wall or trellis.' },
+    { id: 'e2', title: 'Evergreen', description: 'Plants that retain their green foliage throughout the entire year.' },
+    { id: 'e3', title: 'Etiolation', description: 'The pale, weak, and spindly growth of a plant caused by insufficient light.' },
+    { id: 'e4', title: 'Extension', description: 'Educational services provided by universities to share agricultural and gardening knowledge locally.' },
+    { id: 'e5', title: 'Exotic Plant', description: 'A non-native plant introduced to an area from another geographic region.' },
+    { id: 'e6', title: 'Earthworm Castings', description: 'Organic waste produced by earthworms, providing a nutrient-rich soil conditioner.' },
+
+    // F
+    { id: 'f1', title: 'Foliage', description: 'The leaves of a plant, considered collectively.' },
+    { id: 'f2', title: 'Foliar Feeding', description: 'Applying liquid fertilizer directly to plant leaves for rapid nutrient absorption.' },
+    { id: 'f3', title: 'Frond', description: 'The large, divided leaf structure typical of ferns and palms.' },
+    { id: 'f4', title: 'Fungicide', description: 'Chemical or organic agents used to prevent or control fungal diseases in plants.' },
+    { id: 'f5', title: 'Full Sun', description: 'A garden location that receives at least 6 to 8 hours of direct sunlight daily.' },
+    { id: 'f6', title: 'Fastigiate', description: 'Branches that grow nearly parallel and close to the main stem, creating a narrow, upright plant shape.' },
+
+    // G
+    { id: 'g1', title: 'Germination', description: 'The process by which a seed sprouts and begins to grow into a young plant.' },
+    { id: 'g2', title: 'Grafting', description: 'Joining plant tissues together so they grow as a single plant, combining desirable rootstock and upper shoots.' },
+    { id: 'g3', title: 'Green Manure', description: 'Fresh green plants plowed back into the soil to improve fertility and organic matter.' },
+    { id: 'g4', title: 'Ground Cover', description: 'Low-growing plants used to cover soil, suppress weeds, and prevent erosion.' },
+    { id: 'g5', title: 'Hardening Off', description: 'Gradually exposing indoor-raised seedlings to outdoor weather before transplanting them.' },
+    { id: 'g6', title: 'Girdling', description: 'The complete removal of a strip of bark around a stem or trunk, which disrupts nutrient flow.' },
+
+    // H
+    { id: 'h1', title: 'Hardiness Zone', description: 'A geographic region defined by climatic conditions and minimum winter temperatures suitable for plant survival.' },
+    { id: 'h2', title: 'Heirloom Plant', description: 'An open-pollinated plant variety that has been grown and preserved by gardeners for generations.' },
+    { id: 'h3', title: 'Humus', description: 'Dark, organic material in soil produced by the decay of vegetable and animal matter.' },
+    { id: 'h4', title: 'Hybrid', description: 'A plant bred by cross-pollinating two different distinct species or parent lines for desirable traits.' },
+    { id: 'h5', title: 'Hydroponics', description: 'The method of growing plants without soil, using mineral nutrient solutions in a water solvent.' },
+    { id: 'h6', title: 'Hormone Powder', description: 'A synthetic rooting compound applied to plant cuttings to encourage root development.' },
+
+    // I
+    { id: 'i1', title: 'Indeterminate', description: 'Varieties of plants (like vining tomatoes) that continue growing and producing fruit until frost.' },
+    { id: 'i2', title: 'Integrated Pest Management', description: 'An ecosystem-based strategy focused on long-term prevention of pests through combined tactics.' },
+    { id: 'i3', title: 'Invasive Species', description: 'Non-native plants that spread aggressively and cause harm to local natural ecosystems.' },
+    { id: 'i4', title: 'Inoculant', description: 'Beneficial bacteria or fungi applied to seeds or soil to promote healthy plant growth.' },
+    { id: 'i5', title: 'Insecticidal Soap', description: 'A non-toxic spray made from natural potassium fatty acids, effective against soft-bodied pests.' },
+    { id: 'i6', title: 'Intercropping', description: 'Growing two or more different crops in close proximity on the same field.' },
+
+    // J
+    { id: 'j1', title: 'Japanese Garden', description: 'A traditional garden style emphasizing natural landscapes, water elements, rocks, and moss.' },
+    { id: 'j2', title: 'Jiffy Pellets', description: 'Compressed peat moss discs that expand when watered, used for starting seeds.' },
+    { id: 'j3', title: 'Juvenile Phase', description: 'The early growth stage of a plant before it reaches sexual maturity and can flower.' },
+    { id: 'j4', title: 'Joint', description: 'The node or location on a stem where leaves, buds, or branches originate.' },
+    { id: 'j5', title: 'June Drop', description: 'The natural shedding of excess young fruit by trees in early summer to conserve energy.' },
+    { id: 'j6', title: 'Juglone', description: 'A toxic substance released by black walnut trees that inhibits the growth of certain susceptible plants.' },
+
+    // K
+    { id: 'k1', title: 'Knot Garden', description: 'A formal garden layout featuring intricate geometric patterns composed of low, clipped hedges.' },
+    { id: 'k2', title: 'Kitchen Garden', description: 'A garden space dedicated specifically to growing herbs, fruits, and vegetables for culinary use.' },
+    { id: 'k3', title: 'Kelp Meal', description: 'Dried and ground seaweed used as an organic soil amendment rich in micronutrients and minerals.' },
+    { id: 'k4', title: 'Keiki', description: 'A plantlet produced vegetatively on an orchid plant, used for propagation.' },
+    { id: 'k5', title: 'Keyhole Garden', description: 'A circular raised garden bed designed with a central compost basket and a wedge-shaped cutout.' },
+    { id: 'k6', title: 'Kniffin System', description: 'A formal system of training grapevines along horizontal wires on posts.' },
+
+    // L
+    { id: 'l1', title: 'Layering', description: 'A propagation method where a stem is rooted while still attached to the parent plant.' },
+    { id: 'l2', title: 'Loam', description: 'A balanced soil mixture containing ideal proportions of sand, silt, and clay.' },
+    { id: 'l3', title: 'Leaching', description: 'The loss of water-soluble plant nutrients from soil due to heavy rain or overwatering.' },
+    { id: 'l4', title: 'Leaf Mold', description: 'Decomposed leaves used as a soil conditioner to improve water retention and texture.' },
+    { id: 'l5', title: 'Lath House', description: 'An open wooden slatted structure providing shade and protection for delicate plants.' },
+    { id: 'l6', title: 'Lime', description: 'A soil additive derived from limestone used to lower soil acidity and raise pH levels.' },
+
+    // M
+    { id: 'm1', title: 'Mulch', description: 'A layer of material spread over soil to conserve moisture, suppress weeds, and regulate temperature.' },
+    { id: 'm2', title: 'Microclimate', description: 'The specific climate conditions of a localized small area that differ from the surrounding environment.' },
+    { id: 'm3', title: 'Mycorrhizae', description: 'Beneficial fungi that form symbiotic relationships with plant roots, enhancing nutrient absorption.' },
+    { id: 'm4', title: 'Manure', description: 'Animal dung used as organic fertilizer to enrich soil fertility and structure.' },
+    { id: 'm5', title: 'Moss Pole', description: 'A pole covered in sphagnum moss used to support climbing house plants.' },
+    { id: 'm6', title: 'Macronutrients', description: 'Essential plant nutrients needed in large quantities: Nitrogen, Phosphorus, and Potassium (N-P-K).' },
+
+    // N
+    { id: 'n1', title: 'Native Plant', description: 'Plants that naturally occur in a specific ecosystem or region without human intervention.' },
+    { id: 'n2', title: 'Nematodes', description: 'Microscopic roundworms; some species damage roots while beneficial types attack soil pests.' },
+    { id: 'n3', title: 'Node', description: 'The point on a stem where leaves, buds, or branches originate.' },
+    { id: 'n4', title: 'Nitrogen Fixation', description: 'The process by which legumes and soil bacteria convert atmospheric nitrogen into a usable plant nutrient.' },
+    { id: 'n5', title: 'NPK Ratio', description: 'The three numbers on fertilizer labels indicating percentage content of Nitrogen, Phosphorus, and Potassium.' },
+    { id: 'n6', title: 'Necrosis', description: 'The death of plant tissue, usually resulting in browned or blackened leaves and stems.' },
+
+    // O
+    { id: 'o1', title: 'Organic Gardening', description: 'A system of growing plants without synthetic pesticides, chemical fertilizers, or genetically modified seeds.' },
+    { id: 'o2', title: 'Open-Pollinated', description: 'Plants pollinated naturally by insects, birds, wind, or human hands that breed true to type.' },
+    { id: 'o3', title: 'Overwintering', description: 'Protecting plants during cold winter months to ensure survival for the next growing season.' },
+    { id: 'o4', title: 'Ornamental Plant', description: 'Plants grown for decorative purposes in gardens and landscape design.' },
+    { id: 'o5', title: 'Osmocote', description: 'A popular brand of resin-coated, slow-release fertilizer pellets.' },
+    { id: 'o6', title: 'Offshoot', description: 'A lateral shoot or branch that grows from the base of a plant, useful for propagation.' },
+
+    // P
+    { id: 'p1', title: 'Perennial', description: 'A plant that lives for more than two years, returning each spring from its root structure.' },
+    { id: 'p2', title: 'Peat Moss', description: 'Decomposed fibrous material harvested from peat bogs, used to retain moisture in soil mixes.' },
+    { id: 'p3', title: 'Perlite', description: 'Volcanic glass expanded by heat, added to soil mixes to improve aeration and drainage.' },
+    { id: 'p4', title: 'Pinching Back', description: 'Removing the growing tip of a stem to encourage bushy growth and lateral branching.' },
+    { id: 'p5', title: 'Pollination', description: 'The transfer of pollen from male flower parts to female flower parts to produce seeds.' },
+    { id: 'p6', title: 'Pruning', description: 'Selective removal of plant parts to improve health, shape, or fruit yield.' },
+
+    // Q
+    { id: 'q1', title: 'Quarantine', description: 'Isolating newly acquired plants to ensure they are free from pests or diseases before placing near others.' },
+    { id: 'q2', title: 'Quicklime', description: 'Calcium oxide used in agriculture to rapidly decrease soil acidity.' },
+    { id: 'q3', title: 'Quercus', description: 'The botanical genus name for oak trees, widely used in forestry and shade landscaping.' },
+    { id: 'q4', title: 'Queen Anne\'s Lace', description: 'A common wild flowering plant often grown in pollinator and wildflower gardens.' },
+    { id: 'q5', title: 'Quilling', description: 'A floral trait where petals fold inwards along their length to form tube-like shapes.' },
+    { id: 'q6', title: 'Quadrat', description: 'A small plot used in ecological studies to measure plant population density.' },
+
+    // R
+    { id: 'r1', title: 'Raised Bed', description: 'A garden structure built above ground level filled with soil, providing superior drainage and root space.' },
+    { id: 'r2', title: 'Rhizome', description: 'A continuously growing horizontal underground stem that puts out lateral shoots and roots.' },
+    { id: 'r3', title: 'Root Bound', description: 'A condition where a plant\'s roots outgrow its container, becoming tightly coiled and matted.' },
+    { id: 'r4', title: 'Rootstock', description: 'The rooted lower part of a plant onto which a scion or stem tissue is grafted.' },
+    { id: 'r5', title: 'Rock Garden', description: 'A style of garden featuring rocks and drought-tolerant alpine or succulent plants.' },
+    { id: 'r6', title: 'Rotational Cropping', description: 'Changing the locations of crops annually to prevent soil depletion and pest build-up.' },
+
+    // S
+    { id: 's1', title: 'Seedling', description: 'A young, delicate plant raised from a germinated seed.' },
+    { id: 's2', title: 'Succulent', description: 'Plants with fleshy leaves or stems adapted to store water in arid climates.' },
+    { id: 's3', title: 'Scarification', description: 'Scratching, nicking, or weakening a tough seed coat to encourage germination.' },
+    { id: 's4', title: 'Slow-Release Fertilizer', description: 'Nutrient pellets designed to gradually supply food to plants over an extended period.' },
+    { id: 's5', title: 'Stratification', description: 'Exposing seeds to cold, moist conditions to break dormancy and trigger germination.' },
+    { id: 's6', title: 'Soil Test', description: 'An analysis of soil samples to measure pH, nutrient levels, and organic content.' },
+
+    // T
+    { id: 't1', title: 'Topiary', description: 'The horticultural practice of clipping perennial plants into intricate geometric or animal shapes.' },
+    { id: 't2', title: 'Transplanting', description: 'Moving a plant from one location, pot, or seedling tray to another growth environment.' },
+    { id: 't3', title: 'Trellis', description: 'An open framework of woven wood or metal lattice built to support climbing plants.' },
+    { id: 't4', title: 'Tuber', description: 'A swollen, fleshy underground stem or root (like a potato or dahlia) storing nutrients.' },
+    { id: 't5', title: 'Thatch', description: 'A dense layer of dead and living stems, roots, and leaves that accumulates between lawn turf and soil.' },
+    { id: 't6', title: 'Trace Elements', description: 'Essential micronutrients required by plants in tiny quantities, such as zinc, iron, and manganese.' },
+
+    // U
+    { id: 'u1', title: 'Understory', description: 'The layer of vegetation growing beneath the main canopy of forest trees or high shrubs.' },
+    { id: 'u2', title: 'Umbel', description: 'A flower cluster in which individual stalks spread from a common center point, like an umbrella.' },
+    { id: 'u3', title: 'Urban Gardening', description: 'Cultivating plants, vegetables, and flowers in city environments using rooftops, balconies, and small spaces.' },
+    { id: 'u4', title: 'Unisexual Flower', description: 'A flower possessing only male (staminate) or only female (pistillate) reproductive organs.' },
+    { id: 'u5', title: 'Upright Growth', description: 'A natural vertical growth habit seen in tall, narrow trees and shrubs.' },
+    { id: 'u6', title: 'Ultra-Low Volume Spraying', description: 'A pesticide application method delivering concentrated spray in microscopic droplets.' },
+
+    // V
+    { id: 'v1', title: 'Vermiculite', description: 'A natural mineral expanded by heat, added to soil to retain moisture and improve aeration.' },
+    { id: 'v2', title: 'Variegation', description: 'The appearance of differently colored zones, stripes, or blotches on plant leaves.' },
+    { id: 'v3', title: 'Vermicomposting', description: 'Using specialized earthworms to break down organic kitchen waste into nutrient-rich compost.' },
+    { id: 'v4', title: 'Vernalization', description: 'The cooling of seed or bulbs during acceleration of flowering.' },
+    { id: 'v5', title: 'Vine', description: 'A plant whose stem requires support and climbs by tendrils or twining.' },
+    { id: 'v6', title: 'Vascular System', description: 'The internal network (xylem and phloem) that transports water and nutrients through a plant.' },
+
+    // W
+    { id: 'w1', title: 'Wilting', description: 'The drooping of leaves and stems caused by loss of cell turgor pressure, usually due to drought.' },
+    { id: 'w2', title: 'Water-Melting', description: 'Soluble plant fertilizers that dissolve completely in water for quick application.' },
+    { id: 'w3', title: 'Weed', description: 'Any unwanted plant growing in a location where it competes with desired crops or flowers.' },
+    { id: 'w4', title: 'Window Box', description: 'A narrow container mounted directly under a window frame for growing flowers and herbs.' },
+    { id: 'w5', title: 'Worm Castings', description: 'The organic end-product of worm digestion, providing an exceptional natural soil fertilizer.' },
+    { id: 'w6', title: 'Windbreak', description: 'A line of dense trees or shrubs planted to shield gardens and crops from damaging wind.' },
+
+    // X
+    { id: 'x1', title: 'Xeriscaping', description: 'Landscaping and gardening designed specifically to eliminate or minimize the need for supplemental irrigation.' },
+    { id: 'x2', title: 'Xylem', description: 'The vascular tissue in plants that conducts water and dissolved nutrients upward from the root system.' },
+    { id: 'x3', title: 'Xanthophyll', description: 'Yellow pigments responsible for autumn color changes in leaves.' },
+    { id: 'x4', title: 'Xerophyte', description: 'A plant adapted to survive in environments with very little liquid water, like cacti.' },
+    { id: 'x5', title: 'Xeric', description: 'Containing little moisture; extremely dry conditions or environments.' },
+    { id: 'x6', title: 'Xanthomonas', description: 'A genus of bacteria that causes leaf spots and bacterial blights on crops.' },
+
+    // Y
+    { id: 'y1', title: 'Yield', description: 'The total amount of useful agricultural or horticultural crop harvested per area.' },
+    { id: 'y2', title: 'Yellowing (Chlorosis)', description: 'The loss of normal green coloration in plant leaves, often caused by nutrient deficiency.' },
+    { id: 'y3', title: 'Yard Waste', description: 'Organic grass clippings, leaves, and pruned branches suitable for home composting.' },
+    { id: 'y4', title: 'Yarrow', description: 'A tough, drought-tolerant perennial plant popular in herb and pollinator gardens.' },
+    { id: 'y5', title: 'Youth Phase', description: 'The initial vegetative growth stage of a seedling before flowering capability begins.' },
+    { id: 'y6', title: 'Yucca', description: 'A genus of tough evergreen shrubs and trees known for their rigid, sword-like leaves.' },
+
+    // Z
+    { id: 'z1', title: 'Zonal Geranium', description: 'A popular garden flowering plant distinguished by dark horseshoe-shaped rings on its leaves.' },
+    { id: 'z2', title: 'Zinnia', description: 'A genus of fast-growing, colorful annual flowers prized in summer gardens and bouquets.' },
+    { id: 'z3', title: 'Zero Scape', description: 'A form of low-water landscaping utilizing non-living elements like gravel, sand, and stone.' },
+    { id: 'z4', title: 'Zinc Deficiency', description: 'A micronutrient shortage resulting in yellowed leaves and stunted twig growth.' },
+    { id: 'z5', title: 'Zone Gardening', description: 'Planning plant selections based on regional USDA hardiness temperature zones.' },
+    { id: 'z6', title: 'Zygomorphic', description: 'Flowers having bilateral symmetry (can be divided into identical halves along one plane).' }
+];

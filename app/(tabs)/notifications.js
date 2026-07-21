@@ -6,7 +6,7 @@ const FAQ = () => {
         <ScrollView style={styles.scrollview} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
             <View style={styles.fullContainer}>
                 <Text style={styles.pageHeader}>Notifications</Text>
-                <Text style={styles.subHeaderText}>Your notifications from the app</Text>
+                <Text style={styles.subHeaderText}>Garden Sewa Notifications</Text>
                 {
                     notificationsData?.map((notification, key) => {
                         return (

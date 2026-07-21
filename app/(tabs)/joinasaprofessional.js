@@ -1,7 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import Icon from 'react-native-ico-flags';
+import { NP } from 'react-native-country-flag-icons';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { areasByCity } from "../../data/Data";
 import { categories, cityData } from "../../data/servicesList";
 
 import * as ImagePicker from 'expo-image-picker';
@@ -18,7 +20,7 @@ export default function JoinProfessional() {
                 mediaTypes: ['images'],
                 allowsEditing: false,
                 quality: 1,
-                selectionLimit:1
+                selectionLimit: 1
 
             });
             console.log(result)
@@ -27,7 +29,7 @@ export default function JoinProfessional() {
 
                 setSelectedImage(result.assets[0])
                 console.log(selectedImage)
-                console.log(selectedImage.length() , "length", selectedImage.uri, "uri")
+                console.log(selectedImage.length(), "length", selectedImage.uri, "uri")
             } else {
                 alert("You did not select any image")
             }
@@ -44,7 +46,7 @@ export default function JoinProfessional() {
                 mediaTypes: ['images'],
                 allowsEditing: false,
                 quality: 1,
-                selectionLimit:1
+                selectionLimit: 1
 
             });
             console.log(result)
@@ -64,28 +66,37 @@ export default function JoinProfessional() {
 
     }
 
+
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [gender, setGender] = useState('');
 
-    const [area, setArea] = useState('');
+
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
     const [referralPhone, setReferralPhone] = useState('');
     const [emergencyPhone, setEmergencyPhone] = useState('');
     const [yearsExperience, setYearsOfExperience] = useState('');
 
+    const areaByCityNew = (selectedCity && areasByCity[selectedCity]) || [];
+    console.log(areaByCityNew)
+
     const [isAccepted, setIsAccepted] = useState(false);
 
+    const [selectedArea, setSelectedArea] = useState('');
 
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
 
     const [searchQuery, setSearchQuery] = useState('');
     const [searchCityQuery, setSearchCityQuery] = useState('')
+    const [searchAreaQuery, setSearchAreaQuery] = useState('')
+
 
     const [isOpenDropdown, setIsOpenDropdown] = useState(false);
     const [isOpenDropdownCity, setIsOpenDropdownCity] = useState(false);
+    const [isOpenDropdownArea, setIsOpenDropdownArea] = useState(false);
+
 
 
     const filteredCategories = categories?.filter(service =>
@@ -94,6 +105,9 @@ export default function JoinProfessional() {
 
 
     const filteredCityData = cityData.filter(city => city.name.toLowerCase().includes(searchCityQuery.toLowerCase()))
+    const filteredAreaData = areaByCityNew.filter((areaName) =>
+        areaName.toLowerCase().includes(searchAreaQuery.toLowerCase())
+    );
 
     const handleSelectCategory = (title) => {
         setSelectedCategory(title);
@@ -107,11 +121,17 @@ export default function JoinProfessional() {
         setIsOpenDropdownCity(false);
     };
 
+    const handleSelectArea = (name) => {
+        setSelectedArea(name);
+        setSearchAreaQuery('');
+        setIsOpenDropdownArea(false);
+    }
+
 
     const handleImageDelete = (source) => {
-        if(source === "identity"){
+        if (source === "identity") {
             setSelectedIdentificationPicture('')
-        }else{
+        } else {
             setSelectedImage('')
         }
     }
@@ -121,7 +141,7 @@ export default function JoinProfessional() {
         setName('')
         setPhone('')
         setMessage('')
-        setArea('')
+        setSelectedArea('')
         setEmergencyPhone('')
         setReferralPhone('')
         setSelectedCategory('')
@@ -134,477 +154,530 @@ export default function JoinProfessional() {
 
 
     return (
-        <ScrollView style={styles.scrollview} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-            <Text style={styles.headerText}>Join Now</Text>
-            <View style={styles.formContainer}>
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Full name</Text>
-                    <TextInput
-                        style={styles.textInput}
-                        placeholder="Enter your full name"
-                        value={name}
-                        onChangeText={setName}
-                    />
-                </View>
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Phone Number</Text>
-                    <View style={styles.phoneInputContainer}>
-                        <Icon
-                            name='nepal'
-                            width={30}
-                            height={20}
-                            style={styles.flagIcon}
-                        />
+        <KeyboardAwareScrollView
+            style={styles.scrollview}
+            contentContainerStyle={styles.container}
+            keyboardShouldPersistTaps="handled"
+            enableOnAndroid={true}
+            extraScrollHeight={30}
+            extraHeight={100}
+            showsVerticalScrollIndicator={false}
+        >
+            {/* <ScrollView style={styles.scrollview} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled"> */}
+                <Text style={styles.headerText}>Join Now</Text>
+                <View style={styles.formContainer}>
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>Full name</Text>
                         <TextInput
-                            style={styles.flexInput}
-                            placeholder="Enter your phone number"
-                            value={phone}
-                            onChangeText={setPhone}
-                            keyboardType="phone-pad"
-                            numberOfLines={8}
+                            style={styles.textInput}
+                            placeholder="Enter your full name"
+                            value={name}
+                            onChangeText={setName}
                         />
                     </View>
-                </View>
 
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Gender</Text>
-                    <View style={styles.radioGroup}>
-                        {['Male', 'Female'].map((option) => (
-                            <TouchableOpacity
-                                key={option}
-                                style={styles.radioButtonContainer}
-                                onPress={() => setGender(option)}
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>Phone Number</Text>
+                        <View style={styles.phoneInputContainer}>
+                            <NP
+                                width={30}
+                                height={20}
+                                style={styles.flagIcon}
+                            />
+                            <TextInput
+                                style={styles.flexInput}
+                                placeholder="Enter your phone number"
+                                value={phone}
+                                onChangeText={setPhone}
+                                keyboardType="phone-pad"
+                                numberOfLines={8}
+                            />
+                        </View>
+                    </View>
+
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>Gender</Text>
+                        <View style={styles.radioGroup}>
+                            {['Male', 'Female'].map((option) => (
+                                <TouchableOpacity
+                                    key={option}
+                                    style={styles.radioButtonContainer}
+                                    onPress={() => setGender(option)}
+                                >
+                                    <View style={styles.radioOuterCircle}>
+                                        {gender === option && <View style={styles.radioInnerCircle} />}
+                                    </View>
+                                    <Text style={styles.radioText}>{option}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
+
+                    <Text style={styles.label}>Headshot/Profile picture</Text>
+
+                    <View style={[
+                        styles.individualContainer,
+                        {
+                            borderStyle: selectedIdentificationPicture ? 'solid' : 'dashed',
+                            borderWidth: 1.5,
+                            borderColor: 'black',
+                            alignItems: 'center',
+                            justifyContent: 'flex-start',
+                            height: 140,
+                            borderRadius: 4,
+                            flexDirection: 'row',
+                            paddingHorizontal: 12,
+                            paddingVertical: 8,
+                            gap: 10
+                        }
+                    ]}>
+
+                        {selectedIdentificationPicture ? (
+
+                            <View
+                                key={selectedIdentificationPicture.uri}
+                                style={{
+                                    width: 45,
+                                    height: '100%',
+                                    position: 'relative',
+                                    borderRadius: 4,
+                                    overflow: 'hidden'
+                                }}
                             >
-                                <View style={styles.radioOuterCircle}>
-                                    {gender === option && <View style={styles.radioInnerCircle} />}
+                                <Image
+                                    source={{ uri: selectedIdentificationPicture.uri }}
+                                    style={{ width: '100%', height: '100%', borderRadius: 4 }}
+                                    resizeMode="cover"
+                                />
+
+                                <Pressable
+                                    onPress={() => handleImageDelete("identity")}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 4,
+                                        right: 4,
+                                        backgroundColor: 'rgba(0,0,0,0.6)',
+                                        borderRadius: 12,
+                                        padding: 4,
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    <Ionicons name='trash' size={16} color="white" />
+                                </Pressable>
+                            </View>
+                        )
+                            : (
+                                <Pressable
+                                    onPress={handleIdentityPick}
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    <Ionicons name='arrow-down-circle-outline' size={32} color="black" />
+                                    <Text style={{ marginTop: 4 }}>Drop file/photos here</Text>
+                                </Pressable>
+                            )
+                        }
+                    </View>
+
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>eMail address</Text>
+                        <TextInput
+                            style={styles.textInput}
+                            placeholder="Enter your eMail "
+                            value={email}
+                            onChangeText={setEmail}
+                        />
+                    </View>
+
+
+
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>Your Experience (Select any 5) </Text>
+
+                        <TouchableOpacity
+                            style={styles.dropdownTrigger}
+                            activeOpacity={0.8}
+                            onPress={() => setIsOpenDropdown(!isOpenDropdown)}
+                        >
+                            <Text style={[styles.triggerText, !selectedCategory && styles.placeholderText]}>
+                                {selectedCategory || "Select a service"}
+                            </Text>
+                            <Ionicons
+                                name={isOpenDropdown ? "chevron-up" : "chevron-down"}
+                                size={20}
+                                color="#666"
+                            />
+                        </TouchableOpacity>
+
+                        {isOpenDropdown && (
+                            <View style={styles.dropdownContainer}>
+                                <View style={styles.searchBarContainer}>
+                                    <TextInput
+                                        style={styles.searchInput}
+                                        placeholder="Search for services..."
+                                        value={searchQuery}
+                                        onChangeText={setSearchQuery}
+                                        autoFocus={true}
+                                    />
+                                    {searchQuery?.length > 0 && (
+                                        <TouchableOpacity onPress={() => setSearchQuery('')}>
+                                            <Ionicons name="close-circle" size={18} color="#999" />
+                                        </TouchableOpacity>
+                                    )}
                                 </View>
-                                <Text style={styles.radioText}>{option}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </View>
 
-                <Text style={styles.label}>Headshot/Profile picture</Text>
-
-                <View style={[
-                    styles.individualContainer,
-                    {
-                        borderStyle: selectedIdentificationPicture ? 'solid' : 'dashed',
-                        borderWidth: 1.5,
-                        borderColor: 'black',
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        height: 140,
-                        borderRadius: 4,
-                        flexDirection: 'row',
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        gap: 10
-                    }
-                ]}>
-
-                    {selectedIdentificationPicture ? (
-
-                        <View
-                            key={selectedIdentificationPicture.uri}
-                            style={{
-                                width: 45,
-                                height: '100%',
-                                position: 'relative',
-                                borderRadius: 4,
-                                overflow: 'hidden'
-                            }}
-                        >
-                            <Image
-                                source={{ uri: selectedIdentificationPicture.uri }}
-                                style={{ width: '100%', height: '100%', borderRadius: 4 }}
-                                resizeMode="cover"
-                            />
-
-                            <Pressable
-                                onPress={() => handleImageDelete("identity")}
-                                style={{
-                                    position: 'absolute',
-                                    top: 4,
-                                    right: 4,
-                                    backgroundColor: 'rgba(0,0,0,0.6)',
-                                    borderRadius: 12,
-                                    padding: 4,
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <Ionicons name='trash' size={16} color="white" />
-                            </Pressable>
-                        </View>
-                    )
-                        : (
-                            <Pressable
-                                onPress={handleIdentityPick}
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <Ionicons name='arrow-down-circle-outline' size={32} color="black" />
-                                <Text style={{ marginTop: 4 }}>Drop file/photos here</Text>
-                            </Pressable>
-                        )
-                    }
-                </View>
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>eMail address</Text>
-                    <TextInput
-                        style={styles.textInput}
-                        placeholder="Enter your eMail "
-                        value={email}
-                        onChangeText={setEmail}
-                    />
-                </View>
-
-
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Your Experience (Select any 5) </Text>
-
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenDropdown(!isOpenDropdown)}
-                    >
-                        <Text style={[styles.triggerText, !selectedCategory && styles.placeholderText]}>
-                            {selectedCategory || "Select a service"}
-                        </Text>
-                        <Ionicons
-                            name={isOpenDropdown ? "chevron-up" : "chevron-down"}
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenDropdown && (
-                        <View style={styles.dropdownContainer}>
-                            <View style={styles.searchBarContainer}>
-                                <TextInput
-                                    style={styles.searchInput}
-                                    placeholder="Search for services..."
-                                    value={searchQuery}
-                                    onChangeText={setSearchQuery}
-                                    autoFocus={true}
-                                />
-                                {searchQuery?.length > 0 && (
-                                    <TouchableOpacity onPress={() => setSearchQuery('')}>
-                                        <Ionicons name="close-circle" size={18} color="#999" />
-                                    </TouchableOpacity>
-                                )}
+                                <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
+                                    {filteredCategories?.length > 0 ? (
+                                        filteredCategories?.map((service, index) => (
+                                            <TouchableOpacity
+                                                key={service.id || index}
+                                                style={styles.dropdownItem}
+                                                onPress={() => handleSelectCategory(service.title)}
+                                            >
+                                                <Text style={styles.dropdownItemText}>{service.title}</Text>
+                                            </TouchableOpacity>
+                                        ))
+                                    ) : (
+                                        <View style={styles.noResultsContainer}>
+                                            <Text style={styles.noResultsText}>No services found</Text>
+                                        </View>
+                                    )}
+                                </ScrollView>
                             </View>
-
-                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
-                                {filteredCategories?.length > 0 ? (
-                                    filteredCategories?.map((service, index) => (
-                                        <TouchableOpacity
-                                            key={service.id || index}
-                                            style={styles.dropdownItem}
-                                            onPress={() => handleSelectCategory(service.title)}
-                                        >
-                                            <Text style={styles.dropdownItemText}>{service.title}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                ) : (
-                                    <View style={styles.noResultsContainer}>
-                                        <Text style={styles.noResultsText}>No services found</Text>
-                                    </View>
-                                )}
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Years of Experience</Text>
-                    <TextInput
-                        style={styles.textInput}
-                        placeholder="Enter your years of experience"
-                        value={yearsExperience}
-                        onChangeText={setYearsOfExperience}
-                    />
-                </View>
-
-
-                <Text style={styles.label}>Citizenship/ Driving License/ NID</Text>
-
-                <View style={[
-                    styles.individualContainer,
-                    {
-                        borderStyle: selectedImage ? 'solid' : 'dashed',
-                        borderWidth: 1.5,
-                        borderColor: 'black',
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        height: 140,
-                        borderRadius: 4,
-                        flexDirection: 'row',
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        gap: 10
-                    }
-                ]}>
-
-                    {selectedImage ? (
-
-                        <View
-                            key={selectedImage.uri}
-                            style={{
-                                width: 45,
-                                height: '100%',
-                                position: 'relative',
-                                borderRadius: 4,
-                                overflow: 'hidden'
-                            }}
-                        >
-                            <Image
-                                source={{ uri: selectedImage.uri }}
-                                style={{ width: '100%', height: '100%', borderRadius: 4 }}
-                                resizeMode="cover"
-                            />
-
-                            <Pressable
-                                onPress={() => handleImageDelete()}
-                                style={{
-                                    position: 'absolute',
-                                    top: 4,
-                                    right: 4,
-                                    backgroundColor: 'rgba(0,0,0,0.6)',
-                                    borderRadius: 12,
-                                    padding: 4,
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <Ionicons name='trash' size={16} color="white" />
-                            </Pressable>
-                        </View>
-                    )
-                        : (
-                            <Pressable
-                                onPress={handleImagePick}
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <Ionicons name='arrow-down-circle-outline' size={32} color="black" />
-                                <Text style={{ marginTop: 4 }}>Drop file/photos here</Text>
-                            </Pressable>
-                        )
-                    }
-                </View>
-
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>City</Text>
-
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenDropdownCity(!isOpenDropdownCity)}
-                    >
-                        <Text style={[styles.triggerText, !selectedCity && styles.placeholderText]}>
-                            {selectedCity || "Choose a city"}
-                        </Text>
-                        <Ionicons
-                            name={isOpenDropdownCity ? "chevron-up" : "chevron-down"}
-
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenDropdownCity && (
-                        <View style={styles.dropdownContainer}>
-                            <View style={styles.searchBarContainer}>
-                                <TextInput
-                                    style={styles.searchInput}
-                                    placeholder="Search for cities..."
-                                    value={searchCityQuery}
-                                    onChangeText={setSearchCityQuery}
-                                    autoFocus={true}
-                                />
-                                {searchCityQuery?.length > 0 && (
-                                    <TouchableOpacity onPress={() => setSearchCityQuery('')}>
-                                        <Ionicons name="close-circle" size={18} color="#999" />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-
-                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
-                                {filteredCityData?.length > 0 ? (
-                                    filteredCityData?.map((city, index) => (
-                                        <TouchableOpacity
-                                            key={city.id || index}
-                                            style={styles.dropdownItem}
-                                            onPress={() => handleSelectCity(city.name)}
-
-                                        >
-                                            <Text style={styles.dropdownItemText}>{city.name}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                ) : (
-                                    <View style={styles.noResultsContainer}>
-                                        <Text style={styles.noResultsText}>No cities found</Text>
-                                    </View>
-                                )}
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Area</Text>
-                    {selectedCity ? <TextInput
-                        style={styles.textInput}
-                        placeholder="Enter your area"
-                        value={area}
-                        onChangeText={setArea}
-                    /> : <TextInput
-                        style={styles.textInput}
-                        placeholder="Please select a city first"
-                        editable={false}
-                    />
-                    }
-                </View>
-
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Emergency Contact Number</Text>
-                    <View style={styles.phoneInputContainer}>
-                        <Icon
-                            name='nepal'
-                            width={30}
-                            height={20}
-                            style={styles.flagIcon}
-                        />
-                        <TextInput
-                            style={styles.flexInput}
-                            placeholder="Enter the phone number"
-                            value={emergencyPhone}
-                            onChangeText={setEmergencyPhone}
-                            keyboardType="phone-pad"
-                            numberOfLines={8}
-                        />
-                    </View>
-                </View>
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Referral Phone Number</Text>
-                    <View style={styles.phoneInputContainer}>
-                        <Icon
-                            name='nepal'
-                            width={30}
-                            height={20}
-                            style={styles.flagIcon}
-                        />
-                        <TextInput
-                            style={styles.flexInput}
-                            placeholder="Enter the phone number"
-                            value={referralPhone}
-                            onChangeText={setReferralPhone}
-                            keyboardType="phone-pad"
-                            numberOfLines={8}
-                        />
-                    </View>
-                </View>
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Message</Text>
-
-                    <TextInput
-                        style={[styles.textInput], {
-                            height: 100,
-                            borderColor: '#ecdbdb',
-                            borderWidth: 1,
-                            padding: 8
-                        }}
-                        multiline={true}
-                        autoFocus={true}
-                        placeholder="Enter your message"
-                        value={message}
-                        onChangeText={setMessage}
-                    />
-                </View>
-
-
-                {/* Accept Terms  */}
-                <View style={styles.checkboxContainer}>
-                    <Pressable
-                        onPress={() => setIsAccepted(!isAccepted)}
-                        style={styles.checkbox}
-                    >
-                        {isAccepted ? (
-                            <Ionicons name="checkbox" size={24} color="#245d5a" />
-                        ) : (
-                            <Ionicons name="square-outline" size={24} color="#666" />
                         )}
-                    </Pressable>
-                    <Text style={styles.checkboxLabel}>
-                        I accept the{' '}
-                        <Text
-                            style={styles.hyperlink}
-                            onPress={() => router.push('./terms')}
-                        >
-                            Terms and Conditions
-                        </Text>
-                    </Text>
-                </View>
-
-                {/* Buttons */}
-                <View style={styles.bottomContainer}>
-                    <View style={{
-                        flexDirection: "row",
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        width: '50%',
-                        gap: 2,
-
-                    }}
-
-                    >
-                        <Ionicons name='refresh' style={{
-                            width: "16%",
-                            height: 'auto',
-                            paddingVertical: 12
-                        }} />
-                        <Pressable onPress={handleClearForm}>
-                            <Text style={[styles.label]}>Clear Form</Text>
-                        </Pressable>
                     </View>
-                    <View
-                        style={{
+
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>Years of Experience</Text>
+                        <TextInput
+                            style={styles.textInput}
+                            placeholder="Enter your years of experience"
+                            value={yearsExperience}
+                            onChangeText={setYearsOfExperience}
+                        />
+                    </View>
+
+
+                    <Text style={styles.label}>Citizenship/ Driving License/ NID</Text>
+
+                    <View style={[
+                        styles.individualContainer,
+                        {
+                            borderStyle: selectedImage ? 'solid' : 'dashed',
+                            borderWidth: 1.5,
+                            borderColor: 'black',
+                            alignItems: 'center',
+                            justifyContent: 'flex-start',
+                            height: 140,
+                            borderRadius: 4,
+                            flexDirection: 'row',
+                            paddingHorizontal: 12,
+                            paddingVertical: 8,
+                            gap: 10
+                        }
+                    ]}>
+
+                        {selectedImage ? (
+
+                            <View
+                                key={selectedImage.uri}
+                                style={{
+                                    width: 45,
+                                    height: '100%',
+                                    position: 'relative',
+                                    borderRadius: 4,
+                                    overflow: 'hidden'
+                                }}
+                            >
+                                <Image
+                                    source={{ uri: selectedImage.uri }}
+                                    style={{ width: '100%', height: '100%', borderRadius: 4 }}
+                                    resizeMode="cover"
+                                />
+
+                                <Pressable
+                                    onPress={() => handleImageDelete()}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 4,
+                                        right: 4,
+                                        backgroundColor: 'rgba(0,0,0,0.6)',
+                                        borderRadius: 12,
+                                        padding: 4,
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    <Ionicons name='trash' size={16} color="white" />
+                                </Pressable>
+                            </View>
+                        )
+                            : (
+                                <Pressable
+                                    onPress={handleImagePick}
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    <Ionicons name='arrow-down-circle-outline' size={32} color="black" />
+                                    <Text style={{ marginTop: 4 }}>Drop file/photos here</Text>
+                                </Pressable>
+                            )
+                        }
+                    </View>
+
+
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>City</Text>
+
+                        <TouchableOpacity
+                            style={styles.dropdownTrigger}
+                            activeOpacity={0.8}
+                            onPress={() => setIsOpenDropdownCity(!isOpenDropdownCity)}
+                        >
+                            <Text style={[styles.triggerText, !selectedCity && styles.placeholderText]}>
+                                {selectedCity || "Choose a city"}
+                            </Text>
+                            <Ionicons
+                                name={isOpenDropdownCity ? "chevron-up" : "chevron-down"}
+
+                                size={20}
+                                color="#666"
+                            />
+                        </TouchableOpacity>
+
+                        {isOpenDropdownCity && (
+                            <View style={styles.dropdownContainer}>
+                                <View style={styles.searchBarContainer}>
+                                    <TextInput
+                                        style={styles.searchInput}
+                                        placeholder="Search for cities..."
+                                        value={searchCityQuery}
+                                        onChangeText={setSearchCityQuery}
+                                        autoFocus={true}
+                                    />
+                                    {searchCityQuery?.length > 0 && (
+                                        <TouchableOpacity onPress={() => setSearchCityQuery('')}>
+                                            <Ionicons name="close-circle" size={18} color="#999" />
+                                        </TouchableOpacity>
+                                    )}
+                                </View>
+
+                                <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
+                                    {filteredCityData?.length > 0 ? (
+                                        filteredCityData?.map((city, index) => (
+                                            <TouchableOpacity
+                                                key={city.id || index}
+                                                style={styles.dropdownItem}
+                                                onPress={() => handleSelectCity(city.name)}
+
+                                            >
+                                                <Text style={styles.dropdownItemText}>{city.name}</Text>
+                                            </TouchableOpacity>
+                                        ))
+                                    ) : (
+                                        <View style={styles.noResultsContainer}>
+                                            <Text style={styles.noResultsText}>No cities found</Text>
+                                        </View>
+                                    )}
+                                </ScrollView>
+                            </View>
+                        )}
+                    </View>
+
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>Area</Text>
+
+                        <TouchableOpacity
+                            style={styles.dropdownTrigger}
+                            activeOpacity={0.8}
+                            onPress={() => setIsOpenDropdownArea(!isOpenDropdownArea)}
+                        >
+                            <Text style={[styles.triggerText, !selectedArea && styles.placeholderText]}>
+                                {selectedArea || "Choose an Area"}
+                            </Text>
+                            <Ionicons
+                                name={isOpenDropdownArea ? "chevron-up" : "chevron-down"}
+                                size={20}
+                                color="#666"
+                            />
+                        </TouchableOpacity>
+
+                        {isOpenDropdownArea && (
+                            <View style={styles.dropdownContainer}>
+                                <View style={styles.searchBarContainer}>
+                                    <TextInput
+                                        style={styles.searchInput}
+                                        placeholder="Search for area..."
+                                        value={searchAreaQuery}
+                                        onChangeText={setSearchAreaQuery}
+                                        autoFocus={true}
+                                    />
+                                    {searchAreaQuery?.length > 0 && (
+                                        <TouchableOpacity onPress={() => setSearchAreaQuery('')}>
+                                            <Ionicons name="close-circle" size={18} color="#999" />
+                                        </TouchableOpacity>
+                                    )}
+                                </View>
+
+                                <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
+                                    {filteredAreaData?.length > 0 ? (
+                                        filteredAreaData.map((areaName, index) => (
+                                            <TouchableOpacity
+                                                key={index}
+                                                style={styles.dropdownItem}
+                                                onPress={() => handleSelectArea(areaName)}
+                                            >
+                                                <Text style={styles.dropdownItemText}>{areaName}</Text>
+                                            </TouchableOpacity>
+                                        ))
+                                    ) : (
+                                        <View style={styles.noResultsContainer}>
+                                            <Text style={styles.noResultsText}>
+                                                {selectedCity ? "No area found" : "Please select a city first"}
+                                            </Text>
+                                        </View>
+                                    )}
+                                </ScrollView>
+                            </View>
+                        )}
+                    </View>
+
+
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>Emergency Contact Number</Text>
+                        <View style={styles.phoneInputContainer}>
+                            <NP
+
+                                width={30}
+                                height={20}
+                                style={styles.flagIcon}
+                            />
+                            <TextInput
+                                style={styles.flexInput}
+                                placeholder="Enter phone number"
+                                value={emergencyPhone}
+                                onChangeText={setEmergencyPhone}
+                                keyboardType="phone-pad"
+                                numberOfLines={8}
+                            />
+                        </View>
+                    </View>
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>Referral Phone Number</Text>
+                        <View style={styles.phoneInputContainer}>
+                            <NP
+
+                                width={30}
+                                height={20}
+                                style={styles.flagIcon}
+                            />
+                            <TextInput
+                                style={styles.flexInput}
+                                placeholder="Enter phone number"
+                                value={referralPhone}
+                                onChangeText={setReferralPhone}
+                                keyboardType="phone-pad"
+                                numberOfLines={8}
+                            />
+                        </View>
+                    </View>
+
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>Message</Text>
+
+                        <TextInput
+                            style={[styles.textInput], {
+                                height: 100,
+                                borderColor: '#ecdbdb',
+                                borderWidth: 1,
+                                padding: 8
+                            }}
+                            multiline={true}
+                            // autoFocus={true}
+                            placeholder="Enter your message"
+                            value={message}
+                            onChangeText={setMessage}
+                        />
+                    </View>
+
+
+                    {/* Accept Terms  */}
+                    <View style={styles.checkboxContainer}>
+                        <Pressable
+                            onPress={() => setIsAccepted(!isAccepted)}
+                            style={styles.checkbox}
+                        >
+                            {isAccepted ? (
+                                <Ionicons name="checkbox" size={24} color="#245d5a" />
+                            ) : (
+                                <Ionicons name="square-outline" size={24} color="#666" />
+                            )}
+                        </Pressable>
+                        <Text style={styles.checkboxLabel}>
+                            I accept the{' '}
+                            <Text
+                                style={styles.hyperlink}
+                                onPress={() => router.push('./terms')}
+                            >
+                                Terms and Conditions
+                            </Text>
+                        </Text>
+                    </View>
+
+                    {/* Buttons */}
+                    <View style={styles.bottomContainer}>
+                        <View style={{
                             flexDirection: "row",
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: "#245d5a",
-                            gap: 2,
+                            justifyContent: 'flex-start',
                             width: '50%',
-                            marginHorizontal: 'auto',
-                            borderRadius: 12,
-                            height: 44
+                            gap: 2,
+
                         }}
-                    >
 
-                        <Text style={[styles.label], {
-                            color: '#fff',
+                        >
+                            <Ionicons name='refresh' style={{
+                                width: "16%",
+                                height: 'auto',
+                                paddingVertical: 12
+                            }} />
+                            <Pressable onPress={handleClearForm}>
+                                <Text style={[styles.label]}>Clear Form</Text>
+                            </Pressable>
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: "#245d5a",
+                                gap: 2,
+                                width: '50%',
+                                marginHorizontal: 'auto',
+                                borderRadius: 12,
+                                height: 44
+                            }}
+                        >
 
-                        }}>Submit</Text>
+                            <Text style={[styles.label], {
+                                color: '#fff',
+
+                            }}>Submit</Text>
+                        </View>
                     </View>
                 </View>
-            </View>
-        </ScrollView>
+            {/* </ScrollView> */}
+        </KeyboardAwareScrollView>
+
     );
 }
 

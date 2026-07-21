@@ -29,6 +29,13 @@ const SideBarModal = ({ onClose }) => {
                 </View>
             </View>
 
+            <View style={styles.adminButtonWrapper}>
+                <TouchableOpacity style={styles.adminLoginButton} activeOpacity={0.8} onPress={() => handleNavigation('./adminLogin')}>
+                    <Ionicons name="lock-closed-outline" size={18} color="#FFFFFF" />
+                    <Text style={styles.adminButtonText}>Admin Login</Text>
+                </TouchableOpacity>
+            </View>
+
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
@@ -89,12 +96,7 @@ const SideBarModal = ({ onClose }) => {
                 </View>
             </ScrollView>
 
-            <View style={styles.adminButtonWrapper}>
-                <TouchableOpacity style={styles.adminLoginButton} activeOpacity={0.8} onPress={() => handleNavigation('./adminLogin')}>
-                    <Ionicons name="lock-closed-outline" size={18} color="#FFFFFF" />
-                    <Text style={styles.adminButtonText}>Admin Login</Text>
-                </TouchableOpacity>
-            </View>
+
         </View>
     );
 };
@@ -147,7 +149,7 @@ const styles = StyleSheet.create({
         marginTop: 2,
     },
     scrollContent: {
-        paddingVertical: 16,
+        paddingVertical: 8,
     },
     primaryLinks: {
         gap: 8,

@@ -10,7 +10,8 @@ import {
     TextInput,
     View
 } from "react-native";
-import Icon from 'react-native-ico-flags';
+
+import { NP } from 'react-native-country-flag-icons';
 
 import { useState } from 'react';
 import ServiceCard from "../../components/ServiceCard";
@@ -32,7 +33,7 @@ export default function Index() {
             <View style={styles.heroContainer}>
                 <Image
                     source={{
-                        uri:'https://www.gardensewa.com/home/slider/1.jpg'
+                        uri: 'https://www.gardensewa.com/home/slider/1.jpg'
                     }}
                     style={styles.backgroundImage}
                     resizeMode="cover"
@@ -43,7 +44,7 @@ export default function Index() {
 
                     <View style={styles.inputContainer}>
                         <View style={styles.iconWrapper}>
-                            <Icon name="nepal" width={24} height={24} />
+                            <NP width={24} height={24} />
                         </View>
                         <TextInput
                             style={styles.textInput}
@@ -78,6 +79,10 @@ export default function Index() {
                     style={styles.backgroundImage}
                     resizeMode="cover"
                 />
+                <View style={styles.ratingOverlay}>
+                    <Text style={styles.ratingTitle}>4.6 Rating</Text>
+                    <Text style={styles.ratingTitle}>365 Bookings</Text>
+                </View>
                 <View style={styles.cardOverlay}>
                     <View style={styles.tagContainer}>
                         <Text style={styles.tagText}>Most Popular</Text>
@@ -85,6 +90,7 @@ export default function Index() {
                     <Text style={styles.cardTitle}>Lawn Maintenance</Text>
                     <Text style={styles.cardSubTitle}>Professional lawn maintenance service</Text>
                 </View>
+
             </View>
 
             <View style={styles.sectionHeader}>
@@ -207,6 +213,15 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         padding: 16,
     },
+    ratingOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.38)',
+        alignItems: 'flex-end',
+        justifyContent: 'flex-end',
+        gap: 4,
+        padding: 24
+
+    },
     tagContainer: {
         alignSelf: 'flex-start',
         backgroundColor: '#225754',
@@ -225,6 +240,11 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontWeight: 'bold',
         fontSize: 20,
+    },
+    ratingTitle: {
+        color: '#FFFFFF',
+        fontWeight: 'bold',
+        fontSize: 16,
     },
     cardSubTitle: {
         color: '#F0F0F0',

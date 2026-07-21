@@ -2,11 +2,13 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Calendar } from 'react-native-calendars';
-import Icon from 'react-native-ico-flags';
 import { budgetData, categories, cityData, priorityData, shiftsData } from "../../data/servicesList";
 
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
+import { NP } from 'react-native-country-flag-icons';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { areasByCity } from "../../data/Data";
 
 export default function Book() {
 
@@ -20,9 +22,7 @@ export default function Book() {
                 allowsMultipleSelection: true,
                 allowsEditing: false,
                 quality: 1,
-                selectionLimit:5
-                
-
+                selectionLimit: 5
             });
             console.log(result)
 
@@ -43,7 +43,7 @@ export default function Book() {
 
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
-    const [area, setArea] = useState('');
+    const [selectedArea, setSelectedArea] = useState('');
     const [message, setMessage] = useState('');
 
     const [isAccepted, setIsAccepted] = useState(false);
@@ -59,12 +59,14 @@ export default function Book() {
     const [searchCityQuery, setSearchCityQuery] = useState('')
     const [searchPriorityQuery, setSearchPriorityQuery] = useState('')
     const [searchBudgetQuery, setSearchBudgetQuery] = useState('')
+    const [searchAreaQuery, setSearchAreaQuery] = useState('')
 
     const [isOpenDropdown, setIsOpenDropdown] = useState(false);
     const [isOpenDropDownShift, setIsOpenDropdownShift] = useState(false);
     const [isOpenDropdownCity, setIsOpenDropdownCity] = useState(false);
     const [isOpenDropdownPriority, setIsOpenDropdownPriority] = useState(false);
     const [isOpenDropdownBudget, setIsOpenDropdownBudget] = useState(false);
+    const [isOpenDropdownArea, setIsOpenDropdownArea] = useState(false);
 
     const [isOpenStartCalendar, setIsOpenStartCalendar] = useState(false);
     const [isOpenEndCalendar, setIsOpenEndCalendar] = useState(false);
@@ -76,11 +78,18 @@ export default function Book() {
         service.title.toLowerCase().includes(searchQuery.toLowerCase())
     ) || [];
 
+    const areaByCityNew = (selectedCity && areasByCity[selectedCity]) || [];
+    console.log(areaByCityNew)
+
     const filteredShiftsData = shiftsData?.filter(shift =>
         shift.name.toLowerCase().includes(searchShiftQuery?.toLowerCase())
     )
 
     const filteredCityData = cityData.filter(city => city.name.toLowerCase().includes(searchCityQuery.toLowerCase()))
+
+    const filteredAreaData = areaByCityNew.filter((areaName) =>
+        areaName.toLowerCase().includes(searchAreaQuery.toLowerCase())
+    );
 
     const filteredPriorityData = priorityData.filter(priority => priority.name.toLowerCase().includes(searchPriorityQuery.toLowerCase()))
 
@@ -112,6 +121,12 @@ export default function Book() {
         setIsOpenDropdownPriority(false);
     }
 
+    const handleSelectArea = (name) => {
+        setSelectedArea(name);
+        setSearchAreaQuery('');
+        setIsOpenDropdownArea(false);
+    }
+
     const handleSelectBudget = (name) => {
         setSelectedBudget(name);
         setSearchBudgetQuery('');
@@ -124,7 +139,7 @@ export default function Book() {
     }
 
     const handleClearForm = () => {
-        setArea('');
+        // setArea('');
         setEndDate('');
         setStartDate('')
         setIsAccepted(false)
@@ -137,11 +152,21 @@ export default function Book() {
         setSelectedImages('')
         setSelectedPriority('')
         setSelectedShift('')
+        setSelectedArea('')
 
     }
 
     return (
-        <ScrollView style={styles.scrollview} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <KeyboardAwareScrollView
+            style={styles.scrollview}
+            contentContainerStyle={styles.container}
+            keyboardShouldPersistTaps="handled"
+            enableOnAndroid={true}
+            extraScrollHeight={30}
+            extraHeight={100}
+            showsVerticalScrollIndicator={false}
+        >
+            {/* <ScrollView style={styles.scrollview} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled"> */}
             <Text style={styles.headerText}>Book Service</Text>
             <View style={styles.formContainer}>
                 <View style={styles.individualContainer}>
@@ -157,8 +182,7 @@ export default function Book() {
                 <View style={styles.individualContainer}>
                     <Text style={styles.label}>Phone Number</Text>
                     <View style={styles.phoneInputContainer}>
-                        <Icon
-                            name='nepal'
+                        <NP
                             width={30}
                             height={20}
                             style={styles.flagIcon}
@@ -412,7 +436,7 @@ export default function Book() {
                     )}
                 </View>
 
-                <View style={styles.individualContainer}>
+                {/* <View style={styles.individualContainer}>
                     <Text style={styles.label}>Area</Text>
                     {selectedCity ? <TextInput
                         style={styles.textInput}
@@ -425,6 +449,64 @@ export default function Book() {
                         editable={false}
                     />
                     }
+                </View> */}
+
+                <View style={styles.individualContainer}>
+                    <Text style={styles.label}>Area</Text>
+
+                    <TouchableOpacity
+                        style={styles.dropdownTrigger}
+                        activeOpacity={0.8}
+                        onPress={() => setIsOpenDropdownArea(!isOpenDropdownArea)}
+                    >
+                        <Text style={[styles.triggerText, !selectedArea && styles.placeholderText]}>
+                            {selectedArea || "Choose an Area"}
+                        </Text>
+                        <Ionicons
+                            name={isOpenDropdownArea ? "chevron-up" : "chevron-down"}
+                            size={20}
+                            color="#666"
+                        />
+                    </TouchableOpacity>
+
+                    {isOpenDropdownArea && (
+                        <View style={styles.dropdownContainer}>
+                            <View style={styles.searchBarContainer}>
+                                <TextInput
+                                    style={styles.searchInput}
+                                    placeholder="Search for area..."
+                                    value={searchAreaQuery}
+                                    onChangeText={setSearchAreaQuery}
+                                    autoFocus={true}
+                                />
+                                {searchAreaQuery?.length > 0 && (
+                                    <TouchableOpacity onPress={() => setSearchAreaQuery('')}>
+                                        <Ionicons name="close-circle" size={18} color="#999" />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+
+                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
+                                {filteredAreaData?.length > 0 ? (
+                                    filteredAreaData.map((areaName, index) => (
+                                        <TouchableOpacity
+                                            key={index}
+                                            style={styles.dropdownItem}
+                                            onPress={() => handleSelectArea(areaName)}
+                                        >
+                                            <Text style={styles.dropdownItemText}>{areaName}</Text>
+                                        </TouchableOpacity>
+                                    ))
+                                ) : (
+                                    <View style={styles.noResultsContainer}>
+                                        <Text style={styles.noResultsText}>
+                                            {selectedCity ? "No area found" : "Please select a city first"}
+                                        </Text>
+                                    </View>
+                                )}
+                            </ScrollView>
+                        </View>
+                    )}
                 </View>
 
                 <View style={styles.individualContainer}>
@@ -622,7 +704,7 @@ export default function Book() {
                             padding: 8
                         }}
                         multiline={true}
-                        autoFocus={true}
+                        // autoFocus={true}
                         placeholder="Enter your message"
                         value={message}
                         onChangeText={setMessage}
@@ -694,7 +776,10 @@ export default function Book() {
                     </View>
                 </View>
             </View>
-        </ScrollView>
+            {/* </ScrollView> */}
+
+        </KeyboardAwareScrollView>
+
     );
 }
 

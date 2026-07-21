@@ -1,14 +1,32 @@
 import SideBarModal from '@/components/SideBarModal';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Stack } from "expo-router";
-import { useState } from "react";
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 
+SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
+  const [isAppReady, setIsAppReady] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  useEffect(() => {
+    async function prepare() {
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setIsAppReady(true);
+        await SplashScreen.hideAsync();
+      }
+    }
+
+    prepare();
+  }, []);
+
   const onMenuOpen = () => {
-    console.log("menu clicked");
     setIsModalOpen(true);
   };
 
@@ -19,6 +37,10 @@ export default function RootLayout() {
   const onClose = () => {
     setIsModalOpen(false);
   };
+
+  if (!isAppReady) {
+    return null;
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -52,16 +74,12 @@ export default function RootLayout() {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-
                 <Image
                   source={require('@/assets/images/gardensewa.webp')}
                   style={{ width: '100%', height: '100%', marginRight: 2 }}
                   resizeMode="cover"
                 />
               </View>
-
-
-
             ),
             headerRight: () => (
               <View style={{

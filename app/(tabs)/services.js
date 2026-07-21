@@ -1,13 +1,13 @@
 import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import ServiceCard from "../../components/ServiceCard";
 import ServiceStack from "../../components/ServiceStack";
-import { categories, services } from "../../data/servicesList";
+import { services } from "../../data/servicesList";
 
 const { width } = Dimensions.get('window');
 
 const TRENDING_CARD_WIDTH = (width - 36 - 12) / 2;
-
-const CATEGORY_CARD_WIDTH = (width - 36 - 2 - 24 - 10) / 2;
+const PAIR_CARD_WIDTH = (width - 36 - 12) / 2;
+const FULL_WIDTH_CARD = width - 36;
 
 export default function Services() {
     return (
@@ -53,41 +53,41 @@ export default function Services() {
                 </View>
             </View>
 
-            {categories?.map((category, key) => {
-                const categoryServices = services?.filter((service) =>
-                    service.category === category.title
-                );
+            <View style={styles.sectionContainer}>
+                <Text style={styles.sectionHeading}>All Services</Text>
+                <View style={styles.allServicesGrid}>
+                    {services?.map((service, index) => {
+                        const isFullWidthPosition = index % 7 === 0;
 
-                return (
-                    <View key={key} style={styles.categoryContainer}>
-                        <View style={styles.categoryHeader}>
-                            <Image
-                                source={{ uri: category.url }}
-                                style={styles.categoryImage}
-                            />
-                            <View style={styles.categoryOverlay}>
-                                <Text style={styles.categoryTitle}>{category.title}</Text>
-                            </View>
-                        </View>
-
-                        <View style={styles.categoryGridContainer}>
-                            {categoryServices?.length > 0 ? (
-                                categoryServices.map((service, serviceKey) => (
-                                    <ServiceCard
-                                        key={serviceKey}
-                                        cardWidth={CATEGORY_CARD_WIDTH}
-                                        title={service.title}
-                                        imageSource={service.url}
-                                        description={service.description}
+                        if (isFullWidthPosition) {
+                            return (
+                                <View key={service.id || index} style={styles.fullWidthCardContainer}>
+                                    <Image
+                                        source={{ uri: service.url }}
+                                        style={styles.fullWidthCardImage}
                                     />
-                                ))
-                            ) : (
-                                <Text style={styles.noServices}>No services available in this category</Text>
-                            )}
-                        </View>
-                    </View>
-                );
-            })}
+                                    <View style={styles.fullWidthCardOverlay}>
+                                        <Text style={styles.fullWidthCardTitle}>{service.title}</Text>
+                                        <Text style={styles.fullWidthCardDesc} numberOfLines={1} >
+                                            {service.description}
+                                        </Text>
+                                    </View>
+                                </View>
+                            );
+                        }
+
+                        return (
+                            <ServiceCard
+                                key={service.id || index}
+                                cardWidth={PAIR_CARD_WIDTH}
+                                title={service.title}
+                                imageSource={service.url}
+                                description={service.description}
+                            />
+                        );
+                    })}
+                </View>
+            </View>
         </ScrollView>
     );
 }
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         paddingHorizontal: 18,
         paddingBottom: 28,
-        gap: 4
+        gap: 4,
     },
     title: {
         color: '#FFFFFF',
@@ -130,6 +130,7 @@ const styles = StyleSheet.create({
     sectionContainer: {
         marginTop: 20,
         paddingHorizontal: 18,
+        marginBottom: 20,
     },
     sectionHeading: {
         fontSize: 20,
@@ -146,56 +147,44 @@ const styles = StyleSheet.create({
         gap: 12,
         justifyContent: 'flex-start',
     },
-    categoryContainer: {
-        marginTop: 24,
-        marginHorizontal: 18,
-        // borderRadius: 24,
-        // overflow: 'hidden',
-        // borderWidth: 1,
-        // borderColor: '#E2E8F0',
-        marginBottom: 12,
-        // backgroundColor:'red'
-    },
-    categoryHeader: {
-        position: 'relative',
-        height: 160,
-        width: '100%',
-        padding: 8
-    },
-    categoryImage: {
-        width: '100%',
-        height: '100%',
-        borderRadius: 12
-    },
-    categoryOverlay: {
-        position: 'absolute',
-        top: 8,
-        left: 8,
-        right: 8,
-        bottom: 8,
-        backgroundColor: 'rgba(0,0,0,0.35)',
-        justifyContent: 'center',
-        paddingHorizontal: 20,
-        borderRadius: 12,
-        padding: 8
-    },
-    categoryTitle: {
-        color: '#FFFFFF',
-        fontSize: 22,
-        fontWeight: 'bold',
-    },
-    categoryGridContainer: {
-        padding: 12,
+    allServicesGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 10,
-        justifyContent: 'flex-start',
+        gap: 12,
+        justifyContent: 'space-between',
     },
-    noServices: {
-        paddingVertical: 16,
-        color: '#64748B',
-        fontSize: 14,
-        textAlign: 'center',
+    fullWidthCardContainer: {
+        width: FULL_WIDTH_CARD,
+        height: 160,
+        borderRadius: 12,
+        overflow: 'hidden',
+        position: 'relative',
+        marginVertical: 6,
+    },
+    fullWidthCardImage: {
         width: '100%',
-    }
+        height: '100%',
+    },
+    fullWidthCardOverlay: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.45)',
+        alignItems:'center',
+        justifyContent: 'center',
+        padding: 16,
+    },
+    fullWidthCardTitle: {
+        color: '#FFFFFF',
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 4,
+    },
+    fullWidthCardDesc: {
+        color: '#E2E8F0',
+        fontSize: 13,
+        lineHeight: 18,
+    },
 });

@@ -1,13 +1,13 @@
 import { useState } from "react"
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
-import { services } from "../../data/servicesList"
+import { gardeningTerms } from "../../data/servicesList"
 
 const Glossary = () => {
     const alphabetArray = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i))
     const [selectedAlphabet, setSelectedAlphabet] = useState('A')
 
-    const filteredServices = services.filter((service) =>
-        service.title && service.title.trim().toUpperCase().startsWith(selectedAlphabet)
+    const filteredTerms = gardeningTerms.filter((term) =>
+        term.title && term.title.trim().toUpperCase().startsWith(selectedAlphabet)
     )
 
     return (
@@ -43,16 +43,16 @@ const Glossary = () => {
 
             <Text style={styles.sectionIndicator}>{selectedAlphabet}</Text>
 
-            {filteredServices.length > 0 ? (
-                filteredServices.map((service, index) => (
-                    <View key={service.id || index} style={styles.card}>
-                        <Text style={styles.cardTitle}>{service.title}</Text>
-                        <Text style={styles.cardDescription}>{service.description}</Text>
+            {filteredTerms.length > 0 ? (
+                filteredTerms.map((term, index) => (
+                    <View key={term.id || index} style={styles.card}>
+                        <Text style={styles.cardTitle}>{term.title}</Text>
+                        <Text style={styles.cardDescription}>{term.description}</Text>
                     </View>
                 ))
             ) : (
                 <View style={styles.emptyCard}>
-                    <Text style={styles.emptyText}>No services found starting with {selectedAlphabet}</Text>
+                    <Text style={styles.emptyText}>No terms found starting with {selectedAlphabet}</Text>
                 </View>
             )}
         </ScrollView>
