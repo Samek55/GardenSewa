@@ -75,7 +75,7 @@ export default function Index() {
 
             <View style={styles.popularCardContainer}>
                 <Image
-                    source={require('@/assets/images/garden1.jpg')}
+                    source={require('../../assets/images/lawn.jpg')}
                     style={styles.backgroundImage}
                     resizeMode="cover"
                 />
@@ -112,6 +112,7 @@ export default function Index() {
                     ItemSeparatorComponent={() => <View style={{ width: 14 }} />}
                     renderItem={({ item }) => (
                         <ServiceCard
+                            id={item.id}
                             title={item.title}
                             imageSource={item.url}
                             cardWidth={TOP_CARD_WIDTH}
@@ -274,6 +275,6 @@ const styles = StyleSheet.create({
     },
     horizontalListPadding: {
         paddingHorizontal: 8,
-        paddingVertical: 16
+        marginBottom: 8,
     },
 });

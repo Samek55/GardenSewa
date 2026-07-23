@@ -6,7 +6,7 @@ export const services = [
         category: "Design & Installation",
         label: "Top",
         description: "Professional landscape design and planning services to create beautiful, functional outdoor spaces tailored to your needs and preferences.",
-        url: 'https://www.gardensewa.com/services/9.jpg'
+        url: require('../assets/images/9.jpg')
     },
     {
         id: 23,
@@ -14,7 +14,7 @@ export const services = [
         category: "Design & Installation",
         label: "Trending",
         description: "Design, installation, and maintenance of rooftop gardens including container planting, irrigation setup, and soil management to transform rooftops into green spaces.",
-        url: 'https://www.gardensewa.com/services/19.jpg'
+        url: require('../assets/images/19.jpg')
     },
     {
         id: 11,
@@ -22,7 +22,7 @@ export const services = [
         category: "Design & Installation",
         label: "Featured",
         description: "Installation of patios, walkways, retaining walls, stone features, and other non-living landscape elements to enhance outdoor spaces.",
-        url: 'https://www.gardensewa.com/services/7.jpg'
+        url: require('../assets/images/7.jpg')
     },
     {
         id: 19,
@@ -30,7 +30,7 @@ export const services = [
         category: "Design & Installation",
         label: "Featured",
         description: "Design and installation of outdoor landscape lighting including pathway lights, garden lighting, and accent illumination to enhance safety, beauty, and nighttime usability of your outdoor spaces.",
-        url: 'https://www.gardensewa.com/services/15.jpg'
+        url: require('../assets/images/15.jpg')
     },
     {
         id: 25,
@@ -38,7 +38,7 @@ export const services = [
         category: "Design & Installation",
         label: "Trending",
         description: "Installation and maintenance of artificial plants, turf, and landscaping elements for low-maintenance, durable, and aesthetically pleasing green spaces.",
-        url: 'https://www.gardensewa.com/services/21.jpg'
+        url: require('../assets/images/21.jpg')
     },
     {
         id: 20,
@@ -46,7 +46,7 @@ export const services = [
         category: "Design & Installation",
         label: "Featured",
         description: "Professional turf installation and maintenance including laying new grass, repairing damaged turf, and ensuring a lush, healthy lawn for residential and commercial spaces.",
-        url: 'https://www.gardensewa.com/services/16.jpg'
+        url: require('../assets/images/16.jpg')
 
     },
 
@@ -57,7 +57,7 @@ export const services = [
         category: "Maintenance & Care",
         label: "Top",
         description: "Comprehensive garden care including weeding, pruning, mulching, and seasonal maintenance to keep your garden flourishing throughout the year.",
-        url: 'https://www.gardensewa.com/services/3.jpg'
+        url: require('../assets/images/3.jpg')
 
     },
     {
@@ -66,7 +66,7 @@ export const services = [
         category: "Maintenance & Care",
         label: "Top",
         description: "Comprehensive year-round garden maintenance services including seasonal care, pruning, fertilization, pest control, and regular upkeep to keep your garden flourishing.",
-        url: 'https://www.gardensewa.com/services/20.jpg'
+        url: require('../assets/images/20.jpg')
 
     },
     {
@@ -75,7 +75,7 @@ export const services = [
         category: "Maintenance & Care",
         label: "Top",
         description: "Professional lawn maintenance including mowing, edging, fertilizing, and regular upkeep to keep your grass healthy and green year-round.",
-        url: 'https://www.gardensewa.com/services/1.jpg'
+        url: require('../assets/images/9.jpg')
 
     },
     {
@@ -84,7 +84,7 @@ export const services = [
         category: "Maintenance & Care",
         label: "Featured",
         description: "Comprehensive care for flowering plants including planting, pruning, fertilizing, pest management, and seasonal flower arrangement services to keep your garden vibrant.",
-        url: 'https://www.gardensewa.com/services/18.jpg'
+        url: require('../assets/images/18.jpg')
     },
     {
         id: 18,
@@ -92,7 +92,7 @@ export const services = [
         category: "Maintenance & Care",
         label: "Featured",
         description: "Professional tree pruning, trimming, and safe removal services to maintain tree health, improve appearance, and eliminate hazardous or damaged trees from your property.",
-        url: 'https://www.gardensewa.com/services/14.jpg'
+        url: require('../assets/images/14.jpg')
 
     },
     {
@@ -101,7 +101,7 @@ export const services = [
         category: "Maintenance & Care",
         label: "Trending",
         description: "Short-term gardening solutions for events, seasonal displays, or temporary landscaping projects, including plant setup, maintenance, and removal services.",
-        url: 'https://www.gardensewa.com/services/17.jpg'
+        url: require('../assets/images/17.jpg')
 
     },
     {
@@ -110,7 +110,7 @@ export const services = [
         category: "Maintenance & Care",
         label: "Featured",
         description: "Season-specific maintenance including spring cleanups, fall leaf removal, winter preparation, and holiday decoration services.",
-        url: 'https://www.gardensewa.com/services/8.jpg'
+        url: require('../assets/images/8.jpg')
 
     },
 
@@ -121,7 +121,7 @@ export const services = [
         category: "Plant & Soil Health",
         label: "Top",
         description: "Expert planting services for trees, shrubs, flowers, and vegetables, including transplanting existing plants to new locations for optimal growth.",
-        url: 'https://www.gardensewa.com/services/2.jpg'
+        url: require('../assets/images/2.jpg')
 
     },
     {
@@ -130,7 +130,7 @@ export const services = [
         category: "Plant & Soil Health",
         label: "Featured",
         description: "Soil testing, amendment, and preparation services to ensure optimal growing conditions for all your plants and landscaping projects.",
-        url: 'https://www.gardensewa.com/services/4.jpg'
+        url: require('../assets/images/4.jpg')
 
     },
     {
@@ -139,7 +139,7 @@ export const services = [
         category: "Plant & Soil Health",
         label: "Featured",
         description: "Premium soil blends, compost, fertilizers, and soil amendments to nourish your plants and improve growing conditions.",
-        url: 'https://www.gardensewa.com/services/12.jpg'
+        url: require('../assets/images/12.jpg')
 
     },
     {
@@ -148,7 +148,7 @@ export const services = [
         category: "Plant & Soil Health",
         label: "Top",
         description: "Installation, repair, and maintenance of irrigation systems including sprinklers and drip systems to ensure efficient water distribution.",
-        url: 'https://www.gardensewa.com/services/5.jpg'
+        url: require('../assets/images/5.jpg')
 
     },
     {
@@ -157,7 +157,7 @@ export const services = [
         category: "Plant & Soil Health",
         label: "Featured",
         description: "Integrated pest management and disease prevention services to protect your plants and maintain a healthy landscape environment.",
-        url: 'https://www.gardensewa.com/services/6.jpg'
+        url: require('../assets/images/6.jpg')
 
     },
     {
@@ -166,7 +166,7 @@ export const services = [
         category: "Plant & Soil Health",
         label: "Trending",
         description: "Professional plant propagation services including seed starting, cutting propagation, and grafting to expand your plant collection.",
-        url: 'https://www.gardensewa.com/services/11.jpg'
+        url: require('../assets/images/11.jpg')
 
     },
     {
@@ -175,7 +175,7 @@ export const services = [
         category: "Plant & Soil Health",
         label: "Trending",
         description: "Wide selection of quality trees for sale including shade trees, ornamental trees, and fruit trees with expert advice on selection and care.",
-        url: 'https://www.gardensewa.com/services/10.jpg'
+        url: require('../assets/images/10.jpg')
 
     },
 
@@ -186,7 +186,7 @@ export const services = [
         category: "Expert Advice",
         label: "Top",
         description: "Expert consultation on landscape planning, plant selection, garden design, and maintenance strategies for optimal results.",
-        url: 'https://www.gardensewa.com/services/13.jpg'
+        url: require('../assets/images/13.jpg')
 
     }
 ];

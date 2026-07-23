@@ -1,15 +1,22 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Image, Pressable, StyleSheet, Text, View, } from 'react-native';
 
-const ServiceStack = ({ imageSource, description, title }) => {
+const ServiceStack = ({ id, imageSource, description, title }) => {
+    const router = useRouter()
+
     return (
-        <View style={styles.container}>
-            <View style={styles.imageContainer}>
+        <Pressable
+            style={styles.container}
+            onPress={()=>router.push(`./services/${id}`)
+            }
+        >
+            <Pressable style={styles.imageContainer}>
                 <Image
-                    source={{ uri: imageSource }}
+                    source={imageSource}
                     style={styles.image}
                     resizeMode="cover"
                 />
-            </View>
+            </Pressable>
             <View style={styles.textContainer}>
                 <Text style={styles.titleText} numberOfLines={1}>
                     {title}
@@ -18,7 +25,7 @@ const ServiceStack = ({ imageSource, description, title }) => {
                     {description}
                 </Text>
             </View>
-        </View>
+        </Pressable>
     );
 };
 

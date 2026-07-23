@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
-const ServiceCard = ({ id, imageSource, title, description, cardWidth }) => {
+const PairServiceCard = ({ id, imageSource, title, description, cardWidth }) => {
 
     const router = useRouter()
     console.log()
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     },
     image: {
         width: '100%',
-        height: 80,
+        height: 100,
         aspectRatio:16/9
     },
     textContainer: {
@@ -61,4 +61,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ServiceCard;
+export default PairServiceCard;

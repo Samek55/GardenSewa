@@ -1,7 +1,12 @@
-import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from "react-native";
-import ServiceCard from "../../components/ServiceCard";
-import ServiceStack from "../../components/ServiceStack";
-import { services } from "../../data/servicesList";
+import { useRouter } from 'expo-router';
+import {
+    Dimensions, Image,
+    Pressable,
+    ScrollView, StyleSheet, Text, View
+} from "react-native";
+import PairServiceCard from "../../../components/PairServiceCard";
+import ServiceStack from "../../../components/ServiceStack";
+import { services } from "../../../data/servicesList";
 
 const { width } = Dimensions.get('window');
 
@@ -10,6 +15,9 @@ const PAIR_CARD_WIDTH = (width - 36 - 12) / 2;
 const FULL_WIDTH_CARD = width - 36;
 
 export default function Services() {
+
+    const router = useRouter()
+
     return (
         <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
             <View style={styles.heroContainer}>
@@ -29,6 +37,7 @@ export default function Services() {
                 <View style={styles.stackList}>
                     {services?.filter((service) => service.label === "Top").slice(0, 2).map((service, key) => (
                         <ServiceStack
+                            id={String(service.id)}
                             key={key}
                             description={service.description}
                             title={service.title}
@@ -42,7 +51,8 @@ export default function Services() {
                 <Text style={styles.sectionHeading}>Trending Services</Text>
                 <View style={styles.gridContainer}>
                     {services?.filter((service) => service.label === "Trending").slice(0, 4).map((service, key) => (
-                        <ServiceCard
+                        <PairServiceCard
+                            id={String(service.id)}
                             key={key}
                             cardWidth={TRENDING_CARD_WIDTH}
                             description={service.description}
@@ -61,9 +71,14 @@ export default function Services() {
 
                         if (isFullWidthPosition) {
                             return (
-                                <View key={service.id || index} style={styles.fullWidthCardContainer}>
+                                <Pressable
+                                    id={String(service.id)}
+                                    key={service.id || index}
+                                    style={styles.fullWidthCardContainer}
+                                    onPress={() => router.push(`/services/${service.id}`)}
+                                >
                                     <Image
-                                        source={{ uri: service.url }}
+                                        source={service.url}
                                         style={styles.fullWidthCardImage}
                                     />
                                     <View style={styles.fullWidthCardOverlay}>
@@ -72,13 +87,14 @@ export default function Services() {
                                             {service.description}
                                         </Text>
                                     </View>
-                                </View>
+                                </Pressable>
                             );
                         }
 
                         return (
-                            <ServiceCard
+                            <PairServiceCard
                                 key={service.id || index}
+                                id={service.id}
                                 cardWidth={PAIR_CARD_WIDTH}
                                 title={service.title}
                                 imageSource={service.url}
@@ -172,7 +188,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.45)',
-        alignItems:'center',
+        alignItems: 'center',
         justifyContent: 'center',
         padding: 16,
     },

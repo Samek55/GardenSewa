@@ -1,5 +1,5 @@
-import Ionicons from '@expo/vector-icons/Ionicons'
-import { Tabs } from 'expo-router'
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { router, Tabs } from 'expo-router';
 
 const TabLayout = () => {
     return (
@@ -24,10 +24,16 @@ const TabLayout = () => {
             </Tabs.Screen>
             <Tabs.Screen
                 name="services"
+                listeners={({ navigation }) => ({
+                    tabPress: (e) => {
+                        router.replace('/services');
+                    },
+                })}
                 options={{
+                    headerShown: false,
                     title: "Services",
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons size={24} color="black" name={focused ? 'construct-outline' : 'construct-outline'} />
+                        <Ionicons size={24} color="black" name="construct-outline" />
                     )
                 }}
             />
