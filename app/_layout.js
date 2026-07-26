@@ -22,7 +22,7 @@ export default function RootLayout() {
       } finally {
         setIsAppReady(true);
         await SplashScreen.hideAsync();
-        setIsAdVisible(true); 
+        setIsAdVisible(true);
       }
     }
 
@@ -122,11 +122,7 @@ export default function RootLayout() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.adContainer}>
-            <Pressable style={styles.closeButton} onPress={() => setIsAdVisible(false)}>
-              <Ionicons name="close" size={20} color="#333" />
-            </Pressable>
-
-            <PopUpAd />
+            <PopUpAd onClose={() => setIsAdVisible(false)} />
           </View>
         </View>
       </Modal>
@@ -158,12 +154,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 4,
   },
   adContainer: {
     backgroundColor: 'white',
     borderRadius: 16,
-    padding: 20,
+    paddingHorizontal: 12,
+    paddingTop:12,
+    paddingBottom:24,
     width: '90%',
     position: 'relative',
     elevation: 5,

@@ -1,4 +1,4 @@
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import {
     Alert,
     Dimensions,
@@ -26,7 +26,7 @@ const TOP_CARD_WIDTH = (width - 36 - 2 - 24 - 10) / 2.6;
 export default function Index() {
 
     const onWhatsappOpen = async () => {
-        const phoneNumber = "9852024365";
+        const phoneNumber = "+ 977 9852024365";
         const message = "Hello! I am looking for a gardening service";
         const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
         try {
@@ -41,8 +41,15 @@ export default function Index() {
         }
     };
 
+
+
     const [phone, setPhone] = useState('')
+    
     const filteredServicesTop = services.filter(service => service.label === 'Top');
+
+    const formattedPhoneValue = phone.length === 10
+        ? `${phone.slice(0, 5)} ${phone.slice(5, 7)} ${phone.slice(7, 10)}`
+        : phone;
 
     return (
         <View style={styles.screenContainer}>
@@ -68,19 +75,24 @@ export default function Index() {
                             placeholder="Enter your phone number"
                             placeholderTextColor="#999"
                             keyboardType="phone-pad"
-                            value={phone}
-                            onChangeText={setPhone}
+                            value={formattedPhoneValue}
+                            maxLength={12}
+                            onChangeText={(text) => {
+                                const numericOnly = text.replace(/[^0-9]/g, '');
+                                setPhone(numericOnly);
+                            }}
+
                         />
                         <Pressable
                             style={styles.helpButton}
                             onPress={() => {
-                                Alert.alert('Confirm Help Request', `Send a help request from +977 ${phone}?Our team will contact you shortly`, [
+                                Alert.alert('Confirm Help Request', `Send a help request from +977 ${phone}? \nOur team will contact you shortly`, [
                                     {
                                         text: 'CANCEL',
                                         onPress: () => console.log('Cancel Pressed'),
                                         style: 'cancel',
                                     },
-                                    { text: 'CONFIRM', onPress: () => {onWhatsappOpen()} },
+                                    { text: 'CONFIRM', onPress: () => { onWhatsappOpen() } },
                                 ])
                             }}
                         >
@@ -90,7 +102,7 @@ export default function Index() {
                 </View>
             </View>
 
-            <View style={styles.popularCardContainer}>
+            <Pressable style={styles.popularCardContainer} onPress={() => router.replace(`/services/${5}`)}>
                 <Image
                     source={require('../../assets/images/lawn.jpg')}
                     style={styles.backgroundImage}
@@ -104,11 +116,11 @@ export default function Index() {
                     <View style={styles.tagContainer}>
                         <Text style={styles.tagText}>Most Popular</Text>
                     </View>
-                    <Text style={styles.cardTitle}>Lawn Maintenance</Text>
-                    <Text style={styles.cardSubTitle}>Professional lawn maintenance service</Text>
+                    <Text style={styles.cardTitle}>Lawn Care</Text>
+                    <Text style={styles.cardSubTitle}>Professional lawn care service</Text>
                 </View>
 
-            </View>
+            </Pressable>
 
             <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Top Services</Text>

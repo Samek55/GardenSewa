@@ -113,7 +113,7 @@ export default function JoinProfessional() {
         initialValues: {
             name: '',
             phone: '',
-            gender: '',
+            gender: 'Male',
             email: '',
             category: '',
             yearsExperience: '',
@@ -147,7 +147,7 @@ export default function JoinProfessional() {
                 allowsEditing: true,
                 // aspect: [1, 1],
                 quality: 1,
-                selectionLimit:5
+                selectionLimit: 5
             });
 
             if (!result.canceled) {
@@ -277,7 +277,7 @@ export default function JoinProfessional() {
                 {/* Email Address */}
                 <View style={styles.individualContainer}>
                     <Text style={styles.label}>
-                        eMail Address 
+                        eMail Address
                     </Text>
                     <TextInput
                         style={styles.textInput}
@@ -291,10 +291,10 @@ export default function JoinProfessional() {
 
                 {/* Category Dropdown */}
                 <CustomDropdown
-                    label="Your Experience"
+                    label="Your Expertise"
                     required
                     value={formik.values.category}
-                    placeholder="Select a service"
+                    placeholder="Select a service expertise "
                     data={categories}
                     isOpen={activeDropdown === 'category'}
                     onToggle={() => toggleDropdown('category')}
@@ -357,19 +357,28 @@ export default function JoinProfessional() {
                 />
 
                 {/* Area */}
-                <CustomDropdown
-                    label="Area"
-                    required
-                    value={formik.values.area}
-                    placeholder={formik.values.city ? 'Choose an Area' : 'Select a city first'}
-                    data={availableAreas}
-                    isOpen={activeDropdown === 'area'}
-                    onToggle={() => toggleDropdown('area')}
-                    onSelect={(val) => {
-                        formik.setFieldValue('area', val);
-                        setActiveDropdown(null);
-                    }}
-                />
+                {
+                    formik.values.city ? <CustomDropdown
+                        label="Area"
+                        required
+                        value={formik.values.area}
+                        placeholder={formik.values.city ? 'Choose an Area' : 'Select a city first'}
+                        data={availableAreas}
+                        isOpen={activeDropdown === 'area'}
+                        onToggle={() => toggleDropdown('area')}
+                        onSelect={(val) => {
+                            formik.setFieldValue('area', val);
+                            setActiveDropdown(null);
+                        }}
+                    /> : <View>
+                        <Text style={styles.label}>
+                            Area <Text style={styles.asterisk}>*</Text>
+                        </Text>
+                        <Text style={{ color: '#151212', fontSize: 12, fontStyle: 'italic', marginVertical: 8 }}>
+                            Please select a city first.
+                        </Text>
+                    </View>
+                }
 
                 {/* Emergency Phone Number */}
                 <View style={styles.individualContainer}>

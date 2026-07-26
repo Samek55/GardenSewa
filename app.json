@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Garden Sewa",
+    "name": "GardenSewa",
     "slug": "gardensewa",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,7 +11,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.pratigyaluitel.gardensewa",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "LSApplicationQueriesSchemes": ["whatsapp"]
       }
     },
     "android": {
@@ -37,6 +38,17 @@
           "backgroundColor": "#ffffff",
           "dark": {
             "backgroundColor": "#ffffff"
+          }
+        }
+      ],
+      "expo-asset",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "manifestQueries": {
+              "package": ["com.whatsapp"]
+            }
           }
         }
       ]

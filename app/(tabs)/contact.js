@@ -79,7 +79,7 @@ const Contact = () => {
 
             <View style={styles.sectionTextContainer}>
                 <Text style={styles.sectionTitle}>Garden Sewa</Text>
-                <Text style={styles.sectionSubtitle}>Express Garden Service</Text>
+                <Text style={styles.sectionSubtitle}>Professional Gardening Services in Nepal</Text>
             </View>
 
             <View style={styles.listContainer}>

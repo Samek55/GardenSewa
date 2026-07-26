@@ -33,8 +33,10 @@ const ServiceIndividual = () => {
 
             <View style={styles.buttonContainer}>
                 <Pressable
-                    style={styles.button}
-                    onPress={() => router.push('/book')}
+                    style={styles.button} onPress={() => router.push({
+                        pathname: '/book',
+                        params: { serviceName: service.title }
+                    })} 
                 >
                     <Text style={styles.buttonText}>Book This Service</Text>
                 </Pressable>
@@ -83,9 +85,9 @@ const styles = StyleSheet.create({
         paddingBottom: 40,
     },
     buttonContainer: {
-        flex:1,
-        alignItems:'center',
-        justifyContent:'center'
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     notFound: {
         flex: 1,
@@ -120,10 +122,10 @@ const styles = StyleSheet.create({
     },
 
     button: {
-        width:'50%',
-        height:50,
-        alignItems:'center',
-        justifyContent:'center',
+        width: '50%',
+        height: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: '#245d5a',
         paddingVertical: 10,
         paddingHorizontal: 20,

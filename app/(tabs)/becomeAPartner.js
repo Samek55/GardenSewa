@@ -19,7 +19,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { boolean, object, string } from 'yup';
 
 import {
-    categories as businessType,
+    businessType,
     cityData,
     partnershipData,
     serviceOfferedData,
@@ -139,7 +139,7 @@ export default function PartnerBook() {
                 return;
             }
             if (selectedCertificates.length === 0) {
-                Alert.alert('Validation Error', 'Please upload Company Registration Certificate');
+                Alert.alert('Validation Error', 'Please upload Registration Documents');
                 return;
             }
 
@@ -304,7 +304,7 @@ export default function PartnerBook() {
                 {/* Company Photos */}
                 <View style={styles.individualContainer}>
                     <Text style={styles.label}>
-                        Company Photos (up to 5) <Text style={styles.asterisk}>*</Text>
+                        Company Photos ( Upto 5 ) <Text style={styles.asterisk}>*</Text>
                     </Text>
                     <View style={[styles.imagePickerContainer, selectedCompanyImages.length > 0 && styles.solidBorder]}>
                         {selectedCompanyImages.length > 0 &&
@@ -405,10 +405,10 @@ export default function PartnerBook() {
                     }}
                 />
 
-                {/* Company Registration Certificate */}
+                {/* Registration Documents */}
                 <View style={styles.individualContainer}>
                     <Text style={styles.label}>
-                        Company Registration Certificate (up to 5) <Text style={styles.asterisk}>*</Text>
+                        Registration Documents ( Upto 5 ) <Text style={styles.asterisk}>*</Text>
                     </Text>
                     <View style={[styles.imagePickerContainer, selectedCertificates.length > 0 && styles.solidBorder]}>
                         {selectedCertificates.length > 0 &&

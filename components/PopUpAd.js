@@ -1,8 +1,9 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const PopUpAd = () => {
+const PopUpAd = ({ onClose }) => {
     const [seconds, setSeconds] = useState(10);
 
     useEffect(() => {
@@ -23,11 +24,15 @@ const PopUpAd = () => {
                     style={styles.adImage}
                     resizeMode="cover" 
                 />
-                <View style={styles.badge}>
-                    <Text style={styles.badgeText}>
-                        {seconds > 0 ? `${seconds}s` : 'Offer Ending!'}
-                    </Text>
-                </View>
+                {seconds > 0 ? (
+                    <View style={styles.badge}>
+                        <Text style={styles.badgeText}>{seconds}s</Text>
+                    </View>
+                ) : (
+                    <TouchableOpacity style={styles.closeBadge} onPress={onClose}>
+                        <Ionicons name="close" size={18} color="#FFF" />
+                    </TouchableOpacity>
+                )}
             </View>
 
             <Text style={styles.title}>Flat 20% discount off Landscape Lighting</Text>
@@ -37,7 +42,10 @@ const PopUpAd = () => {
 
             <TouchableOpacity 
                 style={styles.button}
-                onPress={() => router.push(`/services/${19}`)}
+                onPress={() => {
+                    onClose?.();
+                    router.push(`/services/${19}`);
+                }}
             >
                 <Text style={styles.buttonText}>View More</Text>
             </TouchableOpacity>
@@ -50,11 +58,11 @@ export default PopUpAd;
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
-        paddingTop: 8,
+        // padding: 1,
     },
     imageWrapper: {
         width: '100%',
-        height: 300, 
+        aspectRatio:1/1,
         borderRadius: 12,
         overflow: 'hidden',
         position: 'relative',
@@ -67,11 +75,26 @@ const styles = StyleSheet.create({
     badge: {
         position: 'absolute',
         top: 8,
-        left: 8,
+        right: 8,
         backgroundColor: 'rgba(34, 87, 84, 0.9)',
         paddingHorizontal: 10,
         paddingVertical: 4,
-        borderRadius: 12,
+        width:40,
+        height:40,
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    closeBadge: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     badgeText: {
         color: '#FFF',

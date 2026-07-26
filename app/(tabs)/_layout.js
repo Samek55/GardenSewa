@@ -115,6 +115,13 @@ const TabLayout = () => {
                     href: null
                 }}
             />
+            <Tabs.Screen
+                name="phoneVerification"
+                options={{
+                    title: "Phone Verification",
+                    href: null
+                }}
+            />
 
         </Tabs>
     )

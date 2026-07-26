@@ -191,7 +191,7 @@ export const services = [
     }
 ];
 
-export const categories = [
+export const businessType = [
     {
         id: 1,
         title: "Design & Installation",
@@ -213,7 +213,138 @@ export const categories = [
         url: 'https://images.unsplash.com/photo-1668120089662-42642838cfef?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
     },
 
-]
+];
+
+export const categories = [
+
+    {
+        id: 1,
+        title: "Landscape Design",
+        url: require('../assets/images/9.jpg')
+    },
+    {
+        id: 2,
+        title: "Rooftop Gardening",
+
+        url: require('../assets/images/19.jpg')
+    },
+    {
+        id: 3,
+        title: "Hardscaping",
+        url: require('../assets/images/7.jpg')
+    },
+    {
+        id: 4,
+        title: "Landscape Lighting",
+        url: require('../assets/images/15.jpg')
+    },
+    {
+        id: 5,
+        title: "Artificial Gardening",
+        url: require('../assets/images/21.jpg')
+    },
+    {
+        id: 6,
+        title: "Turfing Service",
+        url: require('../assets/images/16.jpg')
+
+    },
+
+    // Maintenance & Care
+    {
+        id: 7,
+        title: "Garden Maintenance",
+        url: require('../assets/images/3.jpg')
+
+    },
+    {
+        id: 8,
+        title: "Yearly Garden Maintenance",
+        url: require('../assets/images/20.jpg')
+
+    },
+    {
+        id: 9,
+        title: "Lawn Care",
+        url: require('../assets/images/9.jpg')
+
+    },
+    {
+        id: 10,
+        title: "Flower Maintenance",
+        url: require('../assets/images/18.jpg')
+    },
+    {
+        id: 11,
+        title: "Tree Pruning & Removal",
+        url: require('../assets/images/14.jpg')
+
+    },
+    {
+        id: 12,
+        title: "Temporary Gardening",
+        url: require('../assets/images/17.jpg')
+
+    },
+    {
+        id: 13,
+        title: "Seasonal Services",
+        url: require('../assets/images/8.jpg')
+
+    },
+
+    // Plant & Soil Health
+    {
+        id: 14,
+        title: "Planting and Transplanting",
+        url: require('../assets/images/2.jpg')
+
+    },
+    {
+        id: 15,
+        title: "Soil Improvement",
+        url: require('../assets/images/4.jpg')
+
+    },
+    {
+        id: 16,
+        title: "Soil and Fertilizers",
+        url: require('../assets/images/12.jpg')
+
+    },
+    {
+        id: 17,
+        title: "Irrigation Services",
+        url: require('../assets/images/5.jpg')
+
+    },
+    {
+        id: 18,
+        title: "Pest and Disease Control",
+        url: require('../assets/images/6.jpg')
+
+    },
+    {
+        id: 19,
+        title: "Plant Propagation",
+        url: require('../assets/images/11.jpg')
+
+    },
+    {
+        id: 20,
+        title: "Tree Sales",
+        url: require('../assets/images/10.jpg')
+
+    },
+
+    // Expert Advice
+    {
+        id: 21,
+        title: "Consultation Services",
+        url: require('../assets/images/13.jpg')
+
+    }
+];
 
 
 export const serviceOfferedData = [
@@ -503,7 +634,7 @@ export const sourceData = [
     },
     {
         id: 3,
-        title: "Friends/Family"
+        title: "Friends/ Family"
     },
     {
         id: 4,

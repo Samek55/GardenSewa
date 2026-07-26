@@ -1,8 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useFormik } from 'formik';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
 import {
     Alert,
     Image,
@@ -104,6 +105,11 @@ const CustomDropdown = ({ label, value, placeholder, data, isOpen, onToggle, onS
 };
 
 export default function Book() {
+
+    const params = useLocalSearchParams();
+
+    const [routePhone, setRoutePhone]=useState('')
+
     const [selectedImages, setSelectedImages] = useState([]);
     const [showSummary, setShowSummary] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState(null);
@@ -133,13 +139,19 @@ export default function Book() {
         },
     });
 
+    useEffect(() => {
+        if (params?.serviceName) {
+            formik.setFieldValue('service', params.serviceName);
+        }
+    }, [params?.serviceName]);
+
     const handleImagePick = async () => {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ['images'],
-                allowsEditing: true, 
+                allowsEditing: true,
                 quality: 1,
-                selectionLimit:5
+                selectionLimit: 5
             });
 
             if (!result.canceled) {
@@ -356,19 +368,28 @@ export default function Book() {
                     />
 
                     {/* Area */}
-                    <CustomDropdown
-                        label="Area"
-                        required
-                        value={formik.values.area}
-                        placeholder={formik.values.city ? 'Choose an Area' : 'Select a city first'}
-                        data={availableAreas}
-                        isOpen={activeDropdown === 'area'}
-                        onToggle={() => toggleDropdown('area')}
-                        onSelect={(val) => {
-                            formik.setFieldValue('area', val);
-                            setActiveDropdown(null);
-                        }}
-                    />
+                    {
+                        formik.values.city ? <CustomDropdown
+                            label="Area"
+                            required
+                            value={formik.values.area}
+                            placeholder={formik.values.city ? 'Choose an Area' : 'Select a city first'}
+                            data={availableAreas}
+                            isOpen={activeDropdown === 'area'}
+                            onToggle={() => toggleDropdown('area')}
+                            onSelect={(val) => {
+                                formik.setFieldValue('area', val);
+                                setActiveDropdown(null);
+                            }}
+                        /> : <View>
+                            <Text style={styles.label}>
+                                Area <Text style={styles.asterisk}>*</Text>
+                            </Text>
+                            <Text style={{ color: '#151212', fontSize: 12, fontStyle: 'italic', marginVertical: 8 }}>
+                                Please select a city first.
+                            </Text>
+                        </View>
+                    }
 
                     {/* Priority */}
                     <CustomDropdown
@@ -483,10 +504,15 @@ export default function Book() {
                     message={formik.values.message}
                     onBack={() => setShowSummary(false)}
                     onConfirm={() => {
+                        setRoutePhone(formik.values.phone)
                         formik.resetForm();
                         setSelectedImages([]);
                         setShowSummary(false);
                         Alert.alert("Success", "Your booking has been confirmed!");
+                        router.push({
+                            pathname: '/phoneVerification',
+                            params: { phone: `${routePhone}` },
+                        });
                     }}
                 />
             )}
