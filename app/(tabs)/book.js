@@ -1,160 +1,184 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { Calendar } from 'react-native-calendars';
-import { budgetData, categories, cityData, priorityData, shiftsData } from "../../data/servicesList";
-
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
+import { useFormik } from 'formik';
+import { useState } from 'react';
+import {
+    Alert,
+    Image,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { Calendar } from 'react-native-calendars';
 import { NP } from 'react-native-country-flag-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { areasByCity } from "../../data/Data";
+import { boolean, object, string } from 'yup';
+
+import BookingSummaryCard from '../../components/BookingSummaryCard';
+import { areasByCity } from '../../data/Data';
+import { budgetData, categories, cityData, priorityData, shiftsData } from '../../data/servicesList';
+
+const today = new Date().toISOString().split('T')[0];
+
+const validationSchema = object({
+    name: string().required('Full Name is required').min(3, 'Name too short'),
+    phone: string().required('Phone number is required').min(10, 'Invalid phone number'),
+    service: string().required('Service is required'),
+    startDate: string().required('Start date is required'),
+    endDate: string().required('End date is required'),
+    preferredTime: string().required('Time is required'),
+    city: string().required('City is required'),
+    area: string().required('Area is required'),
+    priority: string().required('Priority is required'),
+    budget: string().required('Budget is required'),
+    terms: boolean().isTrue('Must accept terms and conditions'),
+});
+
+const CustomDropdown = ({ label, value, placeholder, data, isOpen, onToggle, onSelect, required = false }) => {
+    const [query, setQuery] = useState('');
+
+    const filteredData = data.filter((item) =>
+        (item.name || item.title || item).toLowerCase().includes(query.toLowerCase())
+    );
+
+    return (
+        <View style={styles.individualContainer}>
+            <Text style={styles.label}>
+                {label} {required && <Text style={styles.asterisk}>*</Text>}
+            </Text>
+            <TouchableOpacity style={styles.dropdownTrigger} activeOpacity={0.8} onPress={onToggle}>
+                <Text style={[styles.triggerText, !value && styles.placeholderText]}>
+                    {value || placeholder}
+                </Text>
+                <Ionicons name={isOpen ? 'chevron-up' : 'chevron-down'} size={20} color="#666" />
+            </TouchableOpacity>
+
+            {isOpen && (
+                <View style={styles.dropdownContainer}>
+                    <View style={styles.searchBarContainer}>
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder={`Search ${label.toLowerCase()}...`}
+                            value={query}
+                            onChangeText={setQuery}
+                        />
+                        {query.length > 0 && (
+                            <TouchableOpacity onPress={() => setQuery('')}>
+                                <Ionicons name="close-circle" size={18} color="#999" />
+                            </TouchableOpacity>
+                        )}
+                    </View>
+
+                    <ScrollView style={styles.itemsList} nestedScrollEnabled >
+                        {filteredData.length > 0 ? (
+                            filteredData.map((item, idx) => {
+                                const itemLabel = item.name || item.title || item;
+                                return (
+                                    <TouchableOpacity
+                                        key={item.id || idx}
+                                        style={styles.dropdownItem}
+                                        onPress={() => {
+                                            onSelect(itemLabel);
+                                            setQuery('');
+                                        }}
+                                    >
+                                        <Text style={styles.dropdownItemText}>{itemLabel}</Text>
+                                    </TouchableOpacity>
+                                );
+                            })
+                        ) : (
+                            <View style={styles.noResultsContainer}>
+                                <Text style={styles.noResultsText}>No items found</Text>
+                            </View>
+                        )}
+                    </ScrollView>
+                </View>
+            )}
+        </View>
+    );
+};
 
 export default function Book() {
+    const [selectedImages, setSelectedImages] = useState([]);
+    const [showSummary, setShowSummary] = useState(false);
+    const [activeDropdown, setActiveDropdown] = useState(null);
 
-    const [selectedImages, setSelectedImages] = useState('')
-    console.log(selectedImages)
+    const toggleDropdown = (name) => {
+        setActiveDropdown((prev) => (prev === name ? null : name));
+    };
 
-    async function handleImagePick() {
+    const formik = useFormik({
+        initialValues: {
+            name: '',
+            phone: '',
+            service: '',
+            startDate: '',
+            endDate: '',
+            preferredTime: '',
+            city: '',
+            area: '',
+            priority: '',
+            budget: '',
+            message: '',
+            terms: false,
+        },
+        validationSchema,
+        onSubmit: () => {
+            setShowSummary(true);
+        },
+    });
+
+    const handleImagePick = async () => {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ['images'],
-                allowsMultipleSelection: true,
-                allowsEditing: false,
+                allowsEditing: true, 
                 quality: 1,
-                selectionLimit: 5
+                selectionLimit:5
             });
-            console.log(result)
 
             if (!result.canceled) {
-
-                setSelectedImages(result.assets)
-                console.log(result)
-            } else {
-                alert("You did not select any image")
+                setSelectedImages((prev) => [...prev, ...result.assets].slice(0, 5));
             }
-
         } catch (error) {
-            console.log(error)
-
+            console.error('ImagePicker Error:', error);
         }
-
-    }
-
-    const [name, setName] = useState('');
-    const [phone, setPhone] = useState('');
-    const [selectedArea, setSelectedArea] = useState('');
-    const [message, setMessage] = useState('');
-
-    const [isAccepted, setIsAccepted] = useState(false);
-
-    const [selectedCategory, setSelectedCategory] = useState('');
-    const [selectedShift, setSelectedShift] = useState('');
-    const [selectedCity, setSelectedCity] = useState('');
-    const [selectedPriority, setSelectedPriority] = useState('');
-    const [selectedBudget, setSelectedBudget] = useState('');
-
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchShiftQuery, setSearchShiftQuery] = useState('')
-    const [searchCityQuery, setSearchCityQuery] = useState('')
-    const [searchPriorityQuery, setSearchPriorityQuery] = useState('')
-    const [searchBudgetQuery, setSearchBudgetQuery] = useState('')
-    const [searchAreaQuery, setSearchAreaQuery] = useState('')
-
-    const [isOpenDropdown, setIsOpenDropdown] = useState(false);
-    const [isOpenDropDownShift, setIsOpenDropdownShift] = useState(false);
-    const [isOpenDropdownCity, setIsOpenDropdownCity] = useState(false);
-    const [isOpenDropdownPriority, setIsOpenDropdownPriority] = useState(false);
-    const [isOpenDropdownBudget, setIsOpenDropdownBudget] = useState(false);
-    const [isOpenDropdownArea, setIsOpenDropdownArea] = useState(false);
-
-    const [isOpenStartCalendar, setIsOpenStartCalendar] = useState(false);
-    const [isOpenEndCalendar, setIsOpenEndCalendar] = useState(false);
-
-    const [startDate, setStartDate] = useState('')
-    const [endDate, setEndDate] = useState('')
-
-    const filteredCategories = categories?.filter(service =>
-        service.title.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [];
-
-    const areaByCityNew = (selectedCity && areasByCity[selectedCity]) || [];
-    console.log(areaByCityNew)
-
-    const filteredShiftsData = shiftsData?.filter(shift =>
-        shift.name.toLowerCase().includes(searchShiftQuery?.toLowerCase())
-    )
-
-    const filteredCityData = cityData.filter(city => city.name.toLowerCase().includes(searchCityQuery.toLowerCase()))
-
-    const filteredAreaData = areaByCityNew.filter((areaName) =>
-        areaName.toLowerCase().includes(searchAreaQuery.toLowerCase())
-    );
-
-    const filteredPriorityData = priorityData.filter(priority => priority.name.toLowerCase().includes(searchPriorityQuery.toLowerCase()))
-
-    const filteredBudgetData = budgetData.filter(budget => budget.name.toLowerCase().includes(searchPriorityQuery.toLowerCase()))
-
-    console.log(filteredShiftsData)
-
-    const handleSelectCategory = (title) => {
-        setSelectedCategory(title);
-        setSearchQuery('');
-        setIsOpenDropdown(false);
     };
 
-    const handleSelectShift = (name) => {
-        setSelectedShift(name);
-        setSearchShiftQuery('');
-        setIsOpenDropdownShift(false);
-    };
-
-    const handleSelectCity = (name) => {
-        setSelectedCity(name);
-        setSearchCityQuery('');
-        setIsOpenDropdownCity(false);
-    };
-
-    const handleSelectPriority = (name) => {
-        setSelectedPriority(name);
-        setSearchPriorityQuery('');
-        setIsOpenDropdownPriority(false);
-    }
-
-    const handleSelectArea = (name) => {
-        setSelectedArea(name);
-        setSearchAreaQuery('');
-        setIsOpenDropdownArea(false);
-    }
-
-    const handleSelectBudget = (name) => {
-        setSelectedBudget(name);
-        setSearchBudgetQuery('');
-        setIsOpenDropdownBudget(false);
-    }
     const handleImageDelete = (indexToDelete) => {
-        setSelectedImages((prevImages) =>
-            prevImages.filter((_, index) => index !== indexToDelete)
-        );
-    }
+        setSelectedImages((prev) => prev.filter((_, index) => index !== indexToDelete));
+    };
 
     const handleClearForm = () => {
-        // setArea('');
-        setEndDate('');
-        setStartDate('')
-        setIsAccepted(false)
-        setName('')
-        setPhone('')
-        setMessage('')
-        setSelectedBudget('')
-        setSelectedCategory('')
-        setSelectedCity('')
-        setSelectedImages('')
-        setSelectedPriority('')
-        setSelectedShift('')
-        setSelectedArea('')
+        formik.resetForm();
+        setSelectedImages([]);
+        setActiveDropdown(null);
+    };
 
-    }
+    const handleSubmitWithValidation = async () => {
+        const errors = await formik.validateForm();
+        const fieldOrder = [
+            'name', 'phone', 'service', 'startDate',
+            'endDate', 'preferredTime', 'city', 'area',
+            'priority', 'budget', 'terms'
+        ];
+
+        const firstError = fieldOrder.find((field) => errors[field]);
+
+        if (firstError) {
+            formik.setTouched({ [firstError]: true });
+            Alert.alert('Validation Error', errors[firstError]);
+        } else {
+            formik.handleSubmit();
+        }
+    };
+
+    const availableAreas = formik.values.city ? areasByCity[formik.values.city] || [] : [];
 
     return (
         <KeyboardAwareScrollView
@@ -162,665 +186,361 @@ export default function Book() {
             contentContainerStyle={styles.container}
             keyboardShouldPersistTaps="handled"
             enableOnAndroid={true}
-            extraScrollHeight={30}
-            extraHeight={100}
+            extraScrollHeight={120}
+            enableAutomaticScroll={true}
             showsVerticalScrollIndicator={false}
         >
-            {/* <ScrollView style={styles.scrollview} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled"> */}
-            <Text style={styles.headerText}>Book Service</Text>
-            <View style={styles.formContainer}>
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Full name</Text>
-                    <TextInput
-                        style={styles.textInput}
-                        placeholder="Enter your full name"
-                        value={name}
-                        onChangeText={setName}
-                    />
-                </View>
+            {!showSummary ? (
+                <View style={styles.formContainer}>
+                    <Text style={styles.headerText}>Book Service</Text>
 
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Phone Number</Text>
-                    <View style={styles.phoneInputContainer}>
-                        <NP
-                            width={30}
-                            height={20}
-                            style={styles.flagIcon}
-                        />
+                    {/* Full Name */}
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>
+                            Full Name <Text style={styles.asterisk}>*</Text>
+                        </Text>
                         <TextInput
-                            style={styles.flexInput}
-                            placeholder="Enter your phone number"
-                            value={phone}
-                            onChangeText={setPhone}
-                            keyboardType="phone-pad"
-                            numberOfLines={8}
+                            style={styles.textInput}
+                            placeholder="Enter your full name"
+                            value={formik.values.name}
+                            onChangeText={formik.handleChange('name')}
                         />
                     </View>
-                </View>
 
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Select Service</Text>
-
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenDropdown(!isOpenDropdown)}
-                    >
-                        <Text style={[styles.triggerText, !selectedCategory && styles.placeholderText]}>
-                            {selectedCategory || "Select a service"}
+                    {/* Phone Number */}
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>
+                            Phone Number <Text style={styles.asterisk}>*</Text>
                         </Text>
-                        <Ionicons
-                            name={isOpenDropdown ? "chevron-up" : "chevron-down"}
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenDropdown && (
-                        <View style={styles.dropdownContainer}>
-                            <View style={styles.searchBarContainer}>
-                                <TextInput
-                                    style={styles.searchInput}
-                                    placeholder="Search for services..."
-                                    value={searchQuery}
-                                    onChangeText={setSearchQuery}
-                                    autoFocus={true}
-                                />
-                                {searchQuery?.length > 0 && (
-                                    <TouchableOpacity onPress={() => setSearchQuery('')}>
-                                        <Ionicons name="close-circle" size={18} color="#999" />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-
-                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
-                                {filteredCategories?.length > 0 ? (
-                                    filteredCategories?.map((service, index) => (
-                                        <TouchableOpacity
-                                            key={service.id || index}
-                                            style={styles.dropdownItem}
-                                            onPress={() => handleSelectCategory(service.title)}
-                                        >
-                                            <Text style={styles.dropdownItemText}>{service.title}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                ) : (
-                                    <View style={styles.noResultsContainer}>
-                                        <Text style={styles.noResultsText}>No services found</Text>
-                                    </View>
-                                )}
-                            </ScrollView>
+                        <View style={styles.phoneInputContainer}>
+                            <NP width={30} height={20} style={styles.flagIcon} />
+                            <TextInput
+                                style={styles.flexInput}
+                                placeholder="Enter your phone number"
+                                value={formik.values.phone}
+                                onChangeText={formik.handleChange('phone')}
+                                keyboardType="phone-pad"
+                            />
                         </View>
-                    )}
-                </View>
+                    </View>
 
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Choose Date</Text>
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenStartCalendar(!isOpenStartCalendar)}
-                    >
-                        <Text style={[styles.triggerText, !startDate && styles.placeholderText]}>
-                            {startDate || "Select Date"}
-                        </Text>
-                        <Ionicons
-                            name="calendar-clear-outline"
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenStartCalendar && (
-                        <Calendar
-                            onDayPress={day => {
-                                setStartDate(day.dateString);
-                                setIsOpenStartCalendar(false);
-                            }}
-                            markedDates={{
-                                [startDate]: { selected: true, selectedColor: '#245d5a' }
-                            }}
-                            theme={{
-                                todayTextColor: '#245d5a',
-                                arrowColor: '#245d5a',
-                            }}
-                        />
-                    )}
-                </View>
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Service Ending Date</Text>
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenEndCalendar(!isOpenEndCalendar)}
-                    >
-                        <Text style={[styles.triggerText, !endDate && styles.placeholderText]}>
-                            {endDate || "Select Date"}
-                        </Text>
-                        <Ionicons
-                            name="calendar-clear-outline"
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenEndCalendar && (
-                        <Calendar
-                            onDayPress={day => {
-                                setEndDate(day.dateString);
-                                setIsOpenEndCalendar(false);
-                            }}
-                            markedDates={{
-                                [endDate]: { selected: true, selectedColor: '#245d5a' }
-                            }}
-                            theme={{
-                                todayTextColor: '#245d5a',
-                                arrowColor: '#245d5a',
-                            }}
-                        />
-                    )}
-                </View>
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Preferred Time</Text>
-
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenDropdownShift(!isOpenDropDownShift)}
-                    >
-                        <Text style={[styles.triggerText, !selectedShift && styles.placeholderText]}>
-                            {selectedShift || "Choose a shift"}
-                        </Text>
-                        <Ionicons
-                            name={isOpenDropDownShift ? "time-outline" : "time-sharp"}
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenDropDownShift && (
-                        <View style={styles.dropdownContainer}>
-                            <View style={styles.searchBarContainer}>
-                                <TextInput
-                                    style={styles.searchInput}
-                                    placeholder="Search for shifts..."
-                                    value={searchShiftQuery}
-                                    onChangeText={setSearchShiftQuery}
-                                    autoFocus={true}
-                                />
-                                {searchShiftQuery?.length > 0 && (
-                                    <TouchableOpacity onPress={() => setSearchShiftQuery('')}>
-                                        <Ionicons name="close-circle" size={18} color="#999" />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-
-                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
-                                {filteredShiftsData?.length > 0 ? (
-                                    filteredShiftsData?.map((shift, index) => (
-                                        <TouchableOpacity
-                                            key={shift.id || index}
-                                            style={styles.dropdownItem}
-                                            onPress={() => handleSelectShift(shift.name)}
-
-                                        >
-                                            <Text style={styles.dropdownItemText}>{shift.name}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                ) : (
-                                    <View style={styles.noResultsContainer}>
-                                        <Text style={styles.noResultsText}>No shifts found</Text>
-                                    </View>
-                                )}
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>City</Text>
-
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenDropdownCity(!isOpenDropdownCity)}
-                    >
-                        <Text style={[styles.triggerText, !selectedCity && styles.placeholderText]}>
-                            {selectedCity || "Choose a city"}
-                        </Text>
-                        <Ionicons
-                            name={isOpenDropdownCity ? "chevron-up" : "chevron-down"}
-
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenDropdownCity && (
-                        <View style={styles.dropdownContainer}>
-                            <View style={styles.searchBarContainer}>
-                                <TextInput
-                                    style={styles.searchInput}
-                                    placeholder="Search for cities..."
-                                    value={searchCityQuery}
-                                    onChangeText={setSearchCityQuery}
-                                    autoFocus={true}
-                                />
-                                {searchCityQuery?.length > 0 && (
-                                    <TouchableOpacity onPress={() => setSearchCityQuery('')}>
-                                        <Ionicons name="close-circle" size={18} color="#999" />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-
-                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
-                                {filteredCityData?.length > 0 ? (
-                                    filteredCityData?.map((city, index) => (
-                                        <TouchableOpacity
-                                            key={city.id || index}
-                                            style={styles.dropdownItem}
-                                            onPress={() => handleSelectCity(city.name)}
-
-                                        >
-                                            <Text style={styles.dropdownItemText}>{city.name}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                ) : (
-                                    <View style={styles.noResultsContainer}>
-                                        <Text style={styles.noResultsText}>No cities found</Text>
-                                    </View>
-                                )}
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-
-                {/* <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Area</Text>
-                    {selectedCity ? <TextInput
-                        style={styles.textInput}
-                        placeholder="Enter your area"
-                        value={area}
-                        onChangeText={setArea}
-                    /> : <TextInput
-                        style={styles.textInput}
-                        placeholder="Please select a city first"
-                        editable={false}
+                    {/* Service Dropdown */}
+                    <CustomDropdown
+                        label="Select Service"
+                        required
+                        value={formik.values.service}
+                        placeholder="Select a service"
+                        data={categories}
+                        isOpen={activeDropdown === 'service'}
+                        onToggle={() => toggleDropdown('service')}
+                        onSelect={(val) => {
+                            formik.setFieldValue('service', val);
+                            setActiveDropdown(null);
+                        }}
                     />
-                    }
-                </View> */}
 
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Area</Text>
-
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenDropdownArea(!isOpenDropdownArea)}
-                    >
-                        <Text style={[styles.triggerText, !selectedArea && styles.placeholderText]}>
-                            {selectedArea || "Choose an Area"}
+                    {/* Start Date */}
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>
+                            Choose Date <Text style={styles.asterisk}>*</Text>
                         </Text>
-                        <Ionicons
-                            name={isOpenDropdownArea ? "chevron-up" : "chevron-down"}
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.dropdownTrigger}
+                            onPress={() => toggleDropdown('startDate')}
+                        >
+                            <Text style={[styles.triggerText, !formik.values.startDate && styles.placeholderText]}>
+                                {formik.values.startDate || 'Select Date'}
+                            </Text>
+                            <Ionicons name="calendar-clear-outline" size={20} color="#666" />
+                        </TouchableOpacity>
 
-                    {isOpenDropdownArea && (
-                        <View style={styles.dropdownContainer}>
-                            <View style={styles.searchBarContainer}>
-                                <TextInput
-                                    style={styles.searchInput}
-                                    placeholder="Search for area..."
-                                    value={searchAreaQuery}
-                                    onChangeText={setSearchAreaQuery}
-                                    autoFocus={true}
-                                />
-                                {searchAreaQuery?.length > 0 && (
-                                    <TouchableOpacity onPress={() => setSearchAreaQuery('')}>
-                                        <Ionicons name="close-circle" size={18} color="#999" />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-
-                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
-                                {filteredAreaData?.length > 0 ? (
-                                    filteredAreaData.map((areaName, index) => (
-                                        <TouchableOpacity
-                                            key={index}
-                                            style={styles.dropdownItem}
-                                            onPress={() => handleSelectArea(areaName)}
-                                        >
-                                            <Text style={styles.dropdownItemText}>{areaName}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                ) : (
-                                    <View style={styles.noResultsContainer}>
-                                        <Text style={styles.noResultsText}>
-                                            {selectedCity ? "No area found" : "Please select a city first"}
-                                        </Text>
-                                    </View>
-                                )}
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Priority</Text>
-
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenDropdownPriority(!isOpenDropdownPriority)}
-                    >
-                        <Text style={[styles.triggerText, !selectedPriority && styles.placeholderText]}>
-                            {selectedPriority || "Choose a Priority"}
-                        </Text>
-                        <Ionicons
-                            name={isOpenDropdownPriority ? "chevron-up" : "chevron-down"}
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenDropdownPriority && (
-                        <View style={styles.dropdownContainer}>
-                            <View style={styles.searchBarContainer}>
-                                <TextInput
-                                    style={styles.searchInput}
-                                    placeholder="Search for priorities..."
-                                    value={searchPriorityQuery}
-                                    onChangeText={setSearchPriorityQuery}
-                                    autoFocus={true}
-                                />
-                                {searchBudgetQuery?.length > 0 && (
-                                    <TouchableOpacity onPress={() => setSearchPriorityQuery('')}>
-                                        <Ionicons name="close-circle" size={18} color="#999" />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-
-                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
-                                {filteredPriorityData?.length > 0 ? (
-                                    filteredPriorityData?.map((priority, index) => (
-                                        <TouchableOpacity
-                                            key={priority.id || index}
-                                            style={styles.dropdownItem}
-                                            onPress={() => handleSelectPriority(priority.name)}
-
-                                        >
-                                            <Text style={styles.dropdownItemText}>{priority.name}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                ) : (
-                                    <View style={styles.noResultsContainer}>
-                                        <Text style={styles.noResultsText}>No priority found</Text>
-                                    </View>
-                                )}
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Budget</Text>
-
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsOpenDropdownBudget(!isOpenDropdownBudget)}
-                    >
-                        <Text style={[styles.triggerText, !selectedBudget && styles.placeholderText]}>
-                            {selectedBudget || "Choose a Budget"}
-                        </Text>
-                        <Ionicons
-                            name={isOpenDropdownBudget ? "chevron-up" : "chevron-down"}
-                            size={20}
-                            color="#666"
-                        />
-                    </TouchableOpacity>
-
-                    {isOpenDropdownBudget && (
-                        <View style={styles.dropdownContainer}>
-                            <View style={styles.searchBarContainer}>
-                                <TextInput
-                                    style={styles.searchInput}
-                                    placeholder="Search for budgets..."
-                                    value={searchBudgetQuery}
-                                    onChangeText={setSearchBudgetQuery}
-                                    autoFocus={true}
-                                />
-                                {searchBudgetQuery?.length > 0 && (
-                                    <TouchableOpacity onPress={() => setSearchBudgetQuery('')}>
-                                        <Ionicons name="close-circle" size={18} color="#999" />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-
-                            <ScrollView style={styles.itemsList} nestedScrollEnabled={true}>
-                                {filteredBudgetData?.length > 0 ? (
-                                    filteredBudgetData?.map((budget, index) => (
-                                        <TouchableOpacity
-                                            key={budget.id || index}
-                                            style={styles.dropdownItem}
-                                            onPress={() => handleSelectBudget(budget.name)}
-
-                                        >
-                                            <Text style={styles.dropdownItemText}>{budget.name}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                ) : (
-                                    <View style={styles.noResultsContainer}>
-                                        <Text style={styles.noResultsText}>No budget found</Text>
-                                    </View>
-                                )}
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-                <View style={styles.individualContainer}>
-                </View>
-                <Text style={styles.label}>Upload Photos (up to 5)</Text>
-
-                <View style={[
-                    styles.individualContainer,
-                    {
-                        borderStyle: selectedImages && selectedImages.length > 0 ? 'solid' : 'dashed',
-                        borderWidth: 1.5,
-                        borderColor: 'black',
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        height: 140,
-                        borderRadius: 4,
-                        flexDirection: 'row',
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        gap: 10
-                    }
-                ]}>
-
-                    {selectedImages && selectedImages.length > 0 ? (
-                        selectedImages.map((selectedImage, index) => (
-                            <View
-                                key={index}
-                                style={{
-                                    width: 45,
-                                    height: '100%',
-                                    position: 'relative',
-                                    borderRadius: 4,
-                                    overflow: 'hidden'
+                        {activeDropdown === 'startDate' && (
+                            <Calendar
+                                minDate={today}
+                                onDayPress={(day) => {
+                                    formik.setFieldValue('startDate', day.dateString);
+                                    if (formik.values.endDate && day.dateString > formik.values.endDate) {
+                                        formik.setFieldValue('endDate', day.dateString);
+                                    }
+                                    setActiveDropdown(null);
                                 }}
-                            >
-                                <Image
-                                    source={{ uri: selectedImage.uri }}
-                                    style={{ width: '100%', height: '100%', borderRadius: 4 }}
-                                    resizeMode="cover"
-                                />
-
-                                <Pressable
-                                    onPress={() => handleImageDelete(index)}
-                                    style={{
-                                        position: 'absolute',
-                                        top: 4,
-                                        right: 4,
-                                        backgroundColor: 'rgba(0,0,0,0.6)',
-                                        borderRadius: 12,
-                                        padding: 4,
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}
-                                >
-                                    <Ionicons name='trash' size={16} color="white" />
-                                </Pressable>
-                            </View>
-                        ))
-                    ) : (
-                        <Pressable
-                            onPress={handleImagePick}
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}
-                        >
-                            <Ionicons name='arrow-down-circle-outline' size={32} color="black" />
-                            <Text style={{ marginTop: 4 }}>Drop file/photos here</Text>
-                        </Pressable>
-                    )}
-                </View>
-
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Message</Text>
-
-                    <TextInput
-                        style={[styles.textInput], {
-                            height: 100,
-                            borderColor: '#ecdbdb',
-                            borderWidth: 1,
-                            padding: 8
-                        }}
-                        multiline={true}
-                        // autoFocus={true}
-                        placeholder="Enter your message"
-                        value={message}
-                        onChangeText={setMessage}
-                    />
-                </View>
-
-                {/* Accept Terms  */}
-                <View style={styles.checkboxContainer}>
-                    <Pressable
-                        onPress={() => setIsAccepted(!isAccepted)}
-                        style={styles.checkbox}
-                    >
-                        {isAccepted ? (
-                            <Ionicons name="checkbox" size={24} color="#245d5a" />
-                        ) : (
-                            <Ionicons name="square-outline" size={24} color="#666" />
+                                markedDates={{
+                                    [today]: {
+                                        selected: true,
+                                        selectedColor: '#245d5a',
+                                        selectedTextColor: '#ffffff',
+                                    },
+                                    ...(formik.values.startDate && {
+                                        [formik.values.startDate]: {
+                                            selected: true,
+                                            selectedColor: '#245d5a',
+                                            selectedTextColor: '#ffffff',
+                                        },
+                                    }),
+                                }}
+                                theme={{ todayTextColor: '#245d5a', arrowColor: '#245d5a' }}
+                            />
                         )}
-                    </Pressable>
-                    <Text style={styles.checkboxLabel}>
-                        I accept the{' '}
-                        <Text
-                            style={styles.hyperlink}
-                            onPress={() => router.push('./terms')}
-                        >
-                            Terms and Conditions
+                    </View>
+
+                    {/* End Date */}
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>
+                            Service Ending Date <Text style={styles.asterisk}>*</Text>
                         </Text>
-                    </Text>
-                </View>
+                        <TouchableOpacity
+                            style={styles.dropdownTrigger}
+                            onPress={() => toggleDropdown('endDate')}
+                        >
+                            <Text style={[styles.triggerText, !formik.values.endDate && styles.placeholderText]}>
+                                {formik.values.endDate || 'Select Date'}
+                            </Text>
+                            <Ionicons name="calendar-clear-outline" size={20} color="#666" />
+                        </TouchableOpacity>
 
-                {/* Buttons */}
-                <View style={styles.bottomContainer}>
-                    <View style={{
-                        flexDirection: "row",
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        width: '50%',
-                        gap: 2,
-
-                    }}
-
-                    >
-                        <Ionicons name='refresh' style={{
-                            width: "16%",
-                            height: 'auto',
-                            paddingVertical: 12
-                        }} />
-                        <Pressable onPress={handleClearForm}>
-                            <Text style={[styles.label]}>Clear Form</Text>
-                        </Pressable>
+                        {activeDropdown === 'endDate' && (
+                            <Calendar
+                                minDate={formik.values.startDate || today}
+                                onDayPress={(day) => {
+                                    formik.setFieldValue('endDate', day.dateString);
+                                    setActiveDropdown(null);
+                                }}
+                                markedDates={{
+                                    [today]: {
+                                        selected: true,
+                                        selectedColor: '#245d5a',
+                                        selectedTextColor: '#ffffff',
+                                    },
+                                    ...(formik.values.endDate && {
+                                        [formik.values.endDate]: {
+                                            selected: true,
+                                            selectedColor: '#245d5a',
+                                            selectedTextColor: '#ffffff',
+                                        },
+                                    }),
+                                }}
+                                theme={{ todayTextColor: '#245d5a', arrowColor: '#245d5a' }}
+                            />
+                        )}
                     </View>
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: "#245d5a",
-                            gap: 2,
-                            width: '50%',
-                            marginHorizontal: 'auto',
-                            borderRadius: 12,
-                            height: 44
+
+                    {/* Preferred Time */}
+                    <CustomDropdown
+                        label="Preferred Time"
+                        required
+                        value={formik.values.preferredTime}
+                        placeholder="Choose a shift"
+                        data={shiftsData}
+                        isOpen={activeDropdown === 'preferredTime'}
+                        onToggle={() => toggleDropdown('preferredTime')}
+                        onSelect={(val) => {
+                            formik.setFieldValue('preferredTime', val);
+                            setActiveDropdown(null);
                         }}
-                    >
+                    />
 
-                        <Text style={[styles.label], {
-                            color: '#fff',
+                    {/* City */}
+                    <CustomDropdown
+                        label="City"
+                        required
+                        value={formik.values.city}
+                        placeholder="Choose a city"
+                        data={cityData}
+                        isOpen={activeDropdown === 'city'}
+                        onToggle={() => toggleDropdown('city')}
+                        onSelect={(val) => {
+                            formik.setFieldValue('city', val);
+                            formik.setFieldValue('area', '');
+                            setActiveDropdown(null);
+                        }}
+                    />
 
-                        }}>Submit</Text>
+                    {/* Area */}
+                    <CustomDropdown
+                        label="Area"
+                        required
+                        value={formik.values.area}
+                        placeholder={formik.values.city ? 'Choose an Area' : 'Select a city first'}
+                        data={availableAreas}
+                        isOpen={activeDropdown === 'area'}
+                        onToggle={() => toggleDropdown('area')}
+                        onSelect={(val) => {
+                            formik.setFieldValue('area', val);
+                            setActiveDropdown(null);
+                        }}
+                    />
+
+                    {/* Priority */}
+                    <CustomDropdown
+                        label="Priority"
+                        required
+                        value={formik.values.priority}
+                        placeholder="Choose Priority"
+                        data={priorityData}
+                        isOpen={activeDropdown === 'priority'}
+                        onToggle={() => toggleDropdown('priority')}
+                        onSelect={(val) => {
+                            formik.setFieldValue('priority', val);
+                            setActiveDropdown(null);
+                        }}
+                    />
+
+                    {/* Budget */}
+                    <CustomDropdown
+                        label="Budget"
+                        required
+                        value={formik.values.budget}
+                        placeholder="Choose Budget"
+                        data={budgetData}
+                        isOpen={activeDropdown === 'budget'}
+                        onToggle={() => toggleDropdown('budget')}
+                        onSelect={(val) => {
+                            formik.setFieldValue('budget', val);
+                            setActiveDropdown(null);
+                        }}
+                    />
+
+                    {/* Image Picker */}
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>Upload Photos (up to 5)</Text>
+                        <View style={[styles.imagePickerContainer, selectedImages.length > 0 && styles.solidBorder]}>
+                            {selectedImages.length > 0 ? (
+                                selectedImages.map((img, index) => (
+                                    <View key={img.uri || index} style={styles.imageWrapper}>
+                                        <Image source={{ uri: img.uri }} style={styles.imagePreview} />
+                                        <Pressable style={styles.deleteButton} onPress={() => handleImageDelete(index)}>
+                                            <Ionicons name="trash" size={14} color="white" />
+                                        </Pressable>
+                                    </View>
+                                ))
+                            ) : null}
+                            {selectedImages.length < 5 && (
+                                <Pressable
+                                    style={selectedImages.length > 0 ? styles.smallAddButton : styles.imagePlaceholder}
+                                    onPress={handleImagePick}
+                                >
+                                    <Ionicons name="arrow-down-circle-outline" size={32} color="black" />
+                                    {selectedImages.length === 0 && <Text style={{ marginTop: 4 }}>Drop file/photos here</Text>}
+                                </Pressable>
+                            )}
+                        </View>
+                    </View>
+
+                    {/* Message Area */}
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>Message</Text>
+                        <TextInput
+                            style={[styles.textInput, styles.textArea]}
+                            multiline
+                            placeholder="Enter your message"
+                            value={formik.values.message}
+                            onChangeText={formik.handleChange('message')}
+                        />
+                    </View>
+
+                    {/* Terms & Conditions */}
+                    <View style={styles.checkboxContainer}>
+                        <Pressable onPress={() => formik.setFieldValue('terms', !formik.values.terms)}>
+                            <Ionicons
+                                name={formik.values.terms ? 'checkbox' : 'square-outline'}
+                                size={24}
+                                color={formik.values.terms ? '#245d5a' : '#666'}
+                            />
+                        </Pressable>
+                        <Text style={styles.checkboxLabel}>
+                            I accept the{' '}
+                            <Text style={styles.hyperlink} onPress={() => router.push('./terms')}>
+                                Terms and Conditions
+                            </Text>{' '}
+                            <Text style={styles.asterisk}>*</Text>
+                        </Text>
+                    </View>
+
+                    {/* Action Buttons */}
+                    <View style={styles.bottomContainer}>
+                        <TouchableOpacity style={styles.clearButton} onPress={handleClearForm}>
+                            <Ionicons name="refresh" size={18} color="#333" />
+                            <Text style={styles.label}>Clear Form</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.submitButton} onPress={handleSubmitWithValidation}>
+                            <Text style={styles.submitButtonText}>Submit</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
-            </View>
-            {/* </ScrollView> */}
-
+            ) : (
+                <BookingSummaryCard
+                    name={formik.values.name}
+                    phone={formik.values.phone}
+                    service={formik.values.service}
+                    startDate={formik.values.startDate}
+                    endDate={formik.values.endDate}
+                    preferredTime={formik.values.preferredTime}
+                    city={formik.values.city}
+                    area={formik.values.area}
+                    priority={formik.values.priority}
+                    budget={formik.values.budget}
+                    message={formik.values.message}
+                    onBack={() => setShowSummary(false)}
+                    onConfirm={() => {
+                        formik.resetForm();
+                        setSelectedImages([]);
+                        setShowSummary(false);
+                        Alert.alert("Success", "Your booking has been confirmed!");
+                    }}
+                />
+            )}
         </KeyboardAwareScrollView>
-
     );
 }
 
 const styles = StyleSheet.create({
     scrollview: {
         flex: 1,
-        backgroundColor: '#245d5a'
+        backgroundColor: '#245d5a',
     },
     container: {
         paddingHorizontal: 16,
-        paddingVertical: 16
+        paddingVertical: 16,
+        paddingBottom: 26,
     },
     headerText: {
         fontSize: 28,
         fontWeight: 'bold',
-        color: '#fff',
-        marginBottom: 8
+        marginBottom: 8,
     },
     formContainer: {
         width: '100%',
         backgroundColor: '#fff',
         borderRadius: 12,
         padding: 16,
-        gap: 16
+        gap: 16,
+        marginBottom: 10,
     },
     individualContainer: {
         width: '100%',
         gap: 6,
-        zIndex: 10,
     },
     label: {
         fontWeight: '500',
-        color: '#333'
+        color: '#333',
+    },
+    asterisk: {
+        color: '#d9534f',
+        fontWeight: 'bold',
     },
     textInput: {
         width: '100%',
         borderColor: '#ccc',
         borderWidth: 1,
         borderRadius: 6,
-        padding: 10,
+        paddingHorizontal: 10,
         height: 44,
+    },
+    textArea: {
+        height: 100,
+        paddingVertical: 8,
+        textAlignVertical: 'top',
     },
     phoneInputContainer: {
         flexDirection: 'row',
@@ -837,9 +557,7 @@ const styles = StyleSheet.create({
     flexInput: {
         flex: 1,
         height: '100%',
-        paddingVertical: 0,
     },
-
     dropdownTrigger: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -865,11 +583,6 @@ const styles = StyleSheet.create({
         marginTop: 4,
         backgroundColor: '#fff',
         maxHeight: 250,
-        overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
         elevation: 3,
     },
     searchBarContainer: {
@@ -881,22 +594,15 @@ const styles = StyleSheet.create({
         height: 40,
         backgroundColor: '#f9f9f9',
     },
-    searchIcon: {
-        marginRight: 6,
-    },
     searchInput: {
         flex: 1,
         height: '100%',
         fontSize: 14,
-        paddingVertical: 0,
     },
     itemsList: {
         maxHeight: 200,
     },
     dropdownItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
         paddingVertical: 12,
         paddingHorizontal: 12,
         borderBottomWidth: 1,
@@ -914,19 +620,59 @@ const styles = StyleSheet.create({
         color: '#999',
         fontSize: 14,
     },
-    bottomContainer: {
-        flex: 1,
-        flexDirection: 'row'
+    imagePickerContainer: {
+        borderStyle: 'dashed',
+        borderWidth: 1.5,
+        borderColor: '#000',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        minHeight: 120,
+        borderRadius: 6,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        padding: 8,
+        gap: 8,
+    },
+    solidBorder: {
+        borderStyle: 'solid',
+    },
+    imageWrapper: {
+        width: 60,
+        height: 60,
+        borderRadius: 4,
+        overflow: 'hidden',
+    },
+    imagePreview: {
+        width: '100%',
+        height: '100%',
+    },
+    deleteButton: {
+        position: 'absolute',
+        top: 2,
+        right: 2,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        borderRadius: 10,
+        padding: 2,
+    },
+    imagePlaceholder: {
+        width: '100%',
+        height: 100,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    smallAddButton: {
+        width: 60,
+        height: 60,
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     checkboxContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 8,
         gap: 10,
-    },
-    checkbox: {
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     checkboxLabel: {
         fontSize: 14,
@@ -938,10 +684,28 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
         fontWeight: '600',
     },
-    // bottomContainer: {
-    //     flexDirection: 'row',
-    //     alignItems: 'center',
-    //     justifyContent: 'space-between',
-    //     marginTop: 10,
-    // }
+    bottomContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginTop: 10,
+        marginBottom: 10,
+    },
+    clearButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    submitButton: {
+        backgroundColor: '#245d5a',
+        borderRadius: 12,
+        height: 44,
+        width: '45%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    submitButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
 });

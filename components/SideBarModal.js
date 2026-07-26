@@ -194,12 +194,13 @@ const styles = StyleSheet.create({
     },
     adminLoginButton: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
         gap: 8,
         backgroundColor: '#245d5a',
         paddingVertical: 12,
         borderRadius: 14,
+        width:'70%'
     },
     adminButtonText: {
         color: '#FFFFFF',

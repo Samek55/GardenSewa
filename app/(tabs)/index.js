@@ -4,6 +4,7 @@ import {
     Dimensions,
     FlatList,
     Image,
+    Linking,
     Pressable,
     StyleSheet,
     Text,
@@ -23,6 +24,22 @@ const TOP_CARD_WIDTH = (width - 36 - 2 - 24 - 10) / 2.6;
 
 
 export default function Index() {
+
+    const onWhatsappOpen = async () => {
+        const phoneNumber = "9852024365";
+        const message = "Hello! I am looking for a gardening service";
+        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        try {
+            const supported = await Linking.canOpenURL(url);
+            if (supported) {
+                await Linking.openURL(url);
+            } else {
+                Alert.alert("Error", "WhatsApp is not installed on this device");
+            }
+        } catch (error) {
+            console.error("An error occurred", error);
+        }
+    };
 
     const [phone, setPhone] = useState('')
     const filteredServicesTop = services.filter(service => service.label === 'Top');
@@ -63,7 +80,7 @@ export default function Index() {
                                         onPress: () => console.log('Cancel Pressed'),
                                         style: 'cancel',
                                     },
-                                    { text: 'CONFIRM', onPress: () => console.log('OK Pressed') },
+                                    { text: 'CONFIRM', onPress: () => {onWhatsappOpen()} },
                                 ])
                             }}
                         >
@@ -154,7 +171,7 @@ const styles = StyleSheet.create({
     title: {
         color: '#FFFFFF',
         fontWeight: 'bold',
-        fontSize: width * 0.08,
+        fontSize: width * 0.07,
         lineHeight: width * 0.095,
     },
     subTitle: {
@@ -245,7 +262,7 @@ const styles = StyleSheet.create({
     ratingTitle: {
         color: '#FFFFFF',
         fontWeight: 'bold',
-        fontSize: 16,
+        fontSize: 12,
     },
     cardSubTitle: {
         color: '#F0F0F0',

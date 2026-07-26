@@ -28,7 +28,7 @@ export default function Services() {
                 />
                 <View style={styles.overlay}>
                     <Text style={styles.title}>SuperFast Services</Text>
-                    <Text style={styles.subTitle}>Express Gardening Service</Text>
+                    <Text style={styles.subTitle}>Professional gardening services in Nepal</Text>
                 </View>
             </View>
 

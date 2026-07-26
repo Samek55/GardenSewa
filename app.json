@@ -4,7 +4,7 @@
     "slug": "gardensewa",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/splash-icon-actual.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "gardensewa",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -16,7 +16,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/splash-icon-actual.png",
+        "foregroundImage": "./assets/images/adaptive-foreground.png",
         "backgroundColor": "#ffffff"
       },
       "predictiveBackGestureEnabled": false,
@@ -24,7 +24,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/splash-icon-actual.png"
+      "favicon": "./assets/images/icon.png"
     },
     "plugins": [
       "expo-router",
@@ -32,11 +32,11 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon-actual.png",
-          "imageWidth": 180,
+          "imageWidth": 150,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
           "dark": {
-            "backgroundColor": "#121212"
+            "backgroundColor": "#ffffff"
           }
         }
       ]

@@ -5,7 +5,7 @@ export const services = [
         title: "Landscape Design",
         category: "Design & Installation",
         label: "Top",
-        description: "Professional landscape design and planning services to create beautiful, functional outdoor spaces tailored to your needs and preferences.",
+        description: "Garden Sewa provides professional landscape design services to create custom outdoor spaces in Nepal. We handle site analysis, 3D master planning, plant selection, and full execution for functional and breathtaking gardens.\n\nOur eco-friendly and sustainable practices ensure proper land utilization, optimal space planning, and long-term vitality for all outdoor environments.\n\nCustomized landscape design plans are tailored according to space dimensions, terrain, aesthetic preferences, and budget requirements to ensure the best results.",
         url: require('../assets/images/9.jpg')
     },
     {
@@ -13,7 +13,7 @@ export const services = [
         title: "Rooftop Gardening",
         category: "Design & Installation",
         label: "Trending",
-        description: "Design, installation, and maintenance of rooftop gardens including container planting, irrigation setup, and soil management to transform rooftops into green spaces.",
+        description: "Garden Sewa provides professional rooftop gardening services to create green spaces on any roof. We handle soil preparation, plant selection, irrigation, planting, and ongoing maintenance for vibrant and sustainable gardens.\n\nOur eco-friendly and sustainable practices improve air quality, reduce heat, and enhance the aesthetic and environmental value of your building.\n\nCustomized rooftop gardening plans are tailored according to roof structure, sunlight, plant preferences, and design requirements to ensure the best results.",
         url: require('../assets/images/19.jpg')
     },
     {
@@ -21,7 +21,7 @@ export const services = [
         title: "Hardscaping",
         category: "Design & Installation",
         label: "Featured",
-        description: "Installation of patios, walkways, retaining walls, stone features, and other non-living landscape elements to enhance outdoor spaces.",
+        description: "Garden Sewa provides professional hardscaping services to create structural non-living outdoor features in Nepal. We handle design, material selection, paving, stone pathways, retaining walls, and feature installations.\n\nOur durable and sustainable practices enhance functional living areas, prevent soil erosion, and seamlessly integrate hard features with natural greenery.\n\nCustomized hardscaping plans are tailored according to site topography, structural requirements, material choices, and design aesthetics to ensure the best results.",
         url: require('../assets/images/7.jpg')
     },
     {
@@ -29,7 +29,7 @@ export const services = [
         title: "Landscape Lighting",
         category: "Design & Installation",
         label: "Featured",
-        description: "Design and installation of outdoor landscape lighting including pathway lights, garden lighting, and accent illumination to enhance safety, beauty, and nighttime usability of your outdoor spaces.",
+        description: "Garden Sewa provides professional landscape lighting services to illuminate gardens and outdoor spaces in Nepal. We handle lighting design, fixture placement, wiring, energy-efficient setup, and routine checks.\n\nOur eco-friendly and sustainable practices improve nighttime visibility, elevate outdoor aesthetics, and use low-voltage LED solutions for safe operation.\n\nCustomized landscape lighting plans are tailored according to garden layout, focal points, safety needs, and ambient preferences to ensure the best results.",
         url: require('../assets/images/15.jpg')
     },
     {
@@ -37,7 +37,7 @@ export const services = [
         title: "Artificial Gardening",
         category: "Design & Installation",
         label: "Trending",
-        description: "Installation and maintenance of artificial plants, turf, and landscaping elements for low-maintenance, durable, and aesthetically pleasing green spaces.",
+        description: "Garden Sewa provides professional artificial gardening services to create low-maintenance green spaces in Nepal. We handle surface prep, synthetic turf laying, vertical green wall setups, and artificial plant arrangements.\n\nOur durable and sustainable practices offer year-round green appeal without requiring watering, pruning, or chemical treatments.\n\nCustomized artificial gardening plans are tailored according to space requirements, traffic levels, indoor/outdoor conditions, and design choices to ensure the best results.",
         url: require('../assets/images/21.jpg')
     },
     {
@@ -45,7 +45,7 @@ export const services = [
         title: "Turfing Service",
         category: "Design & Installation",
         label: "Featured",
-        description: "Professional turf installation and maintenance including laying new grass, repairing damaged turf, and ensuring a lush, healthy lawn for residential and commercial spaces.",
+        description: "Garden Sewa provides professional turfing services to establish healthy, lush lawns in Nepal. We handle soil levelling, organic enrichment, turf laying, roll compaction, and initial lawn care.\n\nOur eco-friendly and sustainable practices promote fast root establishment, soil stabilization, and a uniform green lawn surface.\n\nCustomized turfing plans are tailored according to soil conditions, lawn usage, grass species preference, and environmental factors to ensure the best results.",
         url: require('../assets/images/16.jpg')
 
     },
@@ -56,7 +56,7 @@ export const services = [
         title: "Garden Maintenance",
         category: "Maintenance & Care",
         label: "Top",
-        description: "Comprehensive garden care including weeding, pruning, mulching, and seasonal maintenance to keep your garden flourishing throughout the year.",
+        description: "Garden Sewa offers comprehensive garden maintenance services for residential and commercial gardens in Nepal. We provide care for lawns, flowers, shrubs, and trees, ensuring your outdoor space remains vibrant and healthy throughout the year.\n\nOur services include watering, fertilization, pruning, pest control, and seasonal adjustments. We also offer customized plans for specific plants, soil types, and environmental conditions.\n\nWhether you have a small garden, rooftop greenery, or a large landscape, our garden maintenance services combine professional expertise with eco-friendly practices to keep your garden thriving effortlessly.",
         url: require('../assets/images/3.jpg')
 
     },
@@ -65,7 +65,7 @@ export const services = [
         title: "Yearly Garden Maintenance",
         category: "Maintenance & Care",
         label: "Top",
-        description: "Comprehensive year-round garden maintenance services including seasonal care, pruning, fertilization, pest control, and regular upkeep to keep your garden flourishing.",
+        description: "Garden Sewa provides professional yearly garden maintenance services for year-round care in Nepal. We handle seasonal pruning, scheduled fertilization, lawn care, pest monitoring, and comprehensive garden upkeep.\n\nOur eco-friendly and sustainable practices preserve plant vitality across all four seasons while protecting the natural soil ecosystem.\n\nCustomized yearly garden maintenance plans are tailored according to plant varieties, garden scale, seasonal requirements, and client schedules to ensure the best results.",
         url: require('../assets/images/20.jpg')
 
     },
@@ -74,7 +74,7 @@ export const services = [
         title: "Lawn Care",
         category: "Maintenance & Care",
         label: "Top",
-        description: "Professional lawn maintenance including mowing, edging, fertilizing, and regular upkeep to keep your grass healthy and green year-round.",
+        description: "Garden Sewa provides professional lawn care services to maintain vibrant grass lawns in Nepal. We handle precision mowing, edging, weed removal, core aeration, and seasonal fertilization.\n\nOur eco-friendly and sustainable practices prevent weed infestations, encourage dense grass growth, and foster healthy root depth.\n\nCustomized lawn care plans are tailored according to grass type, shade exposure, turf condition, and foot traffic to ensure the best results.",
         url: require('../assets/images/9.jpg')
 
     },
@@ -83,7 +83,7 @@ export const services = [
         title: "Flower Maintenance",
         category: "Maintenance & Care",
         label: "Featured",
-        description: "Comprehensive care for flowering plants including planting, pruning, fertilizing, pest management, and seasonal flower arrangement services to keep your garden vibrant.",
+        description: "Garden Sewa provides professional flower maintenance services for vibrant flowering beds in Nepal. We handle deadheading, specialized blooming nutrition, watering, pest prevention, and seasonal rotation.\n\nOur eco-friendly and sustainable practices prolong blooming periods, prevent common plant diseases, and preserve flower health.\n\nCustomized flower maintenance plans are tailored according to flower species, blooming cycles, bed size, and soil conditions to ensure the best results.",
         url: require('../assets/images/18.jpg')
     },
     {
@@ -91,7 +91,7 @@ export const services = [
         title: "Tree Pruning & Removal",
         category: "Maintenance & Care",
         label: "Featured",
-        description: "Professional tree pruning, trimming, and safe removal services to maintain tree health, improve appearance, and eliminate hazardous or damaged trees from your property.",
+        description: "Garden Sewa provides professional tree pruning and removal services for property safety and health in Nepal. We handle branch trimming, canopy thinning, structural pruning, and controlled tree removal.\n\nOur safe and sustainable practices prevent hazards, encourage healthy new growth, and eliminate diseased or dangerous timber.\n\nCustomized tree pruning & removal plans are tailored according to tree height, species, proximity to structures, and health status to ensure the best results.",
         url: require('../assets/images/14.jpg')
 
     },
@@ -100,7 +100,7 @@ export const services = [
         title: "Temporary Gardening",
         category: "Maintenance & Care",
         label: "Trending",
-        description: "Short-term gardening solutions for events, seasonal displays, or temporary landscaping projects, including plant setup, maintenance, and removal services.",
+        description: "Garden Sewa provides professional temporary gardening services for short-term setups and events in Nepal. We handle potted plant rentals, temporary floral displays, event landscape styling, and post-event removal.\n\nOur flexible and sustainable practices deliver instant green aesthetics while ensuring plants remain healthy throughout your occasion.\n\nCustomized temporary gardening plans are tailored according to event duration, venue theme, space layout, and display requirements to ensure the best results.",
         url: require('../assets/images/17.jpg')
 
     },
@@ -109,7 +109,7 @@ export const services = [
         title: "Seasonal Services",
         category: "Maintenance & Care",
         label: "Featured",
-        description: "Season-specific maintenance including spring cleanups, fall leaf removal, winter preparation, and holiday decoration services.",
+        description: "Garden Sewa provides professional seasonal services to prepare gardens for seasonal shifts in Nepal. We handle spring cleanups, autumn leaf clearing, winter frost protection, and seasonal planting.\n\nOur proactive and eco-friendly practices protect sensitive plants, improve soil resilience, and keep gardens looking attractive year-round.\n\nCustomized seasonal service plans are tailored according to regional climate, garden maturity, plant types, and specific seasonal needs to ensure the best results.",
         url: require('../assets/images/8.jpg')
 
     },
@@ -120,7 +120,7 @@ export const services = [
         title: "Planting and Transplanting",
         category: "Plant & Soil Health",
         label: "Top",
-        description: "Expert planting services for trees, shrubs, flowers, and vegetables, including transplanting existing plants to new locations for optimal growth.",
+        description: "Garden Sewa provides professional planting and transplanting services for healthy plant growth in Nepal. We handle soil preparation, root ball treatment, delicate plant relocation, and post-transplant care.\n\nOur gentle and sustainable practices minimize transplant shock, enhance root attachment, and increase plant survival rates.\n\nCustomized planting and transplanting plans are tailored according to plant maturity, soil requirements, location conditions, and seasonal timing to ensure the best results.",
         url: require('../assets/images/2.jpg')
 
     },
@@ -129,7 +129,7 @@ export const services = [
         title: "Soil Improvement",
         category: "Plant & Soil Health",
         label: "Featured",
-        description: "Soil testing, amendment, and preparation services to ensure optimal growing conditions for all your plants and landscaping projects.",
+        description: "Garden Sewa provides professional soil improvement services to restore soil fertility in Nepal. We handle pH testing, organic amendment blending, aeration, composting, and soil conditioning.\n\nOur natural and eco-friendly practices rejuvenate degraded soil, increase nutrient retention, and improve overall soil biology.\n\nCustomized soil improvement plans are tailored according to existing soil composition, drainage characteristics, and intended plant varieties to ensure the best results.",
         url: require('../assets/images/4.jpg')
 
     },
@@ -138,7 +138,7 @@ export const services = [
         title: "Soil and Fertilizers",
         category: "Plant & Soil Health",
         label: "Featured",
-        description: "Premium soil blends, compost, fertilizers, and soil amendments to nourish your plants and improve growing conditions.",
+        description: "Garden Sewa provides professional soil and fertilizer application services for plant nutrition in Nepal. We handle supply and distribution of organic compost, soil mixes, macronutrients, and custom fertilization.\n\nOur eco-friendly and balanced practices prevent nutrient runoff, enrich root ecosystems, and ensure optimal plant vigor.\n\nCustomized soil and fertilizer plans are tailored according to crop/plant species, growth stage, soil deficiency analysis, and environmental safety to ensure the best results.",
         url: require('../assets/images/12.jpg')
 
     },
@@ -147,7 +147,7 @@ export const services = [
         title: "Irrigation Services",
         category: "Plant & Soil Health",
         label: "Top",
-        description: "Installation, repair, and maintenance of irrigation systems including sprinklers and drip systems to ensure efficient water distribution.",
+        description: "Garden Sewa provides professional irrigation services for efficient watering solutions in Nepal. We handle drip irrigation installation, sprinkler setup, line maintenance, and automated water management.\n\nOur water-saving and eco-friendly practices prevent water waste, reduce soil erosion, and deliver targeted hydration to plant roots.\n\nCustomized irrigation plans are tailored according to landscape layout, plant water requirements, water source availability, and budget parameters to ensure the best results.",
         url: require('../assets/images/5.jpg')
 
     },
@@ -156,7 +156,7 @@ export const services = [
         title: "Pest and Disease Control",
         category: "Plant & Soil Health",
         label: "Featured",
-        description: "Integrated pest management and disease prevention services to protect your plants and maintain a healthy landscape environment.",
+        description: "Garden Sewa provides professional pest and disease control services to safeguard plants in Nepal. We handle organic pest treatments, fungal infection control, preventive sprays, and integrated pest management.\n\nOur eco-friendly and non-toxic practices protect beneficial organisms, curb infestation outbreaks, and preserve plant safety.\n\nCustomized pest and disease control plans are tailored according to plant species, identified pest threats, infestation severity, and environmental safety to ensure the best results.",
         url: require('../assets/images/6.jpg')
 
     },
@@ -165,7 +165,7 @@ export const services = [
         title: "Plant Propagation",
         category: "Plant & Soil Health",
         label: "Trending",
-        description: "Professional plant propagation services including seed starting, cutting propagation, and grafting to expand your plant collection.",
+        description: "Garden Sewa provides professional plant propagation services to multiply plant stock in Nepal. We handle seed germination, stem cutting propagation, division, grafting, and sapling nurturing.\n\nOur careful and sustainable practices encourage rapid root production, genetic preservation, and robust plant development.\n\nCustomized plant propagation plans are tailored according to plant species, propagation method, nursery capacity, and desired plant volume to ensure the best results.",
         url: require('../assets/images/11.jpg')
 
     },
@@ -174,7 +174,7 @@ export const services = [
         title: "Tree Sales",
         category: "Plant & Soil Health",
         label: "Trending",
-        description: "Wide selection of quality trees for sale including shade trees, ornamental trees, and fruit trees with expert advice on selection and care.",
+        description: "Garden Sewa provides professional tree sales and delivery services across Nepal. We supply shade trees, ornamental saplings, fruit trees, and flowering species with full planting assistance.\n\nOur sustainable sourcing practices ensure healthy nursery stock, acclimated roots, and optimal growth potential upon planting.\n\nCustomized tree sales packages are tailored according to land availability, climate zone, purpose (shade/fruit/ornamental), and client preference to ensure the best results.",
         url: require('../assets/images/10.jpg')
 
     },
@@ -185,7 +185,7 @@ export const services = [
         title: "Consultation Services",
         category: "Expert Advice",
         label: "Top",
-        description: "Expert consultation on landscape planning, plant selection, garden design, and maintenance strategies for optimal results.",
+        description: "Garden Sewa provides professional consultation services for all landscape and garden projects in Nepal. We offer site assessments, plant selection advice, care guidance, and master plan evaluations.\n\nOur expert and sustainable advice helps clients avoid costly mistakes, maximize space efficiency, and achieve thriving garden environments.\n\nCustomized consultation sessions are tailored according to project scale, site constraints, personal preferences, and individual goals to ensure the best results.",
         url: require('../assets/images/13.jpg')
 
     }
@@ -487,7 +487,7 @@ export const partnershipData = [
         title: "Long Term"
     },
     {
-        id: 2,
+        id: 3,
         title: "Other"
     },
 ]

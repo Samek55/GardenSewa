@@ -3,23 +3,26 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Alert, Image, Linking, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import PopUpAd from '../components/PopUpAd';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [isAppReady, setIsAppReady] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAdVisible, setIsAdVisible] = useState(false);
 
   useEffect(() => {
     async function prepare() {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        await new Promise((resolve) => setTimeout(resolve, 7000));
       } catch (e) {
         console.warn(e);
       } finally {
         setIsAppReady(true);
         await SplashScreen.hideAsync();
+        setIsAdVisible(true); 
       }
     }
 
@@ -30,8 +33,20 @@ export default function RootLayout() {
     setIsModalOpen(true);
   };
 
-  const onWhatsappOpen = () => {
-    alert("WhatsApp Clicked");
+  const onWhatsappOpen = async () => {
+    const phoneNumber = "9852024365";
+    const message = "Hello! I am looking for a gardening service";
+    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("Error", "WhatsApp is not installed on this device");
+      }
+    } catch (error) {
+      console.error("An error occurred", error);
+    }
   };
 
   const onClose = () => {
@@ -56,7 +71,7 @@ export default function RootLayout() {
             headerTitle: () => (
               <View style={{ marginLeft: 8, paddingLeft: 8 }}>
                 <Text style={{ color: "#fff", fontWeight: '600', fontSize: 24 }}>
-                  Garden Sewa
+                  GardenSewa
                 </Text>
               </View>
             ),
@@ -99,6 +114,24 @@ export default function RootLayout() {
         />
       </Stack>
 
+      <Modal
+        visible={isAdVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsAdVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.adContainer}>
+            <Pressable style={styles.closeButton} onPress={() => setIsAdVisible(false)}>
+              <Ionicons name="close" size={20} color="#333" />
+            </Pressable>
+
+            <PopUpAd />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Sidebar Modal */}
       {isModalOpen && (
         <>
           <Pressable
@@ -118,3 +151,34 @@ export default function RootLayout() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  adContainer: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    width: '90%',
+    position: 'relative',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 10,
+    backgroundColor: '#eee',
+    borderRadius: 15,
+    padding: 4,
+  },
+});

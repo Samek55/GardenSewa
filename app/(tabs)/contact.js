@@ -20,6 +20,43 @@ const Contact = () => {
 
     }
 
+
+    const onEmailOpen = async () => {
+        const email = "gardensewa@sriyog.com";
+        const subject = "Gardening Service Inquiry";
+        const message = "Hello! I am looking for a gardening service";
+
+        const url = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+
+        try {
+            const supported = await Linking.canOpenURL(url);
+            if (supported) {
+                await Linking.openURL(url);
+            } else {
+                Alert.alert("Error", "No email app installed on this device");
+            }
+        } catch (error) {
+            console.error("An error occurred", error);
+        }
+    };
+
+
+    const onWebsiteOpen = async () => {
+        const websiteUrl = "https://gardensewa.com";
+
+        try {
+            const supported = await Linking.canOpenURL(websiteUrl);
+
+            if (supported) {
+                await Linking.openURL(websiteUrl);
+            } else {
+                Alert.alert("Error", `Cannot open URL: ${websiteUrl}`);
+            }
+        } catch (error) {
+            console.error("An error occurred while opening the website", error);
+        }
+    };
+
     return (
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.container}>
 
@@ -60,7 +97,7 @@ const Contact = () => {
                     </View>
                 </View>
 
-                <TouchableOpacity style={styles.cardContainer} activeOpacity={0.7} onPress={()=>onWhatsAppOpen()}>
+                <TouchableOpacity style={styles.cardContainer} activeOpacity={0.7} onPress={() => onWhatsAppOpen()}>
                     <View style={styles.iconWrapper}>
                         <Ionicons name="call-outline" size={22} color="#245d5a" />
                     </View>
@@ -71,7 +108,7 @@ const Contact = () => {
                     {/* <Ionicons name="chevron-forward" size={20} color="#666" style={styles.arrowIcon} /> */}
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.cardContainer} activeOpacity={0.7}>
+                <TouchableOpacity style={styles.cardContainer} activeOpacity={0.7} onPress={() => onEmailOpen()}>
                     <View style={styles.iconWrapper}>
                         <Ionicons name="mail-outline" size={22} color="#245d5a" />
                     </View>
@@ -82,7 +119,7 @@ const Contact = () => {
                     {/* <Ionicons name="chevron-forward" size={20} color="#666" style={styles.arrowIcon} /> */}
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.cardContainer} activeOpacity={0.7}>
+                <TouchableOpacity style={styles.cardContainer} activeOpacity={0.7} onPress={()=>onWebsiteOpen()} >
                     <View style={styles.iconWrapper}>
                         <Ionicons name="globe-outline" size={22} color="#245d5a" />
                     </View>
