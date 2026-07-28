@@ -19,7 +19,7 @@ const AdminLogin = () => {
     const [phone, setPhone] = useState("");
     const [pin, setPin] = useState(["", "", "", ""]);
     const [showPin, setShowPin] = useState(false);
-    
+
     const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
     const pinRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
@@ -46,21 +46,21 @@ const AdminLogin = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <KeyboardAvoidingView 
-                behavior={Platform.OS === "ios" ? "padding" : "height"} 
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={styles.keyboardView}
             >
-                <ScrollView 
+                <ScrollView
                     contentContainerStyle={[
-                        styles.scrollContainer, 
+                        styles.scrollContainer,
                         { alignItems: isTablet ? 'center' : 'stretch' }
-                    ]} 
-                    bounces={false} 
+                    ]}
+                    bounces={false}
                     keyboardShouldPersistTaps="handled"
                 >
-                    <View style={[styles.brandingHeaderContainer, { 
-                        paddingTop: screenHeight * 0.04, 
-                        paddingBottom: screenHeight * 0.03 
+                    <View style={[styles.brandingHeaderContainer, {
+                        paddingTop: screenHeight * 0.04,
+                        paddingBottom: screenHeight * 0.03
                     }]}>
                         <View style={styles.outerLockCircle}>
                             <View style={styles.innerLockCircle}>
@@ -72,8 +72,8 @@ const AdminLogin = () => {
                     </View>
 
                     <View style={[
-                        styles.whitePanelCard, 
-                        { 
+                        styles.whitePanelCard,
+                        {
                             maxWidth: cardMaxWidth,
                             paddingHorizontal: dynamicPadding,
                             paddingTop: dynamicPadding,
@@ -87,7 +87,7 @@ const AdminLogin = () => {
                         <Text style={styles.signInTitle}>Sign In</Text>
 
                         <View style={styles.phoneInputRow}>
-                            <NP  width={26} height={18} style={styles.nepalFlag} />
+                            <NP width={26} height={18} style={styles.nepalFlag} />
                             <TextInput
                                 style={styles.phoneTextInput}
                                 value={phone}
@@ -95,6 +95,8 @@ const AdminLogin = () => {
                                 keyboardType="phone-pad"
                                 placeholder="Enter your phone number"
                                 placeholderTextColor="#999"
+                                maxLength={10}
+
                             />
                         </View>
 
@@ -133,7 +135,7 @@ const AdminLogin = () => {
                         <View style={[styles.horizontalDivider, { marginVertical: screenHeight * 0.03 }]} />
 
                         <View style={styles.panelFooterActionContainer}>
-                            <TouchableOpacity style={styles.footerLinkAction} onPress={()=>router.push('./joinasaprofessional')}>
+                            <TouchableOpacity style={styles.footerLinkAction} onPress={() => router.push('./joinasaprofessional')}>
                                 <Text style={styles.professionalJoinText}>Join as Professional : Join Now</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.footerLinkAction}>
@@ -222,8 +224,8 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#000",
         fontWeight: "400",
-        paddingVertical:    0,
-        height:'80%'
+        paddingVertical: 0,
+        height: '80%'
     },
     pinHeaderContainer: {
         flexDirection: "row",

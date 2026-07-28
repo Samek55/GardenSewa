@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { NP } from 'react-native-country-flag-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { boolean, object, string } from 'yup';
+import { array, boolean, object, string } from 'yup';
 
 import {
     businessType,
@@ -37,7 +37,10 @@ const validationSchema = object({
     area: string().required('Area is required'),
     noOfEmployees: string().required('Number of employees is required'),
     businessType: string().required('Business Type is required'),
-    servicesOffered: string().required('Services Offered is required'),
+    servicesOffered: array()
+        .of(string())
+        .min(1, 'Select at least 1 service')
+        .max(5, 'Maximum 5 services allowed'),
     partnershipInterest: string().required('Partnership Interest is required'),
     hearAboutUs: string().required('Please select how you heard about us'),
     message: string(),
@@ -108,6 +111,111 @@ const CustomDropdown = ({ label, value, placeholder, data, isOpen, onToggle, onS
     );
 };
 
+const MultiSelectDropdown = ({
+    label,
+    selectedItems = [],
+    placeholder,
+    data,
+    isOpen,
+    onToggle,
+    onSelectItem,
+    onRemoveItem,
+    required = false,
+    maxLimit = 5,
+}) => {
+    const [query, setQuery] = useState('');
+
+    const filteredData = data.filter((item) =>
+        (item.name || item.title || item).toLowerCase().includes(query.toLowerCase())
+    );
+
+    return (
+        <View style={styles.individualContainer}>
+            <Text style={styles.label}>
+                {label} {required && <Text style={styles.asterisk}>*</Text>}
+            </Text>
+
+            {/* Input / Selector Box with Chips Inside */}
+            <TouchableOpacity
+                style={styles.multiSelectTrigger}
+                activeOpacity={0.8}
+                onPress={onToggle}
+            >
+                <View style={styles.inputInnerContainer}>
+                    {selectedItems.map((item, idx) => (
+                        <View key={idx} style={styles.chip}>
+                            <Text style={styles.chipText}>{item}</Text>
+                            <TouchableOpacity onPress={() => onRemoveItem(item)}>
+                                <Ionicons name="close-circle" size={16} color="#fff" />
+                            </TouchableOpacity>
+                        </View>
+                    ))}
+
+                    {selectedItems.length < maxLimit && (
+                        <Text style={styles.placeholderTextInline}>
+                            {selectedItems.length === 0 ? placeholder : `Add more (${selectedItems.length}/${maxLimit})...`}
+                        </Text>
+                    )}
+                </View>
+
+                <Ionicons name={isOpen ? 'chevron-up' : 'chevron-down'} size={20} color="#666" />
+            </TouchableOpacity>
+
+            {isOpen && (
+                <View style={styles.dropdownContainer}>
+                    <View style={styles.searchBarContainer}>
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder={`Search ${label.toLowerCase()}...`}
+                            value={query}
+                            onChangeText={setQuery}
+                        />
+                        {query.length > 0 && (
+                            <TouchableOpacity onPress={() => setQuery('')}>
+                                <Ionicons name="close-circle" size={18} color="#999" />
+                            </TouchableOpacity>
+                        )}
+                    </View>
+
+                    <ScrollView style={styles.itemsList} nestedScrollEnabled>
+                        {filteredData.length > 0 ? (
+                            filteredData.map((item, idx) => {
+                                const itemLabel = item.name || item.title || item;
+                                const isSelected = selectedItems.includes(itemLabel);
+
+                                return (
+                                    <TouchableOpacity
+                                        key={item.id || idx}
+                                        style={[styles.dropdownItem, styles.multiDropdownItem]}
+                                        onPress={() => {
+                                            if (isSelected) {
+                                                onRemoveItem(itemLabel);
+                                            } else {
+                                                if (selectedItems.length >= maxLimit) {
+                                                    Alert.alert('Limit Reached', `You can select up to ${maxLimit} items.`);
+                                                    return;
+                                                }
+                                                onSelectItem(itemLabel);
+                                            }
+                                        }}
+                                    >
+                                        <Text style={styles.dropdownItemText}>{itemLabel}</Text>
+                                        {isSelected && <Ionicons name="checkmark-circle" size={20} color="#245d5a" />}
+                                    </TouchableOpacity>
+                                );
+                            })
+                        ) : (
+                            <View style={styles.noResultsContainer}>
+                                <Text style={styles.noResultsText}>No items found</Text>
+                            </View>
+                        )}
+                    </ScrollView>
+                </View>
+            )}
+        </View>
+    );
+};
+
 export default function PartnerBook() {
     const [selectedCompanyImages, setSelectedCompanyImages] = useState([]);
     const [selectedCertificates, setSelectedCertificates] = useState([]);
@@ -126,7 +234,7 @@ export default function PartnerBook() {
             area: '',
             noOfEmployees: '',
             businessType: '',
-            servicesOffered: '',
+            servicesOffered: [], // Updated to Array
             partnershipInterest: '',
             hearAboutUs: '',
             message: '',
@@ -224,7 +332,10 @@ export default function PartnerBook() {
 
         if (firstError) {
             formik.setTouched({ [firstError]: true });
-            Alert.alert('Validation Error', errors[firstError]);
+            Alert.alert(
+                'Validation Error',
+                Array.isArray(errors[firstError]) ? errors[firstError][0] : errors[firstError]
+            );
         } else {
             formik.handleSubmit();
         }
@@ -282,15 +393,14 @@ export default function PartnerBook() {
                             value={formik.values.phone}
                             onChangeText={formik.handleChange('phone')}
                             keyboardType="phone-pad"
+                            maxLength={10}
                         />
                     </View>
                 </View>
 
                 {/* Email Address */}
                 <View style={styles.individualContainer}>
-                    <Text style={styles.label}>
-                        eMail Address
-                    </Text>
+                    <Text style={styles.label}>eMail Address</Text>
                     <TextInput
                         style={styles.textInput}
                         placeholder="Enter your eMail"
@@ -375,18 +485,24 @@ export default function PartnerBook() {
                     }}
                 />
 
-                {/* Services Offered Dropdown */}
-                <CustomDropdown
+                {/* Multi-Select Services Offered (Up to 5) */}
+                <MultiSelectDropdown
                     label="Services Offered"
                     required
-                    value={formik.values.servicesOffered}
-                    placeholder="Select the services you offer"
+                    maxLimit={5}
+                    selectedItems={formik.values.servicesOffered}
+                    placeholder="Select up to 5 services"
                     data={serviceOfferedData}
                     isOpen={activeDropdown === 'servicesOffered'}
                     onToggle={() => toggleDropdown('servicesOffered')}
-                    onSelect={(val) => {
-                        formik.setFieldValue('servicesOffered', val);
-                        setActiveDropdown(null);
+                    onSelectItem={(val) => {
+                        formik.setFieldValue('servicesOffered', [...formik.values.servicesOffered, val]);
+                    }}
+                    onRemoveItem={(val) => {
+                        formik.setFieldValue(
+                            'servicesOffered',
+                            formik.values.servicesOffered.filter((item) => item !== val)
+                        );
                     }}
                 />
 
@@ -610,6 +726,50 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#f5f5f5',
     },
+    multiDropdownItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+
+    multiSelectTrigger: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 6,
+        paddingHorizontal: 8,
+        paddingVertical: 6,
+        minHeight: 44,
+        backgroundColor: '#fff',
+    },
+    inputInnerContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: 6,
+    },
+    placeholderTextInline: {
+        color: '#999',
+        fontSize: 14,
+        paddingVertical: 4,
+    },
+    chip: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#245d5a',
+        borderRadius: 14,
+        paddingVertical: 3,
+        paddingHorizontal: 8,
+        gap: 4,
+    },
+    chipText: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: '500',
+    },
     dropdownItemText: {
         fontSize: 14,
         color: '#333',
@@ -621,6 +781,12 @@ const styles = StyleSheet.create({
     noResultsText: {
         color: '#999',
         fontSize: 14,
+    },
+    chipWrapper: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 6,
+        marginBottom: 4,
     },
     imagePickerContainer: {
         borderStyle: 'dashed',

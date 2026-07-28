@@ -1,5 +1,6 @@
-import { Link, router } from 'expo-router';
+import { Link, router, useLocalSearchParams, useRouter } from 'expo-router';
 import {
+    ActivityIndicator,
     Alert,
     Dimensions,
     FlatList,
@@ -14,16 +15,48 @@ import {
 
 import { NP } from 'react-native-country-flag-icons';
 
-import { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
 import ServiceCard from "../../components/ServiceCard";
 import { services } from "../../data/servicesList";
 
 const { width } = Dimensions.get('window');
 const TOP_CARD_WIDTH = (width - 36 - 2 - 24 - 10) / 2.6;
 
-
+const IS_DEV = true;
 
 export default function Index() {
+    const navRouter = useRouter();
+    const params = useLocalSearchParams();
+    const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+
+    useEffect(() => {
+        async function checkOnboardingStatus() {
+            try {
+                if (params.fromOnboarding === 'true') {
+                    setCheckingOnboarding(false);
+                    return;
+                }
+
+                if (IS_DEV) {
+                    navRouter.replace('/(tabs)/onBoarding');
+                    return;
+                }
+
+                const hasSeen = await AsyncStorage.getItem('hasSeenOnboarding');
+                if (!hasSeen) {
+                    navRouter.replace('/(tabs)/onBoarding');
+                } else {
+                    setCheckingOnboarding(false);
+                }
+            } catch (error) {
+                console.error("Failed checking onboarding status:", error);
+                setCheckingOnboarding(false);
+            }
+        }
+
+        checkOnboardingStatus();
+    }, [params.fromOnboarding]);
 
     const onWhatsappOpen = async () => {
         const phoneNumber = "+ 977 9852024365";
@@ -41,15 +74,21 @@ export default function Index() {
         }
     };
 
+    const [phone, setPhone] = useState('');
 
-
-    const [phone, setPhone] = useState('')
-    
     const filteredServicesTop = services.filter(service => service.label === 'Top');
 
     const formattedPhoneValue = phone.length === 10
         ? `${phone.slice(0, 5)} ${phone.slice(5, 7)} ${phone.slice(7, 10)}`
         : phone;
+
+    if (checkingOnboarding) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' }}>
+                <ActivityIndicator size="large" color="#225754" />
+            </View>
+        );
+    }
 
     return (
         <View style={styles.screenContainer}>
@@ -64,7 +103,6 @@ export default function Index() {
                 />
                 <View style={styles.overlay}>
                     <Text style={styles.title}>Professional{"\n"}Gardening Service</Text>
-                    {/* <Text style={styles.subTitle}>SuperFast gardening Service at your Home.</Text> */}
 
                     <View style={styles.inputContainer}>
                         <View style={styles.iconWrapper}>
@@ -81,7 +119,6 @@ export default function Index() {
                                 const numericOnly = text.replace(/[^0-9]/g, '');
                                 setPhone(numericOnly);
                             }}
-
                         />
                         <Pressable
                             style={styles.helpButton}
@@ -119,7 +156,6 @@ export default function Index() {
                     <Text style={styles.cardTitle}>Lawn Care</Text>
                     <Text style={styles.cardSubTitle}>Professional lawn care service</Text>
                 </View>
-
             </Pressable>
 
             <View style={styles.sectionHeader}>
@@ -150,9 +186,7 @@ export default function Index() {
                 />
             </View>
 
-
         </View>
-
     );
 }
 
@@ -178,7 +212,6 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         paddingHorizontal: 20,
         paddingBottom: 20
-
     },
     title: {
         color: '#FFFFFF',
@@ -250,7 +283,6 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         gap: 4,
         padding: 24
-
     },
     tagContainer: {
         alignSelf: 'flex-start',
@@ -259,7 +291,6 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         borderRadius: 12,
         marginBottom: 6,
-
     },
     tagText: {
         color: '#FFFFFF',

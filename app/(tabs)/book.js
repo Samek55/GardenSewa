@@ -108,7 +108,6 @@ export default function Book() {
 
     const params = useLocalSearchParams();
 
-    const [routePhone, setRoutePhone]=useState('')
 
     const [selectedImages, setSelectedImages] = useState([]);
     const [showSummary, setShowSummary] = useState(false);
@@ -232,6 +231,7 @@ export default function Book() {
                                 value={formik.values.phone}
                                 onChangeText={formik.handleChange('phone')}
                                 keyboardType="phone-pad"
+                                maxLength={10}
                             />
                         </View>
                     </View>
@@ -279,7 +279,7 @@ export default function Book() {
                                 markedDates={{
                                     [today]: {
                                         selected: true,
-                                        selectedColor: '#245d5a',
+                                        selectedColor: '#629f9c',
                                         selectedTextColor: '#ffffff',
                                     },
                                     ...(formik.values.startDate && {
@@ -320,7 +320,7 @@ export default function Book() {
                                 markedDates={{
                                     [today]: {
                                         selected: true,
-                                        selectedColor: '#245d5a',
+                                        selectedColor: '#629f9c',
                                         selectedTextColor: '#ffffff',
                                     },
                                     ...(formik.values.endDate && {
@@ -504,14 +504,14 @@ export default function Book() {
                     message={formik.values.message}
                     onBack={() => setShowSummary(false)}
                     onConfirm={() => {
-                        setRoutePhone(formik.values.phone)
+                        const phoneNumber = formik.values.phone;
                         formik.resetForm();
                         setSelectedImages([]);
                         setShowSummary(false);
                         Alert.alert("Success", "Your booking has been confirmed!");
                         router.push({
                             pathname: '/phoneVerification',
-                            params: { phone: `${routePhone}` },
+                            params: { phone: phoneNumber },
                         });
                     }}
                 />

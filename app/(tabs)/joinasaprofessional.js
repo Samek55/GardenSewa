@@ -16,26 +16,28 @@ import {
 } from 'react-native';
 import { NP } from 'react-native-country-flag-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { boolean, object, string } from 'yup';
+import { array, boolean, object, string } from 'yup';
 
 import { areasByCity } from '../../data/Data';
 import { categories, cityData } from '../../data/servicesList';
 
+// Validation Schema supporting multi-select arrays
 const validationSchema = object({
     name: string().required('Full name is required').min(3, 'Name too short'),
     phone: string().required('Phone number is required').min(10, 'Invalid phone number'),
     gender: string().required('Gender selection is required'),
     email: string().email('Invalid email address'),
-    category: string().required('Category/Service is required'),
+    category: array().of(string()).min(1, 'At least 1 expertise is required').max(5, 'Maximum 5 expertise permitted'),
     yearsExperience: string().required('Years of experience is required'),
     city: string().required('City is required'),
-    area: string().required('Area is required'),
+    area: array().of(string()).min(1, 'At least 1 area is required').max(5, 'Maximum 5 areas permitted'),
     emergencyPhone: string().required('Emergency contact number is required').min(10, 'Invalid phone number'),
     referralPhone: string(),
     message: string(),
     terms: boolean().isTrue('Must accept terms and conditions'),
 });
 
+// Single Selection Dropdown Component
 const CustomDropdown = ({ label, value, placeholder, data, isOpen, onToggle, onSelect, required = false }) => {
     const [query, setQuery] = useState('');
 
@@ -100,6 +102,111 @@ const CustomDropdown = ({ label, value, placeholder, data, isOpen, onToggle, onS
     );
 };
 
+const MultiSelectDropdown = ({
+    label,
+    selectedItems = [],
+    placeholder,
+    data,
+    isOpen,
+    onToggle,
+    onSelectItem,
+    onRemoveItem,
+    required = false,
+    maxLimit = 5,
+}) => {
+    const [query, setQuery] = useState('');
+
+    const filteredData = data.filter((item) =>
+        (item.name || item.title || item).toLowerCase().includes(query.toLowerCase())
+    );
+
+    return (
+        <View style={styles.individualContainer}>
+            <Text style={styles.label}>
+                {label} {required && <Text style={styles.asterisk}>*</Text>}
+            </Text>
+
+            {/* Input / Selector Box with Chips Inside */}
+            <TouchableOpacity
+                style={styles.multiSelectTrigger}
+                activeOpacity={0.8}
+                onPress={onToggle}
+            >
+                <View style={styles.inputInnerContainer}>
+                    {selectedItems.map((item, idx) => (
+                        <View key={idx} style={styles.chip}>
+                            <Text style={styles.chipText}>{item}</Text>
+                            <TouchableOpacity onPress={() => onRemoveItem(item)}>
+                                <Ionicons name="close-circle" size={16} color="#fff" />
+                            </TouchableOpacity>
+                        </View>
+                    ))}
+
+                    {selectedItems.length < maxLimit && (
+                        <Text style={styles.placeholderTextInline}>
+                            {selectedItems.length === 0 ? placeholder : `Add more (${selectedItems.length}/${maxLimit})...`}
+                        </Text>
+                    )}
+                </View>
+
+                <Ionicons name={isOpen ? 'chevron-up' : 'chevron-down'} size={20} color="#666" />
+            </TouchableOpacity>
+
+            {isOpen && (
+                <View style={styles.dropdownContainer}>
+                    <View style={styles.searchBarContainer}>
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder={`Search ${label.toLowerCase()}...`}
+                            value={query}
+                            onChangeText={setQuery}
+                        />
+                        {query.length > 0 && (
+                            <TouchableOpacity onPress={() => setQuery('')}>
+                                <Ionicons name="close-circle" size={18} color="#999" />
+                            </TouchableOpacity>
+                        )}
+                    </View>
+
+                    <ScrollView style={styles.itemsList} nestedScrollEnabled>
+                        {filteredData.length > 0 ? (
+                            filteredData.map((item, idx) => {
+                                const itemLabel = item.name || item.title || item;
+                                const isSelected = selectedItems.includes(itemLabel);
+
+                                return (
+                                    <TouchableOpacity
+                                        key={item.id || idx}
+                                        style={[styles.dropdownItem, styles.multiDropdownItem]}
+                                        onPress={() => {
+                                            if (isSelected) {
+                                                onRemoveItem(itemLabel);
+                                            } else {
+                                                if (selectedItems.length >= maxLimit) {
+                                                    Alert.alert('Limit Reached', `You can select up to ${maxLimit} items.`);
+                                                    return;
+                                                }
+                                                onSelectItem(itemLabel);
+                                            }
+                                        }}
+                                    >
+                                        <Text style={styles.dropdownItemText}>{itemLabel}</Text>
+                                        {isSelected && <Ionicons name="checkmark-circle" size={20} color="#245d5a" />}
+                                    </TouchableOpacity>
+                                );
+                            })
+                        ) : (
+                            <View style={styles.noResultsContainer}>
+                                <Text style={styles.noResultsText}>No items found</Text>
+                            </View>
+                        )}
+                    </ScrollView>
+                </View>
+            )}
+        </View>
+    );
+};
+
 export default function JoinProfessional() {
     const [profilePicture, setProfilePicture] = useState(null);
     const [identityPicture, setIdentityPicture] = useState(null);
@@ -115,10 +222,10 @@ export default function JoinProfessional() {
             phone: '',
             gender: 'Male',
             email: '',
-            category: '',
+            category: [], // Multi-select array
             yearsExperience: '',
             city: '',
-            area: '',
+            area: [], // Multi-select array
             emergencyPhone: '',
             referralPhone: '',
             message: '',
@@ -145,9 +252,7 @@ export default function JoinProfessional() {
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ['images'],
                 allowsEditing: true,
-                // aspect: [1, 1],
                 quality: 1,
-                selectionLimit: 5
             });
 
             if (!result.canceled) {
@@ -180,7 +285,7 @@ export default function JoinProfessional() {
 
         if (firstError) {
             formik.setTouched({ [firstError]: true });
-            Alert.alert('Validation Error', errors[firstError]);
+            Alert.alert('Validation Error', Array.isArray(errors[firstError]) ? errors[firstError][0] : errors[firstError]);
         } else {
             formik.handleSubmit();
         }
@@ -227,6 +332,7 @@ export default function JoinProfessional() {
                             value={formik.values.phone}
                             onChangeText={formik.handleChange('phone')}
                             keyboardType="phone-pad"
+                            maxLength={10}
                         />
                     </View>
                 </View>
@@ -276,9 +382,7 @@ export default function JoinProfessional() {
 
                 {/* Email Address */}
                 <View style={styles.individualContainer}>
-                    <Text style={styles.label}>
-                        eMail Address
-                    </Text>
+                    <Text style={styles.label}>eMail Address</Text>
                     <TextInput
                         style={styles.textInput}
                         placeholder="Enter your eMail"
@@ -289,18 +393,21 @@ export default function JoinProfessional() {
                     />
                 </View>
 
-                {/* Category Dropdown */}
-                <CustomDropdown
+                {/* Expertise Multi-Select (Max 5) */}
+                <MultiSelectDropdown
                     label="Your Expertise"
                     required
-                    value={formik.values.category}
-                    placeholder="Select a service expertise "
+                    maxLimit={5}
+                    selectedItems={formik.values.category}
+                    placeholder="Select up to 5 expertises"
                     data={categories}
                     isOpen={activeDropdown === 'category'}
                     onToggle={() => toggleDropdown('category')}
-                    onSelect={(val) => {
-                        formik.setFieldValue('category', val);
-                        setActiveDropdown(null);
+                    onSelectItem={(val) => {
+                        formik.setFieldValue('category', [...formik.values.category, val]);
+                    }}
+                    onRemoveItem={(val) => {
+                        formik.setFieldValue('category', formik.values.category.filter((item) => item !== val));
                     }}
                 />
 
@@ -318,7 +425,7 @@ export default function JoinProfessional() {
                     />
                 </View>
 
-                {/* Citizenship / Driving License / NID */}
+                {/* Identity Document */}
                 <View style={styles.individualContainer}>
                     <Text style={styles.label}>
                         Citizenship/ Driving License/ NID <Text style={styles.asterisk}>*</Text>
@@ -340,7 +447,7 @@ export default function JoinProfessional() {
                     </View>
                 </View>
 
-                {/* City */}
+                {/* Single City Dropdown */}
                 <CustomDropdown
                     label="City"
                     required
@@ -351,36 +458,41 @@ export default function JoinProfessional() {
                     onToggle={() => toggleDropdown('city')}
                     onSelect={(val) => {
                         formik.setFieldValue('city', val);
-                        formik.setFieldValue('area', '');
+                        formik.setFieldValue('area', []);
                         setActiveDropdown(null);
                     }}
                 />
 
-                {/* Area */}
-                {
-                    formik.values.city ? <CustomDropdown
+                {/* Area Multi-Select (Max 5) */}
+                {formik.values.city ? (
+                    <MultiSelectDropdown
                         label="Area"
                         required
-                        value={formik.values.area}
-                        placeholder={formik.values.city ? 'Choose an Area' : 'Select a city first'}
+                        maxLimit={5}
+                        selectedItems={formik.values.area}
+                        placeholder="Choose up to 5 Areas"
                         data={availableAreas}
                         isOpen={activeDropdown === 'area'}
                         onToggle={() => toggleDropdown('area')}
-                        onSelect={(val) => {
-                            formik.setFieldValue('area', val);
-                            setActiveDropdown(null);
+                        onSelectItem={(val) => {
+                            formik.setFieldValue('area', [...formik.values.area, val]);
                         }}
-                    /> : <View>
+                        onRemoveItem={(val) => {
+                            formik.setFieldValue('area', formik.values.area.filter((item) => item !== val));
+                        }}
+                    />
+                ) : (
+                    <View style={styles.individualContainer}>
                         <Text style={styles.label}>
                             Area <Text style={styles.asterisk}>*</Text>
                         </Text>
-                        <Text style={{ color: '#151212', fontSize: 12, fontStyle: 'italic', marginVertical: 8 }}>
+                        <Text style={{ color: '#666', fontSize: 12, fontStyle: 'italic', marginVertical: 4 }}>
                             Please select a city first.
                         </Text>
                     </View>
-                }
+                )}
 
-                {/* Emergency Phone Number */}
+                {/* Emergency Contact */}
                 <View style={styles.individualContainer}>
                     <Text style={styles.label}>
                         Emergency Contact Number <Text style={styles.asterisk}>*</Text>
@@ -397,7 +509,7 @@ export default function JoinProfessional() {
                     </View>
                 </View>
 
-                {/* Referral Phone Number */}
+                {/* Referral Phone */}
                 <View style={styles.individualContainer}>
                     <Text style={styles.label}>Referral Phone Number</Text>
                     <View style={styles.phoneInputContainer}>
@@ -424,7 +536,7 @@ export default function JoinProfessional() {
                     />
                 </View>
 
-                {/* Terms & Conditions */}
+                {/* Terms and Conditions */}
                 <View style={styles.checkboxContainer}>
                     <Pressable onPress={() => formik.setFieldValue('terms', !formik.values.terms)}>
                         <Ionicons
@@ -442,7 +554,7 @@ export default function JoinProfessional() {
                     </Text>
                 </View>
 
-                {/* Action Buttons */}
+                {/* Form Buttons */}
                 <View style={styles.bottomContainer}>
                     <TouchableOpacity style={styles.clearButton} onPress={handleClearForm}>
                         <Ionicons name="refresh" size={18} color="#333" />
@@ -599,6 +711,11 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#f5f5f5',
     },
+    multiDropdownItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
     dropdownItemText: {
         fontSize: 14,
         color: '#333',
@@ -610,6 +727,31 @@ const styles = StyleSheet.create({
     noResultsText: {
         color: '#999',
         fontSize: 14,
+    },
+    chipWrapper: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 6,
+        marginBottom: 4,
+    },
+    placeholderTextInline: {
+        color: '#999',
+        fontSize: 14,
+        paddingVertical: 4,
+    },
+    chip: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#245d5a',
+        borderRadius: 14,
+        paddingVertical: 3,
+        paddingHorizontal: 8,
+        gap: 4,
+    },
+    chipText: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: '500',
     },
     imagePickerContainer: {
         borderStyle: 'dashed',
@@ -687,5 +829,24 @@ const styles = StyleSheet.create({
     submitButtonText: {
         color: '#fff',
         fontWeight: 'bold',
+    },
+    multiSelectTrigger: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 6,
+        paddingHorizontal: 8,
+        paddingVertical: 6,
+        minHeight: 44,
+        backgroundColor: '#fff',
+    },
+    inputInnerContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: 6,
     },
 });
