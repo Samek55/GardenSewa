@@ -122,13 +122,6 @@ const TabLayout = () => {
                     href: null
                 }}
             />
-            <Tabs.Screen
-                name="onBoarding"
-                options={{
-                    title: "Onboarding",
-                    href: null
-                }}
-            />
 
         </Tabs>
     )

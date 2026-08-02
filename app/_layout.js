@@ -2,57 +2,41 @@ import SideBarModal from '@/components/SideBarModal';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useRef, useState } from "react";
-import { Alert, Image, Linking, Modal, Pressable, StyleSheet, Text, View } from "react-native";
-import PopUpAd from '../components/PopUpAd';
+import { useEffect, useState } from "react";
+import { Alert, Image, Linking, Pressable, StyleSheet, Text, View } from "react-native";
 
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const TOTAL_DURATION_MS = 3000;
 
 export default function RootLayout() {
   const [isAppReady, setIsAppReady] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isAdVisible, setIsAdVisible] = useState(false);
-
   const [countdownDigits, setCountdownDigits] = useState("3000");
 
-  const requestRef = useRef(null);
-  const startTimeRef = useRef(null);
-
   useEffect(() => {
-    SplashScreen.hideAsync();
+    // Hide native splash image immediately to display our React splash UI
+    SplashScreen.hideAsync().catch(() => {});
 
-    const updateTimer = (timestamp) => {
-      if (!startTimeRef.current) {
-        startTimeRef.current = timestamp;
-      }
+    const startTime = Date.now();
 
-      const elapsedMs = timestamp - startTimeRef.current;
+    const interval = setInterval(() => {
+      const elapsedMs = Date.now() - startTime;
       const remainingMs = Math.max(0, TOTAL_DURATION_MS - elapsedMs);
 
-      // Pad with leading zeros up to 4 digits (e.g., 0950)
-      const formatted4Digits = Math.floor(remainingMs).toString().padStart(4, '0');
-      setCountdownDigits(formatted4Digits);
+      setCountdownDigits(Math.floor(remainingMs).toString().padStart(4, '0'));
 
-      if (remainingMs > 0) {
-        requestRef.current = requestAnimationFrame(updateTimer);
-      } else {
+      if (remainingMs <= 0) {
+        clearInterval(interval);
         setIsAppReady(true);
-        setIsAdVisible(true);
       }
-    };
+    }, 16);
 
-    requestRef.current = requestAnimationFrame(updateTimer);
-
-    return () => {
-      if (requestRef.current) {
-        cancelAnimationFrame(requestRef.current);
-      }
-    };
+    return () => clearInterval(interval);
   }, []);
 
   const onMenuOpen = () => setIsModalOpen(true);
+  const onClose = () => setIsModalOpen(false);
 
   const onWhatsappOpen = async () => {
     const phoneNumber = "9852024365";
@@ -70,25 +54,25 @@ export default function RootLayout() {
     }
   };
 
-  const onClose = () => setIsModalOpen(false);
-
-  if (!isAppReady) {
-    return (
-      <View style={styles.splashContainer}>
-        <View style={styles.centerContent}>
-          <Image
-            source={require('@/assets/images/splash-icon-actual.png')}
-            style={styles.splashImage}
-            resizeMode="contain"
-          />
-          <Text style={styles.timerText}>{countdownDigits}</Text>
-        </View>
-      </View>
-    );
-  }
   return (
     <View style={{ flex: 1 }}>
+      {/* 1. Main Navigation Stack (Runs in background behind splash) */}
       <Stack>
+        <Stack.Screen
+          name="index"
+          options={{
+            headerShown: false,
+          }}
+        />
+
+        <Stack.Screen
+          name="onBoarding"
+          options={{
+            headerShown: false,
+            animation: 'fade',
+          }}
+        />
+
         <Stack.Screen
           name="(tabs)"
           options={{
@@ -134,43 +118,39 @@ export default function RootLayout() {
         />
       </Stack>
 
-      <Modal
-        visible={isAdVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setIsAdVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.adContainer}>
-            <PopUpAd onClose={() => setIsAdVisible(false)} />
+      {!isAppReady && (
+        <View style={styles.splashOverlay}>
+          <View style={styles.centerContent}>
+            <Image
+              source={require('@/assets/images/splash-icon-actual.png')}
+              style={styles.splashImage}
+              resizeMode="contain"
+            />
+            <Text style={styles.timerText}>{countdownDigits}</Text>
           </View>
         </View>
-      </Modal>
+      )}
 
-      {/* Sidebar Modal */}
+      {/* 3. Sidebar Modal */}
       {isModalOpen && (
-        <>
-          <Pressable
-            style={{
-              position: 'absolute',
-              top: 0, left: 0, right: 0, bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            }}
-            onPress={onClose}
-          />
+        <View style={[StyleSheet.absoluteFillObject, { zIndex: 9999 }]}>
+          <Pressable style={StyleSheet.absoluteFillObject} onPress={onClose}>
+            <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }} />
+          </Pressable>
           <SideBarModal onClose={onClose} />
-        </>
+        </View>
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  splashContainer: {
-    flex: 1,
+  splashOverlay: {
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 9998,
   },
   centerContent: {
     alignItems: 'center',
@@ -188,25 +168,4 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     fontVariant: ['tabular-nums'],
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 4,
-  },
-  adContainer: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingTop: 12,
-    paddingBottom: 24,
-    width: '90%',
-    position: 'relative',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  }
 });

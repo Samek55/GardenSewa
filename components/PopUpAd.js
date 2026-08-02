@@ -1,4 +1,3 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -7,14 +6,17 @@ const PopUpAd = ({ onClose }) => {
     const [seconds, setSeconds] = useState(10);
 
     useEffect(() => {
-        if (seconds <= 0) return;
+        if (seconds <= 0) {
+            onClose?.(); // Auto-dismiss when timer hits 0
+            return;
+        }
 
         const timer = setInterval(() => {
             setSeconds((prev) => prev - 1);
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [seconds]);
+    }, [seconds, onClose]);
 
     return (
         <View style={styles.container}>
@@ -24,15 +26,9 @@ const PopUpAd = ({ onClose }) => {
                     style={styles.adImage}
                     resizeMode="cover" 
                 />
-                {seconds > 0 ? (
-                    <View style={styles.badge}>
-                        <Text style={styles.badgeText}>{seconds}s</Text>
-                    </View>
-                ) : (
-                    <TouchableOpacity style={styles.closeBadge} onPress={onClose}>
-                        <Ionicons name="close" size={18} color="#FFF" />
-                    </TouchableOpacity>
-                )}
+                <View style={styles.badge}>
+                    <Text style={styles.badgeText}>{seconds}s</Text>
+                </View>
             </View>
 
             <Text style={styles.title}>Flat 20% discount off Landscape Lighting</Text>
@@ -55,10 +51,10 @@ const PopUpAd = ({ onClose }) => {
 
 export default PopUpAd;
 
+
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
-        // padding: 1,
     },
     imageWrapper: {
         width: '100%',

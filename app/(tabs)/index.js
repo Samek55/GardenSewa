@@ -1,62 +1,39 @@
-import { Link, router, useLocalSearchParams, useRouter } from 'expo-router';
+import PopUpAd from '@/components/PopUpAd';
+import { Link, router } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
     Alert,
     Dimensions,
     FlatList,
     Image,
     Linking,
+    Modal,
     Pressable,
     StyleSheet,
     Text,
     TextInput,
     View
 } from "react-native";
-
 import { NP } from 'react-native-country-flag-icons';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useEffect, useState } from 'react';
 import ServiceCard from "../../components/ServiceCard";
 import { services } from "../../data/servicesList";
 
 const { width } = Dimensions.get('window');
 const TOP_CARD_WIDTH = (width - 36 - 2 - 24 - 10) / 2.6;
 
-const IS_DEV = true;
-
 export default function Index() {
-    const navRouter = useRouter();
-    const params = useLocalSearchParams();
-    const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+    const [isAdVisible, setIsAdVisible] = useState(false);
+    const [phone, setPhone] = useState('');
 
+    // Trigger Pop-Up Ad when Home mounts
     useEffect(() => {
-        async function checkOnboardingStatus() {
-            try {
-                if (params.fromOnboarding === 'true') {
-                    setCheckingOnboarding(false);
-                    return;
-                }
+        const timer = setTimeout(() => {
+            setIsAdVisible(true);
+        }, 500);
 
-                if (IS_DEV) {
-                    navRouter.replace('/(tabs)/onBoarding');
-                    return;
-                }
-
-                const hasSeen = await AsyncStorage.getItem('hasSeenOnboarding');
-                if (!hasSeen) {
-                    navRouter.replace('/(tabs)/onBoarding');
-                } else {
-                    setCheckingOnboarding(false);
-                }
-            } catch (error) {
-                console.error("Failed checking onboarding status:", error);
-                setCheckingOnboarding(false);
-            }
-        }
-
-        checkOnboardingStatus();
-    }, [params.fromOnboarding]);
+        return () => clearTimeout(timer);
+    }, []);
 
     const onWhatsappOpen = async () => {
         const phoneNumber = "+ 977 9852024365";
@@ -74,30 +51,18 @@ export default function Index() {
         }
     };
 
-    const [phone, setPhone] = useState('');
-
     const filteredServicesTop = services.filter(service => service.label === 'Top');
 
     const formattedPhoneValue = phone.length === 10
         ? `${phone.slice(0, 5)} ${phone.slice(5, 7)} ${phone.slice(7, 10)}`
         : phone;
 
-    if (checkingOnboarding) {
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' }}>
-                <ActivityIndicator size="large" color="#225754" />
-            </View>
-        );
-    }
-
     return (
         <View style={styles.screenContainer}>
 
             <View style={styles.heroContainer}>
                 <Image
-                    source={{
-                        uri: 'https://www.gardensewa.com/home/slider/1.jpg'
-                    }}
+                    source={{ uri: 'https://www.gardensewa.com/home/slider/1.jpg' }}
                     style={styles.backgroundImage}
                     resizeMode="cover"
                 />
@@ -186,6 +151,20 @@ export default function Index() {
                 />
             </View>
 
+            {/* PopUp Ad Modal */}
+            <Modal
+                visible={isAdVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setIsAdVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.adContainer}>
+                        <PopUpAd onClose={() => setIsAdVisible(false)} />
+                    </View>
+                </View>
+            </Modal>
+
         </View>
     );
 }
@@ -218,12 +197,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: width * 0.07,
         lineHeight: width * 0.095,
-    },
-    subTitle: {
-        color: '#E0E0E0',
-        fontWeight: '400',
-        fontSize: 14,
-        marginTop: 6,
     },
     inputContainer: {
         flexDirection: 'row',
@@ -337,4 +310,25 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         marginBottom: 8,
     },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 4,
+    },
+    adContainer: {
+        backgroundColor: 'white',
+        borderRadius: 16,
+        paddingHorizontal: 12,
+        paddingTop: 12,
+        paddingBottom: 24,
+        width: '90%',
+        position: 'relative',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+    }
 });

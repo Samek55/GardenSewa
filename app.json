@@ -2,6 +2,7 @@
   "expo": {
     "name": "GardenSewa",
     "slug": "gardensewa",
+    "owner": "pratigyaluitels-team",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -12,7 +13,9 @@
       "bundleIdentifier": "com.pratigyaluitel.gardensewa",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "LSApplicationQueriesSchemes": ["whatsapp"]
+        "LSApplicationQueriesSchemes": [
+          "whatsapp"
+        ]
       }
     },
     "android": {
@@ -47,7 +50,9 @@
         {
           "android": {
             "manifestQueries": {
-              "package": ["com.whatsapp"]
+              "package": [
+                "com.whatsapp"
+              ]
             }
           }
         }
@@ -60,7 +65,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "1968f487-c034-420a-8219-ebe8f5a1c759"
+        "projectId": "b74963ba-134d-41ce-a6ad-e0d29b2c99c1"
       }
     }
   }

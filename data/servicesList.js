@@ -650,7 +650,7 @@ export const sourceData = [
     },
     {
         id: 7,
-        title: "Flyer/Pamphlet"
+        title: "Flyer/ Pamphlet"
     },
     {
         id: 8,

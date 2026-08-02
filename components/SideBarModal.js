@@ -30,7 +30,7 @@ const SideBarModal = ({ onClose }) => {
             </View>
 
             <View style={styles.adminButtonWrapper}>
-                <TouchableOpacity style={styles.adminLoginButton} activeOpacity={0.8} onPress={() => handleNavigation('./adminLogin')}>
+                <TouchableOpacity style={styles.adminLoginButton} activeOpacity={0.8} onPress={() => handleNavigation('/adminLogin')}>
                     <Ionicons name="lock-closed-outline" size={18} color="#FFFFFF" />
                     <Text style={styles.adminButtonText}>Admin Login</Text>
                 </TouchableOpacity>
@@ -43,60 +43,59 @@ const SideBarModal = ({ onClose }) => {
                 <View style={styles.primaryLinks}>
                     <Text style={styles.sectionTitle}>Menu</Text>
 
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./')}>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/(tabs)')}>
                         <Ionicons name="home-outline" size={20} color="#374151" />
                         <Text style={styles.linkItem}>Home</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./services')}>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/(tabs)/services')}>
                         <Ionicons name="grid-outline" size={20} color="#374151" />
                         <Text style={styles.linkItem}>Services</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./notifications')}>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/(tabs)/notifications')}>
                         <Ionicons name="notifications-outline" size={20} color="#374151" />
                         <Text style={styles.linkItem}>Notifications</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./book')}>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/book')}>
                         <Ionicons name="calendar-outline" size={20} color="#374151" />
                         <Text style={styles.linkItem}>Book a Service</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./joinasaprofessional')}>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/joinasaprofessional')}>
                         <Ionicons name="person-add-outline" size={20} color="#374151" />
                         <Text style={styles.linkItem}>Join as a Professional</Text>
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.secondaryLinks}>
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./about')}>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/about')}>
                         <Ionicons name="information-circle-outline" size={18} color="#6B7280" />
                         <Text style={styles.linkItemSecondary}>About Us</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./contact')}>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/contact')}>
                         <Ionicons name="mail-outline" size={18} color="#6B7280" />
                         <Text style={styles.linkItemSecondary}>Contact</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./faq')}>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/faq')}>
                         <Ionicons name="help-circle-outline" size={18} color="#6B7280" />
                         <Text style={styles.linkItemSecondary}>FAQs</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./glossary')}>
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/glossary')}>
                         <Ionicons name="book-outline" size={18} color="#6B7280" />
                         <Text style={styles.linkItemSecondary}>Glossary</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('./becomeAPartner')}>
+
+                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/becomeAPartner')}>
                         <Ionicons name="shield-checkmark-outline" size={18} color="#6B7280" />
                         <Text style={styles.linkItemSecondary}>Become a Partner</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
-
-
         </View>
     );
 };
@@ -104,7 +103,7 @@ const SideBarModal = ({ onClose }) => {
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        top: 80,
+        top: 60,
         left: 16,
         bottom: 30,
         width: SIDEBAR_WIDTH,
@@ -115,7 +114,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.12,
         shadowRadius: 12,
         elevation: 16,
-        zIndex: 10,
+        zIndex: 10000,
         overflow: 'hidden',
     },
     profileContainer: {
@@ -188,19 +187,19 @@ const styles = StyleSheet.create({
     },
     adminButtonWrapper: {
         paddingHorizontal: 20,
-        paddingBottom: 20,
-        paddingTop: 10,
-        backgroundColor: '#white',
+        paddingBottom: 10,
+        paddingTop: 16,
+        backgroundColor: '#ffffff',
     },
     adminLoginButton: {
         flexDirection: 'row',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
         backgroundColor: '#245d5a',
         paddingVertical: 12,
         borderRadius: 14,
-        width:'70%'
+        width: '70%'
     },
     adminButtonText: {
         color: '#FFFFFF',

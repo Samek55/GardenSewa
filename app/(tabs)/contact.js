@@ -20,6 +20,21 @@ const Contact = () => {
 
     }
 
+    const onMapOpen = async () => {
+        const query = encodeURIComponent("Rem.Work, Kamalpokhari, Kathmandu, Nepal");
+        const webUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+
+        try {
+            const supported = await Linking.canOpenURL(webUrl);
+            if (supported) {
+                await Linking.openURL(webUrl);
+            } else {
+                Alert.alert("Error", "Unable to open browser");
+            }
+        } catch (error) {
+            console.error("An error occurred while opening Google Maps", error);
+        }
+    };
 
     const onEmailOpen = async () => {
         const email = "gardensewa@sriyog.com";
@@ -71,7 +86,7 @@ const Contact = () => {
                     style={styles.mapImage}
                     resizeMode='cover'
                 />
-                <TouchableOpacity style={styles.buttonContainer} activeOpacity={0.8}>
+                <TouchableOpacity style={styles.buttonContainer} activeOpacity={0.8} onPress={onMapOpen}>
                     <Ionicons name="map-outline" size={18} color="white" />
                     <Text style={styles.buttonText}>Open in Maps</Text>
                 </TouchableOpacity>
@@ -119,7 +134,7 @@ const Contact = () => {
                     {/* <Ionicons name="chevron-forward" size={20} color="#666" style={styles.arrowIcon} /> */}
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.cardContainer} activeOpacity={0.7} onPress={()=>onWebsiteOpen()} >
+                <TouchableOpacity style={styles.cardContainer} activeOpacity={0.7} onPress={() => onWebsiteOpen()} >
                     <View style={styles.iconWrapper}>
                         <Ionicons name="globe-outline" size={22} color="#245d5a" />
                     </View>
