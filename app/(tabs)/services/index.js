@@ -82,10 +82,11 @@ export default function Services() {
                                         style={styles.fullWidthCardImage}
                                     />
                                     <View style={styles.fullWidthCardOverlay}>
-                                        <Text style={styles.fullWidthCardTitle}>{service.title}</Text>
                                         <Text style={styles.fullWidthCardDesc} numberOfLines={1} >
-                                            {service.description}
+                                            GardenSewa
                                         </Text>
+                                        <Text style={styles.fullWidthCardTitle}>{service.title}</Text>
+
                                     </View>
                                 </Pressable>
                             );

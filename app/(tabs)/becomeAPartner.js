@@ -256,6 +256,16 @@ export default function PartnerBook() {
         },
     });
 
+    const formatPhone = (text) => {
+        const digitsOnly = (text || '').replace(/[^0-9]/g, '');
+
+        if (digitsOnly.length === 10) {
+            return `${digitsOnly.slice(0, 5)} ${digitsOnly.slice(5, 7)} ${digitsOnly.slice(7, 10)}`;
+        }
+
+        return digitsOnly;
+    };
+
     const handleImagePick = async (type) => {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
@@ -336,8 +346,22 @@ export default function PartnerBook() {
                 'Validation Error',
                 Array.isArray(errors[firstError]) ? errors[firstError][0] : errors[firstError]
             );
-        } else {
+        }
+        else if (selectedCertificates.length == 0) {
+            Alert.alert("Validation Error", "Select at least one certificate.")
+
+        } else if (selectedCompanyImages.length == 0) {
+
+            Alert.alert("Validation Error", "Select at least one company image.")
+
+        }
+        else {
             formik.handleSubmit();
+            router.push({
+                pathname: '/phoneVerification',
+                params: { phone: formik.values.phone, requestType: 'Become a Partner' },
+
+            });
         }
     };
 
@@ -390,10 +414,14 @@ export default function PartnerBook() {
                         <TextInput
                             style={styles.flexInput}
                             placeholder="Enter your phone number"
-                            value={formik.values.phone}
-                            onChangeText={formik.handleChange('phone')}
+                            value={formatPhone(formik.values.phone)}
+                            maxLength={12}
+                            onChangeText={(text) => {
+                                const rawDigits = text.replace(/[^0-9]/g, '').slice(0, 10);
+                                formik.setFieldValue('phone', rawDigits);
+                            }}
                             keyboardType="phone-pad"
-                            maxLength={10}
+                            maxLength={12}
                         />
                     </View>
                 </View>

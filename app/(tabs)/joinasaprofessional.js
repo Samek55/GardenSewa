@@ -286,9 +286,31 @@ export default function JoinProfessional() {
         if (firstError) {
             formik.setTouched({ [firstError]: true });
             Alert.alert('Validation Error', Array.isArray(errors[firstError]) ? errors[firstError][0] : errors[firstError]);
-        } else {
+        }else if(profilePicture == null){
+            Alert.alert("Validation Error", "Upload profile picture")
+
+        } 
+        else if (identityPicture == null){
+            Alert.alert("Validation Error", "Upload identity picture")
+        } 
+        else {
             formik.handleSubmit();
+            router.push({
+                pathname: '/phoneVerification',
+                params: { phone: formik.values.phone, requestType: 'Join as a Professional' },
+
+            });
         }
+    };
+
+    const formatPhone = (text) => {
+        const digitsOnly = (text || '').replace(/[^0-9]/g, '');
+
+        if (digitsOnly.length === 10) {
+            return `${digitsOnly.slice(0, 5)} ${digitsOnly.slice(5, 7)} ${digitsOnly.slice(7, 10)}`;
+        }
+
+        return digitsOnly;
     };
 
     const availableAreas = formik.values.city ? areasByCity[formik.values.city] || [] : [];
@@ -329,10 +351,13 @@ export default function JoinProfessional() {
                         <TextInput
                             style={styles.flexInput}
                             placeholder="Enter your phone number"
-                            value={formik.values.phone}
-                            onChangeText={formik.handleChange('phone')}
+                            value={formatPhone(formik.values.phone)}
+                            maxLength={12}
+                            onChangeText={(text) => {
+                                const rawDigits = text.replace(/[^0-9]/g, '').slice(0, 10);
+                                formik.setFieldValue('phone', rawDigits);
+                            }}
                             keyboardType="phone-pad"
-                            maxLength={10}
                         />
                     </View>
                 </View>
@@ -502,8 +527,12 @@ export default function JoinProfessional() {
                         <TextInput
                             style={styles.flexInput}
                             placeholder="Enter phone number"
-                            value={formik.values.emergencyPhone}
-                            onChangeText={formik.handleChange('emergencyPhone')}
+                            value={formatPhone(formik.values.emergencyPhone)}
+                            maxLength={12}
+                            onChangeText={(text) => {
+                                const rawDigits = text.replace(/[^0-9]/g, '').slice(0, 10);
+                                formik.setFieldValue('emergencyPhone', rawDigits);
+                            }}
                             keyboardType="phone-pad"
                         />
                     </View>
@@ -517,8 +546,12 @@ export default function JoinProfessional() {
                         <TextInput
                             style={styles.flexInput}
                             placeholder="Enter phone number"
-                            value={formik.values.referralPhone}
-                            onChangeText={formik.handleChange('referralPhone')}
+                            value={formatPhone(formik.values.referralPhone)}
+                            maxLength={12}
+                            onChangeText={(text) => {
+                                const rawDigits = text.replace(/[^0-9]/g, '').slice(0, 10);
+                                formik.setFieldValue('referralPhone', rawDigits);
+                            }}
                             keyboardType="phone-pad"
                         />
                     </View>

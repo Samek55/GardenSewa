@@ -109,6 +109,7 @@ export default function Book() {
     const params = useLocalSearchParams();
 
 
+    // const [formattedPhone, setPhone] = useState('')
     const [selectedImages, setSelectedImages] = useState([]);
     const [showSummary, setShowSummary] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState(null);
@@ -184,9 +185,21 @@ export default function Book() {
         if (firstError) {
             formik.setTouched({ [firstError]: true });
             Alert.alert('Validation Error', errors[firstError]);
+        } else if (selectedImages.length == 0) {
+            Alert.alert('Validation Error',"Select at least one image")
         } else {
             formik.handleSubmit();
         }
+    };
+
+    const formatPhone = (text) => {
+        const digitsOnly = (text || '').replace(/[^0-9]/g, '');
+
+        if (digitsOnly.length === 10) {
+            return `${digitsOnly.slice(0, 5)} ${digitsOnly.slice(5, 7)} ${digitsOnly.slice(7, 10)}`;
+        }
+
+        return digitsOnly;
     };
 
     const availableAreas = formik.values.city ? areasByCity[formik.values.city] || [] : [];
@@ -228,10 +241,14 @@ export default function Book() {
                             <TextInput
                                 style={styles.flexInput}
                                 placeholder="Enter your phone number"
-                                value={formik.values.phone}
-                                onChangeText={formik.handleChange('phone')}
+                                value={formatPhone(formik.values.phone)}
+                                maxLength={12}
+                                onChangeText={(text) => {
+                                    const rawDigits = text.replace(/[^0-9]/g, '').slice(0, 10);
+                                    formik.setFieldValue('phone', rawDigits);
+                                }}
                                 keyboardType="phone-pad"
-                                maxLength={10}
+                                maxLength={12}
                             />
                         </View>
                     </View>
@@ -511,7 +528,8 @@ export default function Book() {
                         Alert.alert("Success", "Your booking has been confirmed!");
                         router.push({
                             pathname: '/phoneVerification',
-                            params: { phone: phoneNumber },
+                            params: { phone: phoneNumber, requestType: 'Booking' },
+
                         });
                     }}
                 />

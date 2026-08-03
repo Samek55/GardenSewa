@@ -56,7 +56,6 @@ export default function RootLayout() {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* 1. Main Navigation Stack (Runs in background behind splash) */}
       <Stack>
         <Stack.Screen
           name="index"
