@@ -2,9 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
 import {
+    Alert,
     KeyboardAvoidingView,
     Platform,
-    SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
@@ -14,15 +14,29 @@ import {
     View
 } from "react-native";
 import { NP } from "react-native-country-flag-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const AdminLogin = () => {
-    const [phone, setPhone] = useState("");
+    const [rawPhone, setRawPhone] = useState("");
     const [pin, setPin] = useState(["", "", "", ""]);
     const [showPin, setShowPin] = useState(false);
 
     const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
     const pinRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
+
+    const formatPhone = (text) => {
+        const digitsOnly = (text || "").replace(/[^0-9]/g, "");
+        if (digitsOnly.length === 10) {
+            return `${digitsOnly.slice(0, 5)} ${digitsOnly.slice(5, 7)} ${digitsOnly.slice(7, 10)}`;
+        }
+        return text;
+    };
+
+    const handlePhoneChange = (text) => {
+        const digitsOnly = text.replace(/[^0-9]/g, "").slice(0, 10);
+        setRawPhone(digitsOnly);
+    };
 
     const handlePinChange = (text, index) => {
         const newPin = [...pin];
@@ -38,6 +52,32 @@ const AdminLogin = () => {
         if (e.nativeEvent.key === 'Backspace' && pin[index] === '' && index > 0) {
             pinRefs[index - 1].current.focus();
         }
+    };
+
+    const handleLogin = () => {
+        const fullPin = pin.join("");
+
+        if (!rawPhone || rawPhone.length < 10) {
+            Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number.");
+            return;
+        }
+
+        if (fullPin.length < 4) {
+            Alert.alert("Invalid PIN", "Please enter your complete 4-digit PIN.");
+            return;
+        }
+
+        Alert.alert(
+            "Approval Pending",
+            "Your application is currently under review by the admin. You will receive an SMS with your login details once your profile is approved.\n\nThank you for your patience."
+        );
+    };
+
+    const handleResetPinPress = () => {
+        router.push({
+            pathname: '/resetPin',
+            params: { phone: rawPhone },
+        });
     };
 
     const isTablet = screenWidth > 600;
@@ -90,13 +130,12 @@ const AdminLogin = () => {
                             <NP width={26} height={18} style={styles.nepalFlag} />
                             <TextInput
                                 style={styles.phoneTextInput}
-                                value={phone}
-                                onChangeText={setPhone}
+                                value={formatPhone(rawPhone)}
+                                onChangeText={handlePhoneChange}
                                 keyboardType="phone-pad"
                                 placeholder="Enter your phone number"
                                 placeholderTextColor="#999"
-                                maxLength={10}
-
+                                maxLength={12}
                             />
                         </View>
 
@@ -128,17 +167,27 @@ const AdminLogin = () => {
                             ))}
                         </View>
 
-                        <TouchableOpacity activeOpacity={0.8} style={styles.loginSubmitButton}>
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            style={styles.loginSubmitButton}
+                            onPress={handleLogin}
+                        >
                             <Text style={styles.loginButtonText}>Login</Text>
                         </TouchableOpacity>
 
                         <View style={[styles.horizontalDivider, { marginVertical: screenHeight * 0.03 }]} />
 
                         <View style={styles.panelFooterActionContainer}>
-                            <TouchableOpacity style={styles.footerLinkAction} onPress={() => router.push('./joinasaprofessional')}>
+                            <TouchableOpacity
+                                style={styles.footerLinkAction}
+                                onPress={() => router.push('./joinasaprofessional')}
+                            >
                                 <Text style={styles.professionalJoinText}>Join as Professional : Join Now</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.footerLinkAction}>
+                            <TouchableOpacity
+                                style={styles.footerLinkAction}
+                                onPress={handleResetPinPress}
+                            >
                                 <Text style={styles.resetPinText}>Reset PIN</Text>
                             </TouchableOpacity>
                         </View>
@@ -247,13 +296,13 @@ const styles = StyleSheet.create({
     singlePinBox: {
         flex: 1,
         backgroundColor: "#FFF",
-        // borderRadius: 14,
         fontSize: 20,
         fontWeight: "700",
         color: "#000",
         borderWidth: 1,
         borderColor: "#e2edeb",
         paddingVertical: 0,
+        borderRadius: 12,
     },
     loginSubmitButton: {
         backgroundColor: "#2C5E5A",

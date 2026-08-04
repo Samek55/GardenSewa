@@ -14,7 +14,10 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "LSApplicationQueriesSchemes": [
-          "whatsapp"
+          "whatsapp",
+          "comgooglemaps",
+          "googlegmail",
+          "mailto"
         ]
       }
     },
@@ -51,7 +54,23 @@
           "android": {
             "manifestQueries": {
               "package": [
-                "com.whatsapp"
+                "com.whatsapp",
+                "com.google.android.apps.maps",
+                "com.google.android.gm"
+              ],
+              "intent": [
+                {
+                  "action": "android.intent.action.VIEW",
+                  "data": {
+                    "scheme": "geo"
+                  }
+                },
+                {
+                  "action": "android.intent.action.SENDTO",
+                  "data": {
+                    "scheme": "mailto"
+                  }
+                }
               ]
             }
           }

@@ -1,21 +1,23 @@
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    useWindowDimensions,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import SuccessAfterVerification from "../../components/SuccessModal";
 
 const PhoneVerification = () => {
+  const router = useRouter();
+
   const { phone, requestType } = useLocalSearchParams();
 
   const [isOpenModal, setIsOpenModal] = useState(false);
@@ -81,6 +83,8 @@ const PhoneVerification = () => {
     setOtp(["", "", "", ""]);
     setIsOpenModal(false);
     inputRefs[0].current?.focus();
+    router.replace('/(tabs)/')
+
   };
 
   return (

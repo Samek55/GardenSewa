@@ -2,6 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
 const SuccessAfterVerification = ({ visible, onClose, onClear }) => {
+
+
   return (
     <Modal
       animationType="fade"
@@ -12,26 +14,16 @@ const SuccessAfterVerification = ({ visible, onClose, onClear }) => {
       <View style={styles.overlay}>
         <View style={styles.cardContainer}>
           <View style={styles.iconCircle}>
-            <Ionicons name="checkmark-done" size={48} color="#2C5E5A"  />
+            <Ionicons name="checkmark-done" size={48} color="#2C5E5A" />
           </View>
 
           <Text style={styles.title}>Submitted!</Text>
           <Text style={styles.subtitle}>
             Your Application has been received successfully!
           </Text>
-          <Text style={styles.questionText}>Would you like to clear the form?</Text>
+          {/* <Text style={styles.questionText}>Would you like to clear the form?</Text> */}
 
           <View style={styles.buttonRow}>
-            <Pressable
-              style={({ pressed }) => [
-                styles.button,
-                styles.secondaryButton,
-                pressed && styles.pressed,
-              ]}
-              onPress={onClose}
-            >
-              <Text style={styles.secondaryButtonText}>Keep</Text>
-            </Pressable>
 
             <Pressable
               style={({ pressed }) => [
@@ -39,9 +31,13 @@ const SuccessAfterVerification = ({ visible, onClose, onClear }) => {
                 styles.primaryButton,
                 pressed && styles.pressed,
               ]}
-              onPress={onClear}
+              onPress={() => {
+                onClear();
+                
+              }
+              }
             >
-              <Text style={styles.primaryButtonText}>Clear Form</Text>
+              <Text style={styles.primaryButtonText}>Back to Home</Text>
             </Pressable>
           </View>
         </View>

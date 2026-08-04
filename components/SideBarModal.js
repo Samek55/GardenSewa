@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import React from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -9,10 +9,61 @@ const SIDEBAR_WIDTH = Math.min(width * 0.75, 300);
 
 const SideBarModal = ({ onClose }) => {
     const router = useRouter();
+    const pathname = usePathname();
 
     const handleNavigation = (path) => {
         onClose();
         router.push(path);
+    };
+
+    const isActive = (targetPath) => {
+        if (!pathname) return false;
+
+        if (targetPath === '/(tabs)' || targetPath === '/') {
+            return pathname === '/' || pathname === '/(tabs)' || pathname === '/(tabs)/index';
+        }
+
+        if (targetPath === '/(tabs)/services') {
+            return pathname.startsWith('/services') || pathname.startsWith('/(tabs)/services');
+        }
+
+        if (targetPath === '/(tabs)/notifications') {
+            return pathname.startsWith('/notifications') || pathname.startsWith('/(tabs)/notifications');
+        }
+
+        return pathname === targetPath || pathname === `/(tabs)${targetPath}`;
+    };
+
+    const renderMenuItem = (path, iconName, label, isSecondary = false) => {
+        const active = isActive(path);
+
+        return (
+            <TouchableOpacity
+                key={path}
+                style={[
+                    styles.linkRow,
+                    active && styles.activeLinkRow
+                ]}
+                activeOpacity={0.7}
+                onPress={() => handleNavigation(path)}
+            >
+                <Ionicons
+                    name={iconName}
+                    size={isSecondary ? 18 : 20}
+                    color={active ? "#245d5a" : (isSecondary ? "#6B7280" : "#374151")}
+                />
+                <Text
+                    style={[
+                        isSecondary ? styles.linkItemSecondary : styles.linkItem,
+                        active && styles.activeLinkText
+                    ]}
+                >
+                    {label}
+                </Text>
+
+                {active && <View style={styles.activeBorderRight} />}
+            </TouchableOpacity>
+        );
     };
 
     return (
@@ -30,7 +81,14 @@ const SideBarModal = ({ onClose }) => {
             </View>
 
             <View style={styles.adminButtonWrapper}>
-                <TouchableOpacity style={styles.adminLoginButton} activeOpacity={0.8} onPress={() => handleNavigation('/adminLogin')}>
+                <TouchableOpacity
+                    style={[
+                        styles.adminLoginButton,
+                        isActive('/adminLogin') && styles.adminActiveButton
+                    ]}
+                    activeOpacity={0.8}
+                    onPress={() => handleNavigation('/adminLogin')}
+                >
                     <Ionicons name="lock-closed-outline" size={18} color="#FFFFFF" />
                     <Text style={styles.adminButtonText}>Admin Login</Text>
                 </TouchableOpacity>
@@ -43,57 +101,19 @@ const SideBarModal = ({ onClose }) => {
                 <View style={styles.primaryLinks}>
                     <Text style={styles.sectionTitle}>Menu</Text>
 
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/(tabs)')}>
-                        <Ionicons name="home-outline" size={20} color="#374151" />
-                        <Text style={styles.linkItem}>Home</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/(tabs)/services')}>
-                        <Ionicons name="grid-outline" size={20} color="#374151" />
-                        <Text style={styles.linkItem}>Services</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/(tabs)/notifications')}>
-                        <Ionicons name="notifications-outline" size={20} color="#374151" />
-                        <Text style={styles.linkItem}>Notifications</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/book')}>
-                        <Ionicons name="calendar-outline" size={20} color="#374151" />
-                        <Text style={styles.linkItem}>Book a Service</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/joinasaprofessional')}>
-                        <Ionicons name="person-add-outline" size={20} color="#374151" />
-                        <Text style={styles.linkItem}>Join as a Professional</Text>
-                    </TouchableOpacity>
+                    {renderMenuItem('/(tabs)', 'home-outline', 'Home')}
+                    {renderMenuItem('/(tabs)/services', 'grid-outline', 'Services')}
+                    {renderMenuItem('/(tabs)/notifications', 'notifications-outline', 'Notifications')}
+                    {renderMenuItem('/book', 'calendar-outline', 'Book a Service')}
+                    {renderMenuItem('/joinasaprofessional', 'person-add-outline', 'Join as a Professional')}
                 </View>
 
                 <View style={styles.secondaryLinks}>
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/about')}>
-                        <Ionicons name="information-circle-outline" size={18} color="#6B7280" />
-                        <Text style={styles.linkItemSecondary}>About Us</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/contact')}>
-                        <Ionicons name="mail-outline" size={18} color="#6B7280" />
-                        <Text style={styles.linkItemSecondary}>Contact</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/faq')}>
-                        <Ionicons name="help-circle-outline" size={18} color="#6B7280" />
-                        <Text style={styles.linkItemSecondary}>FAQs</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/glossary')}>
-                        <Ionicons name="book-outline" size={18} color="#6B7280" />
-                        <Text style={styles.linkItemSecondary}>Glossary</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.linkRow} activeOpacity={0.7} onPress={() => handleNavigation('/becomeAPartner')}>
-                        <Ionicons name="shield-checkmark-outline" size={18} color="#6B7280" />
-                        <Text style={styles.linkItemSecondary}>Become a Partner</Text>
-                    </TouchableOpacity>
+                    {renderMenuItem('/about', 'information-circle-outline', 'About Us', true)}
+                    {renderMenuItem('/contact', 'mail-outline', 'Contact', true)}
+                    {renderMenuItem('/faq', 'help-circle-outline', 'FAQs', true)}
+                    {renderMenuItem('/glossary', 'book-outline', 'Glossary', true)}
+                    {renderMenuItem('/becomeAPartner', 'shield-checkmark-outline', 'Become a Partner', true)}
                 </View>
             </ScrollView>
         </View>
@@ -151,7 +171,7 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
     },
     primaryLinks: {
-        gap: 8,
+        gap: 4,
         paddingHorizontal: 20,
     },
     sectionTitle: {
@@ -166,24 +186,46 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
-        paddingVertical: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 8,
+        borderRadius: 8,
+        position: 'relative',
+    },
+    activeLinkRow: {
+        backgroundColor: 'rgba(36, 93, 90, 0.06)',
     },
     linkItem: {
         fontSize: 15,
         fontWeight: '500',
         color: '#374151',
-    },
-    secondaryLinks: {
-        gap: 8,
-        borderTopWidth: 1,
-        borderTopColor: '#F3F4F6',
-        paddingTop: 16,
-        paddingHorizontal: 20,
-        marginTop: 16,
+        flex: 1,
     },
     linkItemSecondary: {
         fontSize: 14,
         color: '#6B7280',
+        flex: 1,
+    },
+    activeLinkText: {
+        color: '#245d5a',
+        fontWeight: '700',
+    },
+    activeBorderRight: {
+        position: 'absolute',
+        right: 0,
+        top: 6,
+        bottom: 6,
+        width: 4,
+        backgroundColor: '#245d5a',
+        borderTopLeftRadius: 4,
+        borderBottomLeftRadius: 4,
+    },
+    secondaryLinks: {
+        gap: 4,
+        borderTopWidth: 1,
+        borderTopColor: '#F3F4F6',
+        paddingTop: 16,
+        paddingHorizontal: 20,
+        marginTop: 12,
     },
     adminButtonWrapper: {
         paddingHorizontal: 20,
@@ -200,6 +242,10 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         borderRadius: 14,
         width: '70%'
+    },
+    adminActiveButton: {
+        borderWidth: 2,
+        borderColor: '#10B981',
     },
     adminButtonText: {
         color: '#FFFFFF',

@@ -122,6 +122,13 @@ const TabLayout = () => {
                     href: null
                 }}
             />
+            <Tabs.Screen
+                name="resetPin"
+                options={{
+                    title: "Reset Pin",
+                    href: null
+                }}
+            />
 
         </Tabs>
     )

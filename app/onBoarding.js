@@ -10,53 +10,36 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { SvgUri } from 'react-native-svg';
 
-const { width } = Dimensions.get('window');
+import Vector1 from '../assets/images/vector1.svg';
+import Vector2 from '../assets/images/vector2.svg';
+import Vector3 from '../assets/images/vector3.svg';
 
-const SlideOneVector = () => (
-  <Image
-    source={require('../assets/images/icon.png')}
-    style={styles.vectorImage}
-    resizeMode="contain"
-  />
-);
-
-const SlideTwoVector = () => (
-  <Image
-    source={require('../assets/images/icon.png')}
-    style={styles.vectorImage}
-    resizeMode="contain"
-  />
-);
-
-const SlideThreeVector = () => (
-  <Image
-    source={require('../assets/images/icon.png')}
-    style={styles.vectorImage}
-    resizeMode="contain"
-  />
-);
+const { width, height } = Dimensions.get('window');
 
 const SLIDES = [
   {
     id: '1',
-    title: 'Welcome to GardenSewa',
-    description: 'Your one-stop solution for expert gardening and plant care services.',
-    VectorGraphic: SlideOneVector,
+    title: 'Effortless Garden Care',
+    description:
+      'Book trusted local experts for lawn care, landscaping, and maintenance in just a few taps.',
+    vectorAsset: Vector1,
   },
   {
     id: '2',
-    title: 'Expert Plant Care',
-    description: 'Book professional gardeners directly to keep your indoor and outdoor space green.',
-    VectorGraphic: SlideTwoVector,
+    title: 'Grow Your Business',
+    description:
+      'Set your own schedule, connect with local clients, and build a steady income on your terms.',
+    vectorAsset: Vector2,
   },
   {
     id: '3',
-    title: 'Get Started Today',
-    description: 'Browse available gardening services and transform your home space.',
-    VectorGraphic: SlideThreeVector,
+    title: 'Supply & Partner',
+    description:
+      'Partner with us to supply plants, tools, and materials directly to our active gardening community.',
+    vectorAsset: Vector3,
   },
 ];
 
@@ -92,14 +75,37 @@ export default function OnBoardingScreen() {
   };
 
   const renderItem = ({ item }) => {
-    const VectorGraphic = item.VectorGraphic;
+    const assetUri = Image.resolveAssetSource(item.vectorAsset)?.uri;
+
     return (
       <View style={styles.slide}>
-        <View style={styles.vectorContainer}>
-          <VectorGraphic />
+        <View style={styles.header}>
+          {currentIndex < SLIDES.length - 1 ? (
+            <TouchableOpacity onPress={handleFinish} style={styles.skipHeaderButton}>
+              <Text style={styles.skipText}>Skip</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.headerPlaceholder} />
+          )}
         </View>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.description}>{item.description}</Text>
+
+        <View style={styles.illustrationSection}>
+          <View style={styles.vectorBackgroundCircle}>
+            {assetUri ? (
+              <SvgUri
+                width={width * 0.7}
+                height={height * 0.3}
+                uri={assetUri}
+              />
+            ) : null}
+          </View>
+        </View>
+
+        {/* Content Section */}
+        <View style={styles.contentSection}>
+          <Text style={styles.title}>{item.title}</Text>
+          <Text style={styles.description}>{item.description}</Text>
+        </View>
       </View>
     );
   };
@@ -119,8 +125,8 @@ export default function OnBoardingScreen() {
         contentContainerStyle={{ flexGrow: 1 }}
       />
 
+      {/* Footer Area */}
       <View style={styles.footer}>
-        {/* Pagination Dots */}
         <View style={styles.paginationContainer}>
           {SLIDES.map((_, index) => (
             <View
@@ -133,23 +139,12 @@ export default function OnBoardingScreen() {
           ))}
         </View>
 
-        {/* Navigation Buttons */}
         <View style={styles.buttonContainer}>
-          {currentIndex < SLIDES.length - 1 ? (
-            <>
-              <TouchableOpacity onPress={handleFinish} style={styles.skipButton}>
-                <Text style={styles.skipText}>Skip</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.button} onPress={handleNext}>
-                <Text style={styles.buttonText}>Next</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <TouchableOpacity style={[styles.button, styles.fullButton]} onPress={handleNext}>
-              <Text style={styles.buttonText}>Get Started</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity style={styles.button} onPress={handleNext}>
+            <Text style={styles.buttonText}>
+              {currentIndex < SLIDES.length - 1 ? 'Next' : 'Get Started'}
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -164,45 +159,70 @@ const styles = StyleSheet.create({
   slide: {
     width,
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     paddingHorizontal: 28,
-    paddingBottom: 12,
+    justifyContent: 'space-between',
   },
-  vectorContainer: {
+  header: {
+    width: '100%',
+    height: 44,
+    alignItems: 'flex-end',
     justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
+    marginTop: 8,
   },
-  vectorImage: {
-    width: width * 0.5,
-    height: width * 0.5,
-    borderRadius: 24,
+  skipHeaderButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  skipText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  headerPlaceholder: {
+    height: 32,
+  },
+  illustrationSection: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: height * 0.38,
+  },
+  vectorBackgroundCircle: {
+    width: width * 0.78,
+    height: width * 0.78,
+    borderRadius: (width * 0.78) / 2,
+    backgroundColor: '#F0FDF4', 
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contentSection: {
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    marginBottom: 16,
   },
   title: {
-    fontSize: 26,
-    fontWeight: '700',
+    fontSize: 28,
+    fontWeight: '800',
     color: '#245d5a',
     textAlign: 'center',
     marginBottom: 12,
+    letterSpacing: -0.3,
   },
   description: {
     fontSize: 15,
     color: '#64748B',
     textAlign: 'center',
-    paddingHorizontal: 12,
-    lineHeight: 22,
+    lineHeight: 23,
+    paddingHorizontal: 10,
   },
   footer: {
     paddingHorizontal: 28,
-    paddingBottom: 12,
-    marginBottom: 68,
+    paddingBottom: 20,
   },
   paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   dot: {
     height: 8,
@@ -215,35 +235,26 @@ const styles = StyleSheet.create({
   },
   inactiveDot: {
     width: 8,
-    backgroundColor: '#CBD5E1',
+    backgroundColor: '#E2E8F0',
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  skipButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-  },
-  skipText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#64748B',
   },
   button: {
     backgroundColor: '#245d5a',
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-  },
-  fullButton: {
+    paddingVertical: 16,
     width: '100%',
     alignItems: 'center',
+    borderRadius: 14,
+    shadowColor: '#245d5a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 3,
   },
   buttonText: {
-    color: '#FFF',
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });
