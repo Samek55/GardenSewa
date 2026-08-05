@@ -12,7 +12,6 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import SuccessAfterVerification from "../../components/SuccessModal";
 
 const PhoneVerification = () => {
@@ -88,7 +87,7 @@ const PhoneVerification = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
@@ -174,7 +173,7 @@ const PhoneVerification = () => {
           onClear={handleClearForm}
         />
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -262,7 +261,7 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: "auto",
+    // marginTop: "auto",
   },
   loginButtonText: {
     color: "#FFF",

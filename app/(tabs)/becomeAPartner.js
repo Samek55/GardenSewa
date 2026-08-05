@@ -386,6 +386,7 @@ export default function PartnerBook() {
                     <TextInput
                         style={styles.textInput}
                         placeholder="Enter your full name"
+                        placeholderTextColor={'#999'}
                         value={formik.values.name}
                         onChangeText={formik.handleChange('name')}
                     />
@@ -399,6 +400,7 @@ export default function PartnerBook() {
                     <TextInput
                         style={styles.textInput}
                         placeholder="Enter Name of your Organization"
+                        placeholderTextColor={'#999'}
                         value={formik.values.organization}
                         onChangeText={formik.handleChange('organization')}
                     />
@@ -413,6 +415,7 @@ export default function PartnerBook() {
                         <NP width={30} height={20} style={styles.flagIcon} />
                         <TextInput
                             style={styles.flexInput}
+                            placeholderTextColor={'#999'}
                             placeholder="Enter your phone number"
                             value={formatPhone(formik.values.phone)}
                             maxLength={12}
@@ -431,6 +434,7 @@ export default function PartnerBook() {
                     <Text style={styles.label}>eMail Address</Text>
                     <TextInput
                         style={styles.textInput}
+                        placeholderTextColor={'#999'}
                         placeholder="Enter your eMail"
                         value={formik.values.email}
                         onChangeText={formik.handleChange('email')}
@@ -491,6 +495,7 @@ export default function PartnerBook() {
                     </Text>
                     <TextInput
                         style={styles.textInput}
+                        placeholderTextColor={'#999'}
                         placeholder="Enter the number of employees"
                         value={formik.values.noOfEmployees}
                         onChangeText={formik.handleChange('noOfEmployees')}
@@ -601,6 +606,7 @@ export default function PartnerBook() {
                         style={[styles.textInput, styles.textArea]}
                         multiline
                         placeholder="Enter your message"
+                        placeholderTextColor={'#999'}
                         value={formik.values.message}
                         onChangeText={formik.handleChange('message')}
                     />

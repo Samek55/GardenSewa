@@ -14,7 +14,6 @@ import {
     View
 } from "react-native";
 import { NP } from "react-native-country-flag-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const AdminLogin = () => {
     const [rawPhone, setRawPhone] = useState("");
@@ -85,7 +84,7 @@ const AdminLogin = () => {
     const dynamicPadding = screenHeight < 700 ? 16 : 32;
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={styles.keyboardView}
@@ -194,7 +193,7 @@ const AdminLogin = () => {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
     );
 };
 
@@ -323,7 +322,7 @@ const styles = StyleSheet.create({
     panelFooterActionContainer: {
         alignItems: "center",
         gap: 14,
-        marginTop: 'auto',
+        // marginTop: 'auto',
     },
     footerLinkAction: {
         paddingVertical: 2,

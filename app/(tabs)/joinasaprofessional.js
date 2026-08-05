@@ -286,13 +286,13 @@ export default function JoinProfessional() {
         if (firstError) {
             formik.setTouched({ [firstError]: true });
             Alert.alert('Validation Error', Array.isArray(errors[firstError]) ? errors[firstError][0] : errors[firstError]);
-        }else if(profilePicture == null){
+        } else if (profilePicture == null) {
             Alert.alert("Validation Error", "Upload profile picture")
 
-        } 
-        else if (identityPicture == null){
+        }
+        else if (identityPicture == null) {
             Alert.alert("Validation Error", "Upload identity picture")
-        } 
+        }
         else {
             formik.handleSubmit();
             router.push({
@@ -336,6 +336,7 @@ export default function JoinProfessional() {
                     <TextInput
                         style={styles.textInput}
                         placeholder="Enter your full name"
+                        placeholderTextColor={'#999'}
                         value={formik.values.name}
                         onChangeText={formik.handleChange('name')}
                     />
@@ -351,6 +352,7 @@ export default function JoinProfessional() {
                         <TextInput
                             style={styles.flexInput}
                             placeholder="Enter your phone number"
+                            placeholderTextColor={'#999'}
                             value={formatPhone(formik.values.phone)}
                             maxLength={12}
                             onChangeText={(text) => {
@@ -411,6 +413,7 @@ export default function JoinProfessional() {
                     <TextInput
                         style={styles.textInput}
                         placeholder="Enter your eMail"
+                        placeholderTextColor={'#999'}
                         value={formik.values.email}
                         onChangeText={formik.handleChange('email')}
                         keyboardType="email-address"
@@ -444,6 +447,7 @@ export default function JoinProfessional() {
                     <TextInput
                         style={styles.textInput}
                         placeholder="Enter your years of experience"
+                        placeholderTextColor={'#999'}
                         value={formik.values.yearsExperience}
                         onChangeText={formik.handleChange('yearsExperience')}
                         keyboardType="numeric"
@@ -526,6 +530,7 @@ export default function JoinProfessional() {
                         <NP width={30} height={20} style={styles.flagIcon} />
                         <TextInput
                             style={styles.flexInput}
+                            placeholderTextColor={'#999'}
                             placeholder="Enter phone number"
                             value={formatPhone(formik.values.emergencyPhone)}
                             maxLength={12}
@@ -546,6 +551,7 @@ export default function JoinProfessional() {
                         <TextInput
                             style={styles.flexInput}
                             placeholder="Enter phone number"
+                            placeholderTextColor={'#999'}
                             value={formatPhone(formik.values.referralPhone)}
                             maxLength={12}
                             onChangeText={(text) => {
@@ -563,6 +569,7 @@ export default function JoinProfessional() {
                     <TextInput
                         style={[styles.textInput, styles.textArea]}
                         multiline
+                        placeholderTextColor={'#999'}
                         placeholder="Enter your message"
                         value={formik.values.message}
                         onChangeText={formik.handleChange('message')}

@@ -186,7 +186,7 @@ export default function Book() {
             formik.setTouched({ [firstError]: true });
             Alert.alert('Validation Error', errors[firstError]);
         } else if (selectedImages.length == 0) {
-            Alert.alert('Validation Error',"Select at least one image")
+            Alert.alert('Validation Error', "Select at least one image")
         } else {
             formik.handleSubmit();
         }
@@ -226,6 +226,7 @@ export default function Book() {
                         <TextInput
                             style={styles.textInput}
                             placeholder="Enter your full name"
+                            placeholderTextColor={'#999'}
                             value={formik.values.name}
                             onChangeText={formik.handleChange('name')}
                         />
@@ -241,6 +242,7 @@ export default function Book() {
                             <TextInput
                                 style={styles.flexInput}
                                 placeholder="Enter your phone number"
+                                placeholderTextColor={'#999'}
                                 value={formatPhone(formik.values.phone)}
                                 maxLength={12}
                                 onChangeText={(text) => {
@@ -471,6 +473,7 @@ export default function Book() {
                             style={[styles.textInput, styles.textArea]}
                             multiline
                             placeholder="Enter your message"
+                            placeholderTextColor={'#999'}
                             value={formik.values.message}
                             onChangeText={formik.handleChange('message')}
                         />

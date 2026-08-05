@@ -1,21 +1,16 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
   Dimensions,
   FlatList,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { SvgUri } from 'react-native-svg';
-
-import Vector1 from '../assets/images/vector1.svg';
-import Vector2 from '../assets/images/vector2.svg';
-import Vector3 from '../assets/images/vector3.svg';
 
 const { width, height } = Dimensions.get('window');
 
@@ -25,21 +20,21 @@ const SLIDES = [
     title: 'Effortless Garden Care',
     description:
       'Book trusted local experts for lawn care, landscaping, and maintenance in just a few taps.',
-    vectorAsset: Vector1,
+    vectorAsset: require('../assets/images/vector1.svg'),
   },
   {
     id: '2',
     title: 'Grow Your Business',
     description:
       'Set your own schedule, connect with local clients, and build a steady income on your terms.',
-    vectorAsset: Vector2,
+    vectorAsset: require('../assets/images/vector2.svg'),
   },
   {
     id: '3',
     title: 'Supply & Partner',
     description:
       'Partner with us to supply plants, tools, and materials directly to our active gardening community.',
-    vectorAsset: Vector3,
+    vectorAsset: require('../assets/images/vector3.svg'),
   },
 ];
 
@@ -75,8 +70,6 @@ export default function OnBoardingScreen() {
   };
 
   const renderItem = ({ item }) => {
-    const assetUri = Image.resolveAssetSource(item.vectorAsset)?.uri;
-
     return (
       <View style={styles.slide}>
         <View style={styles.header}>
@@ -91,11 +84,11 @@ export default function OnBoardingScreen() {
 
         <View style={styles.illustrationSection}>
           <View style={styles.vectorBackgroundCircle}>
-            {assetUri ? (
-              <SvgUri
-                width={width * 0.7}
-                height={height * 0.3}
-                uri={assetUri}
+            {item.vectorAsset ? (
+              <Image
+                source={item.vectorAsset}
+                style={{ width: width * 0.7, height: height * 0.3 }}
+                contentFit="contain"
               />
             ) : null}
           </View>
@@ -190,7 +183,7 @@ const styles = StyleSheet.create({
     width: width * 0.78,
     height: width * 0.78,
     borderRadius: (width * 0.78) / 2,
-    backgroundColor: '#F0FDF4', 
+    backgroundColor: '#F0FDF4',
     alignItems: 'center',
     justifyContent: 'center',
   },

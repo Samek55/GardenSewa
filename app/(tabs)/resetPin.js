@@ -14,7 +14,6 @@ import {
     View,
 } from "react-native";
 
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const ResetPin = () => {
     const router = useRouter();
@@ -140,7 +139,7 @@ const ResetPin = () => {
     const cardMaxWidth = isTablet ? 500 : "100%";
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={styles.keyboardView}
@@ -287,7 +286,7 @@ const ResetPin = () => {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
     );
 };
 
