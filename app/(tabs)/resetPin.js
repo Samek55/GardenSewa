@@ -14,7 +14,6 @@ import {
     View,
 } from "react-native";
 
-
 const ResetPin = () => {
     const router = useRouter();
     const params = useLocalSearchParams();
@@ -29,7 +28,7 @@ const ResetPin = () => {
     const [seconds, setSeconds] = useState(60);
     const [canResend, setCanResend] = useState(false);
 
-    const { width: screenWidth } = useWindowDimensions();
+    const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
     const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
     const newPinRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
@@ -128,7 +127,7 @@ const ResetPin = () => {
             {
                 text: "OK",
                 onPress: () => {
-                    resetForm(); // Clears form after successful validation & save
+                    resetForm();
                     router.back();
                 },
             },
@@ -137,6 +136,7 @@ const ResetPin = () => {
 
     const isTablet = screenWidth > 600;
     const cardMaxWidth = isTablet ? 500 : "100%";
+    const pinBoxHeight = screenHeight < 700 ? 46 : 54;
 
     return (
         <View style={styles.container}>
@@ -193,7 +193,7 @@ const ResetPin = () => {
                                 <TextInput
                                     key={`otp-${index}`}
                                     ref={otpRefs[index]}
-                                    style={styles.singlePinBox}
+                                    style={[styles.singlePinBox, { height: pinBoxHeight }]}
                                     value={digit}
                                     onChangeText={(text) =>
                                         handlePinChange(text, index, otp, setOtp, otpRefs)
@@ -224,7 +224,7 @@ const ResetPin = () => {
                                 <TextInput
                                     key={`new-${index}`}
                                     ref={newPinRefs[index]}
-                                    style={styles.singlePinBox}
+                                    style={[styles.singlePinBox, { height: pinBoxHeight }]}
                                     value={digit}
                                     onChangeText={(text) =>
                                         handlePinChange(text, index, newPin, setNewPin, newPinRefs)
@@ -244,7 +244,7 @@ const ResetPin = () => {
                                 <TextInput
                                     key={`confirm-${index}`}
                                     ref={confirmPinRefs[index]}
-                                    style={styles.singlePinBox}
+                                    style={[styles.singlePinBox, { height: pinBoxHeight }]}
                                     value={digit}
                                     onChangeText={(text) =>
                                         handlePinChange(
@@ -310,9 +310,9 @@ const styles = StyleSheet.create({
         paddingBottom: 14,
     },
     outerCircle: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
+        width: 80,
+        height: 80,
+        borderRadius: 50,
         borderWidth: 1.5,
         borderColor: "rgba(255, 255, 255, 0.4)",
         backgroundColor: "rgba(255, 255, 255, 0.08)",
@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#F7F9F8",
         paddingHorizontal: 22,
         paddingTop: 22,
-        paddingBottom: 24,
+        paddingBottom: Platform.OS === 'web' ? 24 : 30,
     },
     fieldLabel: {
         fontSize: 13,
@@ -373,24 +373,18 @@ const styles = StyleSheet.create({
     },
     singlePinBox: {
         flex: 1,
-        height: 48,
         backgroundColor: "#FFF",
         fontSize: 20,
         fontWeight: "700",
         color: "#000",
         borderWidth: 1,
-        borderColor: "#d2e3e1",
+        borderColor: "#e2edeb",
         paddingVertical: 0,
-        borderRadius: 14,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.03,
-        shadowRadius: 2,
-        elevation: 1,
+        borderRadius: 12,
     },
     resendContainer: {
         alignItems: "center",
-        marginVertical: 6,
+        marginVertical: 4,
         marginBottom: 10,
     },
     resendText: {
