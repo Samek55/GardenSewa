@@ -38,18 +38,19 @@ const AdminLogin = () => {
     };
 
     const handlePinChange = (text, index) => {
+        const cleaned = text.replace(/[^0-9]/g, "");
         const newPin = [...pin];
-        newPin[index] = text;
+        newPin[index] = cleaned.slice(-1);
         setPin(newPin);
 
-        if (text.length === 1 && index < 3) {
-            pinRefs[index + 1].current.focus();
+        if (cleaned.length > 0 && index < 3) {
+            pinRefs[index + 1].current?.focus();
         }
     };
 
     const handleKeyPress = (e, index) => {
         if (e.nativeEvent.key === 'Backspace' && pin[index] === '' && index > 0) {
-            pinRefs[index - 1].current.focus();
+            pinRefs[index - 1].current?.focus();
         }
     };
 
@@ -149,12 +150,13 @@ const AdminLogin = () => {
                             </TouchableOpacity>
                         </View>
 
+                        {/* PIN inputs centered with smaller explicit width matching resetPin */}
                         <View style={styles.pinInputsGroupRow}>
                             {pin.map((digit, index) => (
                                 <TextInput
                                     key={index}
                                     ref={pinRefs[index]}
-                                    style={[styles.singlePinBox, { height: screenHeight < 700 ? 46 : 54 }]}
+                                    style={styles.singlePinBox}
                                     value={digit}
                                     onChangeText={(text) => handlePinChange(text, index)}
                                     onKeyPress={(e) => handleKeyPress(e, index)}
@@ -288,20 +290,21 @@ const styles = StyleSheet.create({
     },
     pinInputsGroupRow: {
         flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 24,
+        justifyContent: "center",
         gap: 12,
+        marginBottom: 24,
     },
     singlePinBox: {
-        flex: 1,
+        width: 46,
+        height: 54,
         backgroundColor: "#FFF",
         fontSize: 20,
         fontWeight: "700",
         color: "#000",
-        borderWidth: 1,
-        borderColor: "#e2edeb",
+        borderWidth: 1.5,
+        borderColor: "#C5CEE0",
+        borderRadius: 10,
         paddingVertical: 0,
-        borderRadius: 12,
     },
     loginSubmitButton: {
         backgroundColor: "#2C5E5A",
@@ -322,7 +325,6 @@ const styles = StyleSheet.create({
     panelFooterActionContainer: {
         alignItems: "center",
         gap: 14,
-        // marginTop: 'auto',
     },
     footerLinkAction: {
         paddingVertical: 2,

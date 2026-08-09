@@ -45,11 +45,12 @@ const PhoneVerification = () => {
   }, [seconds]);
 
   const handleOtpChange = (text, index) => {
+    const cleaned = text.replace(/[^0-9]/g, "");
     const newOtp = [...otp];
-    newOtp[index] = text;
+    newOtp[index] = cleaned.slice(-1);
     setOtp(newOtp);
 
-    if (text.length === 1 && index < 3) {
+    if (cleaned.length > 0 && index < 3) {
       inputRefs[index + 1].current?.focus();
     }
   };
@@ -82,8 +83,7 @@ const PhoneVerification = () => {
     setOtp(["", "", "", ""]);
     setIsOpenModal(false);
     inputRefs[0].current?.focus();
-    router.replace('/(tabs)/')
-
+    router.replace('/(tabs)/');
   };
 
   return (
@@ -126,15 +126,13 @@ const PhoneVerification = () => {
               </Text>
             </Text>
 
+            {/* Centered PIN row matching resetPin style */}
             <View style={styles.pinInputsGroupRow}>
               {otp.map((digit, index) => (
                 <TextInput
                   key={index}
                   ref={inputRefs[index]}
-                  style={[
-                    styles.singlePinBox,
-                    { height: screenHeight < 700 ? 52 : 58 },
-                  ]}
+                  style={styles.singlePinBox}
                   value={digit}
                   onChangeText={(text) => handleOtpChange(text, index)}
                   onKeyPress={(e) => handleKeyPress(e, index)}
@@ -215,19 +213,20 @@ const styles = StyleSheet.create({
   },
   pinInputsGroupRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     marginTop: 24,
     marginBottom: 28,
     gap: 12,
   },
   singlePinBox: {
-    flex: 1,
+    width: 46,
+    height: 54,
     backgroundColor: "#FFF",
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
     color: "#000",
-    borderWidth: 1,
-    borderColor: "#d2e3e1",
+    borderWidth: 1.5,
+    borderColor: "#C5CEE0",
     paddingVertical: 0,
     borderRadius: 10,
   },
@@ -261,7 +260,6 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     justifyContent: "center",
     alignItems: "center",
-    // marginTop: "auto",
   },
   loginButtonText: {
     color: "#FFF",
