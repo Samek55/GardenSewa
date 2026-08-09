@@ -62,7 +62,7 @@ export default function Index() {
 
             <View style={styles.heroContainer}>
                 <Image
-                    source={{ uri: 'https://www.gardensewa.com/home/slider/1.jpg' }}
+                    source={require('../../assets/images/home/hero.jpg')}
                     style={styles.backgroundImage}
                     resizeMode="cover"
                 />
@@ -106,7 +106,7 @@ export default function Index() {
 
             <Pressable style={styles.popularCardContainer} onPress={() => router.replace(`/services/${5}`)}>
                 <Image
-                    source={require('../../assets/images/lawn.jpg')}
+                    source={require('../../assets/images/home/lawn.jpg')}
                     style={styles.backgroundImage}
                     resizeMode="cover"
                 />

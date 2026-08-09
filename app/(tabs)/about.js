@@ -5,7 +5,7 @@ export default function About() {
     return (
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.container}>
             <Image
-                source={require('../../assets/images/garden4.jpg')}
+                source={require('../../assets/images/about/garden4.jpg')}
                 style={styles.bannerImage}
                 resizeMode="cover"
             />

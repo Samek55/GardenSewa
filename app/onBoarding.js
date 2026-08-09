@@ -20,21 +20,21 @@ const SLIDES = [
     title: 'Effortless Garden Care',
     description:
       'Book trusted local experts for lawn care, landscaping, and maintenance in just a few taps.',
-    vectorAsset: require('../assets/images/vector1.svg'),
+    vectorAsset: require('../assets/images/onboarding/vector1.svg'),
   },
   {
     id: '2',
     title: 'Grow Your Business',
     description:
       'Set your own schedule, connect with local clients, and build a steady income on your terms.',
-    vectorAsset: require('../assets/images/vector2.svg'),
+    vectorAsset: require('../assets/images/onboarding/vector2.svg'),
   },
   {
     id: '3',
     title: 'Supply & Partner',
     description:
       'Partner with us to supply plants, tools, and materials directly to our active gardening community.',
-    vectorAsset: require('../assets/images/vector3.svg'),
+    vectorAsset: require('../assets/images/onboarding/vector3.svg'),
   },
 ];
 

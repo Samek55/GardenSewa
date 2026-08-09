@@ -22,7 +22,7 @@ const PopUpAd = ({ onClose }) => {
         <View style={styles.container}>
             <View style={styles.imageWrapper}>
                 <Image 
-                    source={require('../assets/images/15.jpg')} 
+                    source={require('../assets/images/services/15.jpg')} 
                     style={styles.adImage}
                     resizeMode="cover" 
                 />

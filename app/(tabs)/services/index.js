@@ -22,7 +22,7 @@ export default function Services() {
         <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
             <View style={styles.heroContainer}>
                 <Image
-                    source={require('@/assets/images/garden2.jpg')}
+                    source={require('@/assets/images/services/garden2.jpg')}
                     style={styles.backgroundImage}
                     resizeMode="cover"
                 />

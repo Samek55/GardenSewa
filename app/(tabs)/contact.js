@@ -82,7 +82,7 @@ const Contact = () => {
 
             <View style={styles.mapCard}>
                 <Image
-                    source={require('../../assets/images/map.png')}
+                    source={require('../../assets/images/contact/map.png')}
                     style={styles.mapImage}
                     resizeMode='cover'
                 />
