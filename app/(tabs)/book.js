@@ -151,7 +151,8 @@ export default function Book() {
                 mediaTypes: ['images'],
                 allowsEditing: true,
                 quality: 1,
-                selectionLimit: 5
+                selectionLimit: 5,
+                aspect:[1,1]
             });
 
             if (!result.canceled) {

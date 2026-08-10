@@ -253,6 +253,7 @@ export default function JoinProfessional() {
                 mediaTypes: ['images'],
                 allowsEditing: true,
                 quality: 1,
+                aspect:[1,1]
             });
 
             if (!result.canceled) {

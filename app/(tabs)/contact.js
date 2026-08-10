@@ -1,13 +1,13 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import {
-    Alert,
-    Image,
-    Linking,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 const Contact = () => {
   const onWhatsAppOpen = async () => {
@@ -107,18 +107,7 @@ const Contact = () => {
           <Text style={styles.buttonText}>Open in Maps</Text>
         </TouchableOpacity>
       </View>
-            <View style={styles.mapCard}>
-                <Image
-                    source={require('../../assets/images/contact/map.png')}
-                    style={styles.mapImage}
-                    resizeMode='cover'
-                />
-                <TouchableOpacity style={styles.buttonContainer} activeOpacity={0.8} onPress={onMapOpen}>
-                    <Ionicons name="map-outline" size={18} color="white" />
-                    <Text style={styles.buttonText}>Open in Maps</Text>
-                </TouchableOpacity>
-            </View>
-
+      
       <View style={styles.sectionTextContainer}>
         <Text style={styles.sectionTitle}>Garden Sewa</Text>
         <Text style={styles.sectionSubtitle}>

@@ -234,7 +234,7 @@ export default function PartnerBook() {
             area: '',
             noOfEmployees: '',
             businessType: '',
-            servicesOffered: [], // Updated to Array
+            servicesOffered: [], 
             partnershipInterest: '',
             hearAboutUs: '',
             message: '',
@@ -273,6 +273,7 @@ export default function PartnerBook() {
                 allowsEditing: true,
                 quality: 1,
                 selectionLimit: 5,
+                aspect:[1,1]
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {
