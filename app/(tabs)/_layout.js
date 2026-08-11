@@ -64,71 +64,7 @@ const TabLayout = () => {
                     )
                 }}
             />
-            <Tabs.Screen
-                name="faq"
-                options={{
-                    title: "Faq",
-                    href: null
-                }}
-            />
-
-            <Tabs.Screen
-                name="notifications"
-                options={{
-                    title: "Notification",
-                    href: null
-                }}
-            />
-
-            <Tabs.Screen
-                name="joinasaprofessional"
-                options={{
-                    title: "Join as a Professional",
-                    href: null
-                }}
-            />
-            <Tabs.Screen
-                name="adminLogin"
-                options={{
-                    title: "Admin Login",
-                    href: null
-                }}
-            />
-            <Tabs.Screen
-                name="becomeAPartner"
-                options={{
-                    title: "Become a Partner",
-                    href: null
-                }}
-            />
-            <Tabs.Screen
-                name="glossary"
-                options={{
-                    title: "Glossary",
-                    href: null
-                }}
-            />
-            <Tabs.Screen
-                name="terms"
-                options={{
-                    title: "Terms and Conditions",
-                    href: null
-                }}
-            />
-            <Tabs.Screen
-                name="phoneVerification"
-                options={{
-                    title: "Phone Verification",
-                    href: null
-                }}
-            />
-            <Tabs.Screen
-                name="resetPin"
-                options={{
-                    title: "Reset Pin",
-                    href: null
-                }}
-            />
+            
 
         </Tabs>
     )

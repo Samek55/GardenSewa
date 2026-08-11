@@ -164,6 +164,49 @@ function MainAppContent() {
               )
             }}
           />
+          <Stack.Screen
+            name="(all)"
+            options={{
+              headerShown: true,
+              headerStyle: { backgroundColor: "#245d5a" },
+              headerTitleAlign: 'left',
+              headerTitle: () => (
+                <View style={{ marginLeft: 8, paddingLeft: 8 }}>
+                  <Text style={{ color: "#fff", fontWeight: '600', fontSize: 24 }}>
+                    GardenSewa
+                  </Text>
+                </View>
+              ),
+              headerTitleStyle: { color: "#fff", fontWeight: '600' },
+              headerLeft: () => (
+                <View style={{
+                  width: 36,
+                  height: 36,
+                  backgroundColor: "#fff",
+                  borderRadius: 18,
+                  overflow: 'hidden',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <Image
+                    source={require('@/assets/images/gardensewa.webp')}
+                    style={{ width: '100%', height: '100%', marginRight: 2 }}
+                    resizeMode="cover"
+                  />
+                </View>
+              ),
+              headerRight: () => (
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+                  <Pressable onPress={onWhatsappOpen}>
+                    <Ionicons name="logo-whatsapp" size={24} color="white" />
+                  </Pressable>
+                  <Pressable onPress={onMenuOpen}>
+                    <Ionicons name="menu" size={24} color="white" />
+                  </Pressable>
+                </View>
+              )
+            }}
+          />
         </Stack>
 
         {!isAppReady && (
