@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import {
     Alert,
     KeyboardAvoidingView,
@@ -15,10 +15,15 @@ import {
 } from "react-native";
 import { NP } from "react-native-country-flag-icons";
 
+import { AuthContext } from "../../context/AuthContext";
+import { MOCK_PROFESSIONALS } from "../../data/servicesList";
+
 const AdminLogin = () => {
     const [rawPhone, setRawPhone] = useState("");
     const [pin, setPin] = useState(["", "", "", ""]);
     const [showPin, setShowPin] = useState(false);
+
+    const { login } = useContext(AuthContext);
 
     const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
@@ -54,7 +59,7 @@ const AdminLogin = () => {
         }
     };
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         const fullPin = pin.join("");
 
         if (!rawPhone || rawPhone.length < 10) {
@@ -67,10 +72,29 @@ const AdminLogin = () => {
             return;
         }
 
-        Alert.alert(
-            "Approval Pending",
-            "Your application is currently under review by the admin. You will receive an SMS with your login details once your profile is approved.\n\nThank you for your patience."
+        const matchedProfessional = MOCK_PROFESSIONALS.find(
+            (prof) => prof.phone === rawPhone && prof.pin === fullPin
         );
+
+        if (matchedProfessional) {
+            await login(matchedProfessional);
+
+            Alert.alert(
+                "Login Successful",
+                `Welcome back, ${matchedProfessional.name}!`,
+                [
+                    {
+                        text: "OK",
+                        onPress: () => router.replace("/booking"),
+                    },
+                ]
+            );
+        } else {
+            Alert.alert(
+                "Access Denied",
+                "Invalid phone number or PIN. Please check your credentials and try again."
+            );
+        }
     };
 
     const handleResetPinPress = () => {
@@ -150,7 +174,6 @@ const AdminLogin = () => {
                             </TouchableOpacity>
                         </View>
 
-                        {/* PIN inputs centered with smaller explicit width matching resetPin */}
                         <View style={styles.pinInputsGroupRow}>
                             {pin.map((digit, index) => (
                                 <TextInput
@@ -181,7 +204,7 @@ const AdminLogin = () => {
                         <View style={styles.panelFooterActionContainer}>
                             <TouchableOpacity
                                 style={styles.footerLinkAction}
-                                onPress={() => router.push('./joinasaprofessional')}
+                                onPress={() => router.push('/joinasaprofessional')}
                             >
                                 <Text style={styles.professionalJoinText}>Join as Professional : Join Now</Text>
                             </TouchableOpacity>

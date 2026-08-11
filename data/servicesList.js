@@ -868,3 +868,263 @@ export const gardeningTerms = [
     { id: 'z5', title: 'Zone Gardening', description: 'Planning plant selections based on regional USDA hardiness temperature zones.' },
     { id: 'z6', title: 'Zygomorphic', description: 'Flowers having bilateral symmetry (can be divided into identical halves along one plane).' }
 ];
+
+
+export const BookingsListProfessional = [
+    {
+        id: 101,
+        fullName: 'Pratigya Luitel',
+        phone: '9841428133',
+        service: 'landscaping services',
+        location: 'Kathmandu, Paknajol',
+        budget: 'Below NPR 5000',
+        booking_date: '2026/08/01',
+        startDate: '2026/08/03',
+        endDate: '2026/08/10',
+        approxDays: 5,
+        specialRequest: 'Needs garden hedge trimming and soil rejuvenation.',
+        workStatus: 'OnGoing'
+    },
+    {
+        id: 102,
+        fullName: 'Aarav Shrestha',
+        phone: '9801029384',
+        service: 'Lawn Mowing & Maintenance',
+        location: 'Lalitpur, Jhamsikhel',
+        budget: 'NPR 5000 - 10000',
+        booking_date: '2026/08/01',
+        startDate: '2026/08/03',
+        endDate: '2026/08/04',
+        approxDays: 1,
+        specialRequest: 'Bring specialized motorized lawn mower.',
+        workStatus: 'Cancelled'
+    },
+    {
+        id: 103,
+        fullName: 'Sita Sharma',
+        phone: '9851092834',
+        service: 'Indoor Plant Styling',
+        location: 'Bhaktapur, Suryabinayak',
+        budget: 'Below NPR 5000',
+        booking_date: '2026/08/02',
+        startDate: '2026/08/04',
+        endDate: '2026/08/05',
+        approxDays: 1,
+        specialRequest: 'Repotting succulent collection into ceramic pots.',
+        workStatus: 'Completed'
+    },
+    {
+        id: 104,
+        fullName: 'Rohan Adhikari',
+        phone: '9812345678',
+        service: 'Tree Pruning & Cutting',
+        location: 'Kathmandu, Baneshwor',
+        budget: 'NPR 10000 - 20000',
+        booking_date: '2026/08/05',
+        startDate: '2026/08/08',
+        endDate: '2026/08/09',
+        approxDays: 2,
+        specialRequest: 'Trim high branches near power cables safely.',
+        workStatus: 'New'
+    },
+    {
+        id: 105,
+        fullName: 'Kiran Thapa',
+        phone: '9860112233',
+        service: 'Garden Irrigation Setup',
+        location: 'Lalitpur, Sanepa',
+        budget: 'Above NPR 20000',
+        booking_date: '2026/08/06',
+        startDate: '2026/08/07',
+        endDate: '2026/08/12',
+        approxDays: 5,
+        specialRequest: 'Install automatic drip irrigation timer.',
+        workStatus: 'Dispute'
+    },
+    {
+        id: 106,
+        fullName: 'Pooja Karki',
+        phone: '9849876543',
+        service: 'Vertical Garden Installation',
+        location: 'Kathmandu, Balaju',
+        budget: 'NPR 10000 - 20000',
+        booking_date: '2026/08/06',
+        startDate: '2026/08/10',
+        endDate: '2026/08/12',
+        approxDays: 3,
+        specialRequest: 'Balcony wall setup with creeping flowering plants.',
+        workStatus: 'New'
+    },
+    {
+        id: 107,
+        fullName: 'Bishal Gurung',
+        phone: '9803456789',
+        service: 'Seasonal Flower Planting',
+        location: 'Kathmandu, Maharajgunj',
+        budget: 'Below NPR 5000',
+        booking_date: '2026/08/07',
+        startDate: '2026/08/09',
+        endDate: '2026/08/09',
+        approxDays: 1,
+        specialRequest: 'Plant marigolds and petunias along walkways.',
+        workStatus: 'OnGoing'
+    },
+    {
+        id: 108,
+        fullName: 'Anjali Giri',
+        phone: '9818765432',
+        service: 'Pest Control & Spraying',
+        location: 'Lalitpur, Imadol',
+        budget: 'Below NPR 5000',
+        booking_date: '2026/08/07',
+        startDate: '2026/08/08',
+        endDate: '2026/08/08',
+        approxDays: 1,
+        specialRequest: 'Use organic, pet-safe pesticides only.',
+        workStatus: 'Completed'
+    },
+    {
+        id: 109,
+        fullName: 'Dipendra Basnet',
+        phone: '9851123456',
+        service: 'Rooftop Organic Farm Design',
+        location: 'Bhaktapur, Thimi',
+        budget: 'Above NPR 20000',
+        booking_date: '2026/08/08',
+        startDate: '2026/08/12',
+        endDate: '2026/08/18',
+        approxDays: 6,
+        specialRequest: 'Set up raised beds for seasonal vegetable cultivation.',
+        workStatus: 'New'
+    },
+    {
+        id: 110,
+        fullName: 'Suman Rai',
+        phone: '9865432109',
+        service: 'Landscape Lighting Design',
+        location: 'Kathmandu, Budhanilkantha',
+        budget: 'NPR 10000 - 20000',
+        booking_date: '2026/08/08',
+        startDate: '2026/08/11',
+        endDate: '2026/08/13',
+        approxDays: 2,
+        specialRequest: 'Install low-voltage solar garden spotlights.',
+        workStatus: 'OnGoing'
+    },
+    {
+        id: 111,
+        fullName: 'Nisha Khadka',
+        phone: '9840011223',
+        service: 'Grass Turf Laying',
+        location: 'Kathmandu, Kirtipur',
+        budget: 'NPR 10000 - 20000',
+        booking_date: '2026/08/09',
+        startDate: '2026/08/14',
+        endDate: '2026/08/16',
+        approxDays: 2,
+        specialRequest: 'Level garden bed prior to Bermuda grass installation.',
+        workStatus: 'New'
+    },
+    {
+        id: 112,
+        fullName: 'Subash Tamang',
+        phone: '9808123456',
+        service: 'Water Feature Maintenance',
+        location: 'Lalitpur, Kupondole',
+        budget: 'Below NPR 5000',
+        booking_date: '2026/08/09',
+        startDate: '2026/08/10',
+        endDate: '2026/08/10',
+        approxDays: 1,
+        specialRequest: 'Clean koi pond filter and balance water pH.',
+        workStatus: 'Completed'
+    },
+    {
+        id: 113,
+        fullName: 'Prashant Dahal',
+        phone: '9811223344',
+        service: 'Soil Fertilization & Mulching',
+        location: 'Kathmandu, Chabahel',
+        budget: 'Below NPR 5000',
+        booking_date: '2026/08/10',
+        startDate: '2026/08/12',
+        endDate: '2026/08/13',
+        approxDays: 1,
+        specialRequest: 'Apply rich organic compost across fruit orchard.',
+        workStatus: 'New'
+    },
+    {
+        id: 114,
+        fullName: 'Mina Gautam',
+        phone: '9861987654',
+        service: 'Bonsai Care & Pruning',
+        location: 'Kathmandu, Lazimpat',
+        budget: 'NPR 5000 - 10000',
+        booking_date: '2026/08/10',
+        startDate: '2026/08/11',
+        endDate: '2026/08/11',
+        approxDays: 1,
+        specialRequest: 'Precision wire training and root trimming.',
+        workStatus: 'Cancelled'
+    },
+    {
+        id: 115,
+        fullName: 'Rajesh Maharjan',
+        phone: '9843344556',
+        service: 'Full Garden Renovation',
+        location: 'Lalitpur, Pulchowk',
+        budget: 'Above NPR 20000',
+        booking_date: '2026/08/11',
+        startDate: '2026/08/15',
+        endDate: '2026/08/22',
+        approxDays: 7,
+        specialRequest: 'Complete redesign including stone pathways and planting.',
+        workStatus: 'New'
+    }
+];
+
+//notes
+//booking_date+id can be auto_generated when sending the request to the backend to book a service, 
+// other things are the same user input, why not show images if they are recorded?
+//is approxDays calculated based on priority selected by the users?
+//in notification section is the status change reported in the professional section and the user section?
+//does user approve the project status changes?
+//how to handle complaints?
+//preferredTime = where?
+
+
+
+export const MOCK_PROFESSIONALS = [
+    {
+        id: 'prof_001',
+        name: 'Pratigya Luitel',
+        phone: '9860443954',
+        pin: '1234',
+        gender: 'Female',
+        email: 'pratiluitel55@gmail.com',
+        category: [categories[0].title, categories[1].title],
+        yearsExperience: '2',
+        city: cityData[0].name, // Kathmandu
+        area: ['Kalanki', 'Kuleshwor Heights'],
+        emergencyPhone: '9800000001',
+        referralPhone: '9800000002',
+        message: 'Excited to join the team.',
+        terms: true,
+    },
+    {
+        id: 'prof_002',
+        name: 'Amir Lama',
+        phone: '9712092736',
+        pin: '0000',
+        gender: 'Male',
+        email: 'amir.lama@gmail.com',
+        category: [categories[2].title, categories[6].title],
+        yearsExperience: '5',
+        city: cityData[2].name, // Lalitpur
+        area: ['Sanepa', 'Jhamsikhel'],
+        emergencyPhone: '9800000003',
+        referralPhone: '',
+        message: '',
+        terms: true,
+    },
+];
