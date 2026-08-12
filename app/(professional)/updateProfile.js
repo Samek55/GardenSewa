@@ -13,7 +13,6 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { NP } from 'react-native-country-flag-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { array, object, string } from 'yup';
 
@@ -325,7 +324,6 @@ const UpdateProfile = () => {
           <View style={styles.individualContainer}>
             <Text style={styles.label}>Phone Number</Text>
             <View style={[styles.phoneInputContainer, styles.disabledInput]}>
-              <NP width={30} height={20} style={styles.flagIcon} />
               <TextInput
                 style={[styles.flexInput, { color: '#666' }]}
                 value={formatPhone(formik.values.phone)}

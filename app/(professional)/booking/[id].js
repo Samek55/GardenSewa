@@ -1,21 +1,24 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as Print from 'expo-print';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import * as Sharing from 'expo-sharing';
+import { useEffect, useState } from 'react';
 import {
+    Alert,
     Modal,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
     TouchableWithoutFeedback,
-    View
+    View,
 } from 'react-native';
 import { BookingsListProfessional } from '../../../data/servicesList';
 
 const STATUS_OPTIONS = ['New', 'OnGoing', 'Completed', 'Cancelled', 'Dispute'];
 
 const IndividualBooking = () => {
-    const { id } = useLocalSearchParams();
+    const { id, updatedStatus } = useLocalSearchParams();
 
     const booking = BookingsListProfessional.find((item) => item.id.toString() === id?.toString()) || {
         id: id || 'B34',
@@ -39,6 +42,14 @@ const IndividualBooking = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [statusHistory, setStatusHistory] = useState({ from: '', to: '' });
 
+    // Update status automatically when returning from the pay screen
+    useEffect(() => {
+        if (updatedStatus) {
+            setCurrentStatus(updatedStatus);
+            setSelectedStatus(updatedStatus);
+        }
+    }, [updatedStatus]);
+
     const handleSubmitStatus = () => {
         if (selectedStatus === currentStatus) return;
 
@@ -54,6 +65,77 @@ const IndividualBooking = () => {
         setIsModalVisible(false);
     };
 
+    const handlePayPress = () => {
+        router.push({
+            pathname: '/booking/pay',
+            params: { bookingId: booking.id },
+        });
+    };
+
+    const handleSharePDF = async () => {
+        try {
+            const htmlContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                    <style>
+                        body { font-family: Helvetica, Arial, sans-serif; padding: 24px; color: #1E293B; background-color: #FFFFFF; }
+                        .header { text-align: center; border-bottom: 2px solid #245d5a; padding-bottom: 12px; margin-bottom: 20px; }
+                        .brand { font-size: 26px; color: #245d5a; font-weight: bold; margin: 0; }
+                        .booking-id { font-size: 15px; color: #64748B; margin-top: 4px; font-weight: 600; }
+                        .card { border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; background-color: #F8FAFC; }
+                        .client-name { font-size: 20px; font-weight: bold; color: #0F172A; margin-bottom: 4px; }
+                        .phone { font-size: 14px; color: #64748B; margin-bottom: 16px; font-weight: 500; }
+                        .row { margin-bottom: 12px; }
+                        .label { font-size: 11px; color: #94A3B8; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
+                        .value { font-size: 14px; font-weight: 600; color: #1E293B; }
+                        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #94A3B8; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <div class="brand">GardenSewa</div>
+                        <div class="booking-id">Booking ID: ${booking.id}</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="client-name">${booking.fullName}</div>
+                        ${currentStatus !== 'New' ? `<div class="phone"> ${booking.phone || '+977 9712092736'}</div>` : ''}
+
+                        <div class="row"><div class="label">Service</div><div class="value">${booking.service}</div></div>
+                        <div class="row"><div class="label">Location</div><div class="value">${booking.location}</div></div>
+                        <div class="row"><div class="label">Budget</div><div class="value">${booking.budget}</div></div>
+                        <div class="row"><div class="label">Booking Date</div><div class="value">${booking.booking_date}</div></div>
+                        <div class="row"><div class="label">Starting Date</div><div class="value">${booking.startDate || '29 July 2026, Wednesday'}</div></div>
+                        <div class="row"><div class="label">Ending Date</div><div class="value">${booking.endDate || '29 July 2026, Wednesday'}</div></div>
+                        <div class="row"><div class="label">Approx Days to Complete</div><div class="value">${booking.approxDays || '1 Day'}</div></div>
+                        <div class="row"><div class="label">Special Request</div><div class="value">${booking.specialRequest || 'None'}</div></div>
+                        <div class="row"><div class="label">Work Status</div><div class="value">${currentStatus}</div></div>
+                    </div>
+
+                    <div class="footer">Generated via GardenSewa App</div>
+                </body>
+                </html>
+            `;
+
+            const { uri } = await Print.printToFileAsync({ html: htmlContent });
+
+            if (await Sharing.isAvailableAsync()) {
+                await Sharing.shareAsync(uri, {
+                    mimeType: 'application/pdf',
+                    dialogTitle: `Share Booking ${booking.id}`,
+                    UTI: 'com.adobe.pdf',
+                });
+            } else {
+                Alert.alert('Sharing Unavailable', 'Sharing is not supported on this device');
+            }
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            Alert.alert('Error', 'Failed to generate PDF for sharing');
+        }
+    };
+
     return (
         <View style={styles.safeArea}>
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -62,17 +144,21 @@ const IndividualBooking = () => {
                         <Ionicons name="arrow-back" size={22} color="#1E293B" />
                     </TouchableOpacity>
                     <Text style={styles.bookingIdTitle}>Booking ID: {booking.id}</Text>
-                    <TouchableOpacity style={styles.shareBtn}>
+                    
+                    <TouchableOpacity style={styles.shareBtn} onPress={handleSharePDF}>
                         <Ionicons name="share-outline" size={22} color="#1E293B" />
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.card}>
                     <Text style={styles.clientName}>{booking.fullName}</Text>
-                    <View style={styles.phoneRow}>
-                        <Ionicons name="call-outline" size={14} color="#64748B" />
-                        <Text style={styles.phoneText}>{booking.phone || '+977 9712092736'}</Text>
-                    </View>
+
+                    {currentStatus !== 'New' && (
+                        <View style={styles.phoneRow}>
+                            <Ionicons name="call-outline" size={14} color="#64748B" />
+                            <Text style={styles.phoneText}>{booking.phone || '+977 9712092736'}</Text>
+                        </View>
+                    )}
 
                     <View style={styles.infoGroup}>
                         <Text style={styles.fieldLabel}>Service</Text>
@@ -100,33 +186,47 @@ const IndividualBooking = () => {
                         <Text style={styles.fieldValue}>{booking.specialRequest || 'None'}</Text>
                     </View>
 
-                    <View style={styles.divider} />
+                    {currentStatus === 'New' ? (
+                        <View style={styles.paySectionContainer}>
+                            <TouchableOpacity
+                                style={styles.payToViewBtn}
+                                activeOpacity={0.85}
+                                onPress={handlePayPress}
+                            >
+                                <Text style={styles.payToViewBtnText}>Pay NPR 99 to View Contact</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <>
+                            <View style={styles.divider} />
+                            <Text style={styles.sectionHeading}>Work Status</Text>
 
-                    <Text style={styles.sectionHeading}>Work Status</Text>
+                            <TouchableOpacity
+                                style={styles.dropdownTrigger}
+                                activeOpacity={0.8}
+                                onPress={() => setIsDropdownOpen(true)}
+                            >
+                                <Text style={styles.dropdownTriggerText}>{selectedStatus}</Text>
+                                <Ionicons name="chevron-down" size={20} color="#245d5a" />
+                            </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={styles.dropdownTrigger}
-                        activeOpacity={0.8}
-                        onPress={() => setIsDropdownOpen(true)}
-                    >
-                        <Text style={styles.dropdownTriggerText}>{selectedStatus}</Text>
-                        <Ionicons name="chevron-down" size={20} color="#245d5a" />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[
-                            styles.submitButton,
-                            selectedStatus === currentStatus && styles.submitButtonDisabled,
-                        ]}
-                        activeOpacity={0.85}
-                        onPress={handleSubmitStatus}
-                        disabled={selectedStatus === currentStatus}
-                    >
-                        <Text style={styles.submitButtonText}>Submit</Text>
-                    </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[
+                                    styles.submitButton,
+                                    selectedStatus === currentStatus && styles.submitButtonDisabled,
+                                ]}
+                                activeOpacity={0.85}
+                                onPress={handleSubmitStatus}
+                                disabled={selectedStatus === currentStatus}
+                            >
+                                <Text style={styles.submitButtonText}>Submit</Text>
+                            </TouchableOpacity>
+                        </>
+                    )}
                 </View>
             </ScrollView>
 
+            {/* Dropdown Modal */}
             <Modal
                 visible={isDropdownOpen}
                 transparent={true}
@@ -224,37 +324,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#F8FAFC',
     },
-    topHeader: {
-        backgroundColor: '#245d5a',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-    },
-    brandRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    logoBadge: {
-        backgroundColor: '#FFFFFF',
-        padding: 4,
-        borderRadius: 8,
-    },
-    brandTitle: {
-        color: '#FFFFFF',
-        fontSize: 20,
-        fontWeight: '700',
-    },
-    headerIcons: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-    },
-    iconBtn: {
-        padding: 4,
-    },
     scrollContent: {
         paddingHorizontal: 16,
         paddingBottom: 30,
@@ -315,6 +384,20 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         color: '#1E293B',
+    },
+    paySectionContainer: {
+        marginTop: 24,
+    },
+    payToViewBtn: {
+        backgroundColor: '#245d5a',
+        borderRadius: 8,
+        paddingVertical: 14,
+        alignItems: 'center',
+    },
+    payToViewBtnText: {
+        color: '#FFFFFF',
+        fontSize: 15,
+        fontWeight: '700',
     },
     divider: {
         height: 1,

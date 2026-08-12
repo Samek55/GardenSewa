@@ -25,6 +25,12 @@ export default function BookingLayout() {
                     headerShown:false
                 }} 
             />
+            <Stack.Screen 
+                name="pay" 
+                options={{ 
+                    headerShown:false
+                }} 
+            />
         </Stack>
     );
 }

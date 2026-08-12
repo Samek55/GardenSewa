@@ -2,14 +2,14 @@ import { Feather, Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
-    FlatList,
-    Modal,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  FlatList,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { BookingsListProfessional } from '../../../data/servicesList';
@@ -107,20 +107,19 @@ const BookingSummaryPage = () => {
     return matchesStatus && matchesSearch && matchesDate;
   });
 
-  // Generates dots on the calendar for days containing bookings or date ranges
   const getMarkedDates = () => {
     const marked = {};
 
     BookingsListProfessional.forEach((item) => {
-      const rawBookingDate = item.bookingDate || item.booking_date;
-      const singleISO = formatToISODate(rawBookingDate);
+      // const rawBookingDate = item.bookingDate || item.booking_date;
+      // const singleISO = formatToISODate(rawBookingDate);
 
-      if (singleISO) {
-        marked[singleISO] = {
-          marked: true,
-          dotColor: '#245d5a',
-        };
-      }
+      // if (singleISO) {
+      //   marked[singleISO] = {
+      //     marked: true,
+      //     dotColor: '#245d5a',
+      //   };
+      // }
 
       // Mark range start and end dates
       const startISO = formatToISODate(item.startDate);
@@ -314,7 +313,7 @@ const BookingSummaryPage = () => {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* 5. Interactive Calendar Modal */}
+      {/*  Interactive Calendar Modal */}
       <Modal
         visible={isCalendarOpen}
         transparent={true}
