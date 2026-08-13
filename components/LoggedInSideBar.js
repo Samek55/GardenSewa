@@ -81,7 +81,7 @@ const SideBarModalLoggedIn = ({ onClose }) => {
                 />
                 <View style={styles.profileDetails}>
                     <Text style={styles.profileName}>{user?.name || 'Pratigya Luitel'}</Text>
-                    <Text style={styles.profilePhone}>{user?.phone || '+977 9860443954'}</Text>
+                    <Text style={styles.profilePhone}>+977 {user?.phone || '+977 9860443954'}</Text>
                 </View>
             </View>
 
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     },
     bottomButtonWrapper: {
         paddingHorizontal: 16,
-        paddingBottom: 16,
+        paddingBottom: 24,
         paddingTop: 8,
         backgroundColor: '#ffffff',
     },

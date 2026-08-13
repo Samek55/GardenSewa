@@ -438,6 +438,29 @@ const UpdateProfile = () => {
             />
           ) : null}
 
+          {/* Account Section */}
+          <View style={styles.accountSection}>
+            <View style={styles.accountTitleRow}>
+              <Ionicons name="settings-outline" size={18} color="#245d5a" />
+              <Text style={styles.accountTitleText}>Account</Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.accountCard}
+              activeOpacity={0.7}
+              onPress={() => router.push('/resetPin')}
+            >
+              <View style={styles.keyIconBadge}>
+                <Ionicons name="key-outline" size={20} color="#245d5a" />
+              </View>
+              <View style={styles.accountCardTextContainer}>
+                <Text style={styles.changePinTitle}>Change PIN</Text>
+                <Text style={styles.changePinSubtitle}>Update your 4-digit login PIN</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+            </TouchableOpacity>
+          </View>
+
           {/* Save Button */}
           <TouchableOpacity style={styles.saveButton} onPress={formik.handleSubmit}>
             <Text style={styles.saveButtonText}>Save Changes</Text>
@@ -452,8 +475,6 @@ const UpdateProfile = () => {
             <Text style={styles.logoutText}>Log Out</Text>
           </TouchableOpacity>
         </View>
-
-
       </KeyboardAwareScrollView>
     </View>
   );
@@ -466,13 +487,13 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingBottom:44
+    paddingBottom: 44,
   },
   profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
-    paddingHorizontal:12,
+    paddingHorizontal: 12,
     gap: 16,
   },
   titleText: {
@@ -691,6 +712,51 @@ const styles = StyleSheet.create({
     color: '#999',
     fontSize: 14,
   },
+  accountSection: {
+    gap: 12,
+    marginTop: 8,
+  },
+  accountTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  accountTitleText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
+  accountCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  keyIconBadge: {
+    width: 42,
+    height: 42,
+    borderRadius: 10,
+    backgroundColor: '#E6F0EF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  accountCardTextContainer: {
+    flex: 1,
+  },
+  changePinTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  changePinSubtitle: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 2,
+  },
   saveButton: {
     backgroundColor: '#245d5a',
     borderRadius: 8,
@@ -703,9 +769,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
     fontSize: 16,
-  },
-  footer: {
-    marginVertical: 16,
   },
   logoutButton: {
     flexDirection: 'row',

@@ -114,6 +114,7 @@ const SideBarModal = ({ onClose }) => {
                     {renderMenuItem('/faq', 'help-circle-outline', 'FAQs', true)}
                     {renderMenuItem('/glossary', 'book-outline', 'Glossary', true)}
                     {renderMenuItem('/becomeAPartner', 'shield-checkmark-outline', 'Become a Partner', true)}
+                    {renderMenuItem('/favorites', "heart-outline",'Favorites', true)}
                 </View>
             </ScrollView>
         </View>
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 4,
         backgroundColor: "#245d5a",
-        paddingVertical: 20,
+        paddingVertical: 12,
         paddingHorizontal: 16,
     },
     avatarPlaceholder: {
@@ -168,10 +169,10 @@ const styles = StyleSheet.create({
         marginTop: 2,
     },
     scrollContent: {
-        paddingVertical: 8,
+        paddingVertical: 4,
     },
     primaryLinks: {
-        gap: 4,
+        gap: 2,
         paddingHorizontal: 20,
     },
     sectionTitle: {
