@@ -125,9 +125,12 @@ const MultiSelectDropdown = ({
 }) => {
     const [query, setQuery] = useState('');
 
-    const filteredData = data.filter((item) =>
-        (item.name || item.title || item).toLowerCase().includes(query.toLowerCase())
-    );
+    const filteredData = data.filter((item) => {
+        const itemLabel = item.name || item.title || item;
+        const matchesQuery = itemLabel.toLowerCase().includes(query.toLowerCase());
+        const isNotSelected = !selectedItems.includes(itemLabel);
+        return matchesQuery && isNotSelected;
+    });
 
     return (
         <View style={styles.individualContainer}>
@@ -181,26 +184,20 @@ const MultiSelectDropdown = ({
                         {filteredData.length > 0 ? (
                             filteredData.map((item, idx) => {
                                 const itemLabel = item.name || item.title || item;
-                                const isSelected = selectedItems.includes(itemLabel);
 
                                 return (
                                     <TouchableOpacity
                                         key={item.id || idx}
                                         style={[styles.dropdownItem, styles.multiDropdownItem]}
                                         onPress={() => {
-                                            if (isSelected) {
-                                                onRemoveItem(itemLabel);
-                                            } else {
-                                                if (selectedItems.length >= maxLimit) {
-                                                    Alert.alert('Limit Reached', `You can select up to ${maxLimit} items.`);
-                                                    return;
-                                                }
-                                                onSelectItem(itemLabel);
+                                            if (selectedItems.length >= maxLimit) {
+                                                Alert.alert('Limit Reached', `You can select up to ${maxLimit} items.`);
+                                                return;
                                             }
+                                            onSelectItem(itemLabel);
                                         }}
                                     >
                                         <Text style={styles.dropdownItemText}>{itemLabel}</Text>
-                                        {isSelected && <Ionicons name="checkmark-circle" size={20} color="#245d5a" />}
                                     </TouchableOpacity>
                                 );
                             })
@@ -234,7 +231,7 @@ export default function PartnerBook() {
             area: '',
             noOfEmployees: '',
             businessType: '',
-            servicesOffered: [], 
+            servicesOffered: [],
             partnershipInterest: '',
             hearAboutUs: '',
             message: '',
@@ -273,7 +270,7 @@ export default function PartnerBook() {
                 allowsEditing: true,
                 quality: 1,
                 selectionLimit: 5,
-                aspect:[1,1]
+                aspect: [1, 1]
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {

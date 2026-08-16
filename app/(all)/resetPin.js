@@ -21,7 +21,8 @@ const ResetPin = () => {
 
     const phoneParam = Array.isArray(params.phone) ? params.phone[0] : params.phone;
 
-    const [step, setStep] = useState(1);
+    // Default flow starts at step 2
+    const [step, setStep] = useState(2);
     const [phoneNumber, setPhoneNumber] = useState("");
     const [otp, setOtp] = useState(["", "", "", ""]);
     const [newPin, setNewPin] = useState(["", "", "", ""]);
@@ -42,7 +43,7 @@ const ResetPin = () => {
 
     useFocusEffect(
         useCallback(() => {
-            setStep(1);
+            setStep(2);
             setSeconds(60);
             setCanResend(false);
             setOtp(["", "", "", ""]);
@@ -78,7 +79,7 @@ const ResetPin = () => {
         setOtp(["", "", "", ""]);
         setNewPin(["", "", "", ""]);
         setConfirmPin(["", "", "", ""]);
-        setStep(1);
+        setStep(2);
     };
 
     const handlePinChange = (text, index, stateArray, setStateArray, refs, nextGroupRef = null) => {
@@ -112,14 +113,6 @@ const ResetPin = () => {
         }
     };
 
-    const formatPhone = (text) => {
-        const digitsOnly = (text || "").replace(/[^0-9]/g, "");
-        if (digitsOnly.length === 10) {
-            return `${digitsOnly.slice(0, 5)} ${digitsOnly.slice(5, 7)} ${digitsOnly.slice(7, 10)}`;
-        }
-        return text;
-    };
-
     const handleResend = () => {
         if (!canResend) return;
         setSeconds(60);
@@ -127,15 +120,6 @@ const ResetPin = () => {
         setOtp(["", "", "", ""]);
         otpRefs[0].current?.focus();
         Alert.alert("Code Sent", `A new OTP code has been sent to ${phoneNumber || "your phone number"}.`);
-    };
-
-    // Step 1 -> Step 2
-    const handlePhoneNext = () => {
-        if (!phoneNumber || phoneNumber.length < 10) {
-            Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number.");
-            return;
-        }
-        setStep(2);
     };
 
     // Step 2 -> Step 3
@@ -180,7 +164,7 @@ const ResetPin = () => {
     };
 
     const handleBackOrCancel = () => {
-        if (step > 1) {
+        if (step > 2) {
             setStep((prev) => prev - 1);
         } else {
             resetForm();
@@ -192,13 +176,11 @@ const ResetPin = () => {
     const cardMaxWidth = isTablet ? 480 : "100%";
 
     const getHeaderTitle = () => {
-        if (step === 1) return "Enter Phone";
         if (step === 2) return "Verification";
         return "Set New PIN";
     };
 
     const getHeaderSubtitle = () => {
-        if (step === 1) return "Please enter your registered phone number to receive a verification code.";
         if (step === 2) return "Enter the 4-digit code sent to your phone number.";
         return "Choose and confirm your new 4-digit security PIN.";
     };
@@ -230,43 +212,6 @@ const ResetPin = () => {
 
                         {/* FORM CARD SECTION */}
                         <View style={styles.formCard}>
-                            {step === 1 && (
-                                <View style={styles.stepContent}>
-                                    <Text style={styles.fieldLabel}>Phone Number</Text>
-                                    <View style={styles.phoneInputRow}>
-                                        <TextInput
-                                            style={styles.phoneTextInput}
-                                            value={formatPhone(phoneNumber)}
-                                            onChangeText={(text) =>
-                                                setPhoneNumber(text.replace(/[^0-9]/g, ""))
-                                            }
-                                            keyboardType="phone-pad"
-                                            placeholder="Enter phone number"
-                                            placeholderTextColor="#A0A0A0"
-                                            maxLength={12}
-                                        />
-                                    </View>
-
-                                    <View style={styles.actionButtonGroup}>
-                                        <TouchableOpacity
-                                            activeOpacity={0.7}
-                                            style={styles.cancelButton}
-                                            onPress={handleBackOrCancel}
-                                        >
-                                            <Text style={styles.cancelButtonText}>Cancel</Text>
-                                        </TouchableOpacity>
-
-                                        <TouchableOpacity
-                                            activeOpacity={0.85}
-                                            style={styles.brandButton}
-                                            onPress={handlePhoneNext}
-                                        >
-                                            <Text style={styles.brandButtonText}>Next</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            )}
-
                             {step === 2 && (
                                 <View style={styles.stepContent}>
                                     <Text style={styles.fieldLabel}>Verification Code</Text>
@@ -322,7 +267,7 @@ const ResetPin = () => {
                                             style={styles.cancelButton}
                                             onPress={handleBackOrCancel}
                                         >
-                                            <Text style={styles.cancelButtonText}>Back</Text>
+                                            <Text style={styles.cancelButtonText}>Cancel</Text>
                                         </TouchableOpacity>
 
                                         <TouchableOpacity
@@ -518,23 +463,6 @@ const styles = StyleSheet.create({
         letterSpacing: 0.6,
         marginBottom: 10,
         marginTop: 4,
-    },
-    phoneInputRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#F4F7F6",
-        borderWidth: 1.5,
-        borderColor: "#E2E8E7",
-        borderRadius: 12,
-        height: 52,
-        paddingHorizontal: 16,
-        marginBottom: 20,
-    },
-    phoneTextInput: {
-        flex: 1,
-        fontSize: 16,
-        fontWeight: "600",
-        color: "#0F201E",
     },
     pinInputsGroupRow: {
         flexDirection: "row",
