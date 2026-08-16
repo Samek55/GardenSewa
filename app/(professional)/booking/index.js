@@ -67,41 +67,17 @@ const BookingSummaryPage = () => {
       item.service?.toLowerCase().includes(query) ||
       item.location?.toLowerCase().includes(query);
 
-    // 3. Date & Date Range Filter Logic
+    // 3. Date Filter Logic (Evaluates bookingDate / booking_date only)
     let matchesDate = true;
     if (selectedDateStr) {
-      // Standardize selected calendar date to timestamp (at midnight)
       const selectedTimestamp = new Date(`${selectedDateStr}T00:00:00`).getTime();
-
-      // Normalize single date fields (bookingDate or booking_date)
       const rawBookingDate = item.bookingDate || item.booking_date;
       const itemBookingISO = formatToISODate(rawBookingDate);
       const itemBookingTimestamp = itemBookingISO
         ? new Date(`${itemBookingISO}T00:00:00`).getTime()
         : null;
 
-      // Normalize range fields (startDate and endDate)
-      const itemStartISO = formatToISODate(item.startDate);
-      const itemEndISO = formatToISODate(item.endDate);
-      const itemStartTimestamp = itemStartISO
-        ? new Date(`${itemStartISO}T00:00:00`).getTime()
-        : null;
-      const itemEndTimestamp = itemEndISO
-        ? new Date(`${itemEndISO}T00:00:00`).getTime()
-        : null;
-
-      // Evaluation Logic
-      if (itemStartTimestamp && itemEndTimestamp) {
-        // Lies on or between startDate and endDate
-        matchesDate =
-          selectedTimestamp >= itemStartTimestamp &&
-          selectedTimestamp <= itemEndTimestamp;
-      } else if (itemBookingTimestamp) {
-        // Exact single-day match
-        matchesDate = itemBookingTimestamp === selectedTimestamp;
-      } else {
-        matchesDate = false;
-      }
+      matchesDate = itemBookingTimestamp === selectedTimestamp;
     }
 
     return matchesStatus && matchesSearch && matchesDate;
@@ -110,31 +86,24 @@ const BookingSummaryPage = () => {
   const getMarkedDates = () => {
     const marked = {};
 
+    // Aggregate total bookings per bookingDate
     BookingsListProfessional.forEach((item) => {
-      // const rawBookingDate = item.bookingDate || item.booking_date;
-      // const singleISO = formatToISODate(rawBookingDate);
+      const rawBookingDate = item.bookingDate || item.booking_date;
+      const singleISO = formatToISODate(rawBookingDate);
 
-      // if (singleISO) {
-      //   marked[singleISO] = {
-      //     marked: true,
-      //     dotColor: '#245d5a',
-      //   };
-      // }
-
-      // Mark range start and end dates
-      const startISO = formatToISODate(item.startDate);
-      const endISO = formatToISODate(item.endDate);
-      if (startISO) marked[startISO] = { marked: true, dotColor: '#245d5a' };
-      if (endISO) marked[endISO] = { marked: true, dotColor: '#245d5a' };
+      if (singleISO) {
+        if (!marked[singleISO]) {
+          marked[singleISO] = { count: 0 };
+        }
+        marked[singleISO].count += 1;
+      }
     });
 
-    // Active Selection Highlight
+    // Handle Active Selection Highlight
     if (selectedDateStr) {
       marked[selectedDateStr] = {
-        ...(marked[selectedDateStr] || {}),
+        ...(marked[selectedDateStr] || { count: 0 }),
         selected: true,
-        selectedColor: '#245d5a',
-        selectedTextColor: '#FFFFFF',
       };
     }
 
@@ -181,25 +150,28 @@ const BookingSummaryPage = () => {
           </View>
         </View>
 
-        <View style={styles.infoRow}>
-          <View style={styles.infoPill}>
-            <Feather name="tool" size={14} color="#245d5a" />
-            <Text style={styles.infoPillText} numberOfLines={1}>
-              {item.service || 'Service'}
-            </Text>
-          </View>
+        <View style={styles.infoPill}>
+          <Feather name="tool" size={14} color="#245d5a" />
+          <Text style={styles.infoPillText} numberOfLines={1}>
+            {item.service || 'Service'}
+          </Text>
+        </View>
 
+        {/* Updated Footer Row: Budget & View More in the same row */}
+        <View style={styles.footerRow}>
           <View style={styles.infoPill}>
             <Ionicons name="cash-outline" size={15} color="#2D3748" />
             <Text style={styles.infoPillText}>
-              {item.budget || 'NPR 5,000'}
+              Budget : {item.budget || 'NPR 5,000'}
             </Text>
           </View>
-        </View>
 
-        <View style={styles.cardFooter}>
-          <Text style={styles.viewDetailsText}>View Request Details</Text>
-          <Ionicons name="arrow-forward" size={16} color="#245d5a" />
+          <TouchableOpacity
+            style={styles.viewMoreBtn}
+            onPress={() => router.push(`/booking/${item.id}`)}
+          >
+            <Text style={styles.viewDetailsText}>View More</Text>
+          </TouchableOpacity>
         </View>
       </TouchableOpacity>
     );
@@ -313,7 +285,7 @@ const BookingSummaryPage = () => {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/*  Interactive Calendar Modal */}
+      {/* Interactive Calendar Modal */}
       <Modal
         visible={isCalendarOpen}
         transparent={true}
@@ -335,11 +307,56 @@ const BookingSummaryPage = () => {
                 setIsCalendarOpen(false);
               }}
               markedDates={getMarkedDates()}
+              dayComponent={({ date, state, marking }) => {
+                const isSelected = marking?.selected;
+                const count = marking?.count || 0;
+                const isDisabled = state === 'disabled';
+
+                return (
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (!isDisabled) {
+                        setSelectedDateStr(date.dateString);
+                        setIsCalendarOpen(false);
+                      }
+                    }}
+                    style={[
+                      styles.customDayContainer,
+                      isSelected && styles.selectedDayContainer,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.dayText,
+                        isDisabled && styles.disabledDayText,
+                        isSelected && styles.selectedDayText,
+                      ]}
+                    >
+                      {date.day}
+                    </Text>
+                    {count > 0 && (
+                      <View
+                        style={[
+                          styles.countBadge,
+                          isSelected && styles.selectedCountBadge,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.countText,
+                            isSelected && styles.selectedCountText,
+                          ]}
+                        >
+                          {count}
+                        </Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              }}
               theme={{
                 calendarBackground: '#ffffff',
                 textSectionTitleColor: '#64748B',
-                selectedDayBackgroundColor: '#245d5a',
-                selectedDayTextColor: '#ffffff',
                 todayTextColor: '#245d5a',
                 dayTextColor: '#1E293B',
                 textDisabledColor: '#CBD5E1',
@@ -502,6 +519,46 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#1E293B',
   },
+  customDayContainer: {
+    width: 36,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+  selectedDayContainer: {
+    backgroundColor: '#245d5a',
+  },
+  dayText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#1E293B',
+  },
+  disabledDayText: {
+    color: '#CBD5E1',
+  },
+  selectedDayText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  countBadge: {
+    backgroundColor: '#E8F4F3',
+    borderRadius: 10,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    marginTop: 2,
+  },
+  selectedCountBadge: {
+    backgroundColor: '#FFFFFF',
+  },
+  countText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#245d5a',
+  },
+  selectedCountText: {
+    color: '#245d5a',
+  },
   clearDateBtn: {
     marginTop: 16,
     backgroundColor: '#FEF2F2',
@@ -595,12 +652,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textTransform: 'capitalize',
   },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
   infoPill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -611,24 +662,39 @@ const styles = StyleSheet.create({
     gap: 6,
     borderWidth: 1,
     borderColor: '#F1F5F9',
+    alignSelf: 'flex-start',
   },
   infoPillText: {
     fontSize: 13,
     fontWeight: '600',
     color: '#334155',
   },
-  cardFooter: {
+  footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginTop: 12,
     paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: '#F1F5F9',
   },
+  viewMoreBtn: {
+    backgroundColor: '#245d5a',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#245d5a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
+  },
   viewDetailsText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#245d5a',
+    color: '#FFFFFF',
   },
   emptyContainer: {
     alignItems: 'center',
