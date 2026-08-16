@@ -72,6 +72,13 @@ export default function AllLayout() {
                     href: null
                 }}
             />
+            <Stack.Screen
+                name="favorites"
+                options={{
+                    title: "Favorites",
+                    href: null
+                }}
+            />
         </Stack>
     );
 }

@@ -1113,11 +1113,11 @@ export const MOCK_PROFESSIONALS = [
     },
     {
         id: 'prof_002',
-        name: 'Amir Lama',
-        phone: '9712092736',
-        pin: '0000',
+        name: 'Pratik Luitel',
+        phone: '9852024365',
+        pin: '1234',
         gender: 'Male',
-        email: 'amir.lama@gmail.com',
+        email: 'pratik.lama@gmail.com',
         category: [categories[2].title, categories[6].title],
         yearsExperience: '5',
         city: cityData[2].name, // Lalitpur

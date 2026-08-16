@@ -60,7 +60,7 @@ const ResetPin = () => {
 
     useEffect(() => {
         let timer = null;
-        if (!canResend && seconds > 0) {
+        if (step === 2 && !canResend && seconds > 0) {
             timer = setInterval(() => {
                 setSeconds((prev) => prev - 1);
             }, 1000);
@@ -71,7 +71,7 @@ const ResetPin = () => {
         return () => {
             if (timer) clearInterval(timer);
         };
-    }, [seconds, canResend]);
+    }, [seconds, canResend, step]);
 
     const resetForm = () => {
         setPhoneNumber("");
@@ -129,22 +129,26 @@ const ResetPin = () => {
         Alert.alert("Code Sent", `A new OTP code has been sent to ${phoneNumber || "your phone number"}.`);
     };
 
-    const handleNext = () => {
-        const fullOtp = otp.join("");
-
+    // Step 1 -> Step 2
+    const handlePhoneNext = () => {
         if (!phoneNumber || phoneNumber.length < 10) {
             Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number.");
             return;
         }
+        setStep(2);
+    };
 
+    // Step 2 -> Step 3
+    const handleOtpNext = () => {
+        const fullOtp = otp.join("");
         if (fullOtp.length < 4) {
             Alert.alert("Incomplete Code", "Please enter the complete 4-digit verification code.");
             return;
         }
-
-        setStep(2);
+        setStep(3);
     };
 
+    // Step 3 submission
     const handleSave = () => {
         const fullNewPin = newPin.join("");
         const fullConfirmPin = confirmPin.join("");
@@ -175,9 +179,9 @@ const ResetPin = () => {
         ]);
     };
 
-    const handleCancel = () => {
-        if (step === 2) {
-            setStep(1);
+    const handleBackOrCancel = () => {
+        if (step > 1) {
+            setStep((prev) => prev - 1);
         } else {
             resetForm();
             router.back();
@@ -186,6 +190,18 @@ const ResetPin = () => {
 
     const isTablet = screenWidth > 600;
     const cardMaxWidth = isTablet ? 480 : "100%";
+
+    const getHeaderTitle = () => {
+        if (step === 1) return "Enter Phone";
+        if (step === 2) return "Verification";
+        return "Set New PIN";
+    };
+
+    const getHeaderSubtitle = () => {
+        if (step === 1) return "Please enter your registered phone number to receive a verification code.";
+        if (step === 2) return "Enter the 4-digit code sent to your phone number.";
+        return "Choose and confirm your new 4-digit security PIN.";
+    };
 
     return (
         <View style={styles.container}>
@@ -208,14 +224,8 @@ const ResetPin = () => {
                             <View style={styles.iconCircle}>
                                 <Ionicons name="build-outline" size={26} color="#FFFFFF" />
                             </View>
-                            <Text style={styles.headerTitle}>
-                                {step === 1 ? "Verification" : "Set New PIN"}
-                            </Text>
-                            <Text style={styles.headerSubtitle}>
-                                {step === 1
-                                    ? "Enter your phone number and verification code to proceed."
-                                    : "Choose and confirm your new 4-digit security PIN."}
-                            </Text>
+                            <Text style={styles.headerTitle}>{getHeaderTitle()}</Text>
+                            <Text style={styles.headerSubtitle}>{getHeaderSubtitle()}</Text>
                         </View>
 
                         {/* FORM CARD SECTION */}
@@ -237,6 +247,28 @@ const ResetPin = () => {
                                         />
                                     </View>
 
+                                    <View style={styles.actionButtonGroup}>
+                                        <TouchableOpacity
+                                            activeOpacity={0.7}
+                                            style={styles.cancelButton}
+                                            onPress={handleBackOrCancel}
+                                        >
+                                            <Text style={styles.cancelButtonText}>Cancel</Text>
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity
+                                            activeOpacity={0.85}
+                                            style={styles.brandButton}
+                                            onPress={handlePhoneNext}
+                                        >
+                                            <Text style={styles.brandButtonText}>Next</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            )}
+
+                            {step === 2 && (
+                                <View style={styles.stepContent}>
                                     <Text style={styles.fieldLabel}>Verification Code</Text>
                                     <View style={styles.pinInputsGroupRow}>
                                         {otp.map((digit, index) => {
@@ -288,15 +320,15 @@ const ResetPin = () => {
                                         <TouchableOpacity
                                             activeOpacity={0.7}
                                             style={styles.cancelButton}
-                                            onPress={handleCancel}
+                                            onPress={handleBackOrCancel}
                                         >
-                                            <Text style={styles.cancelButtonText}>Cancel</Text>
+                                            <Text style={styles.cancelButtonText}>Back</Text>
                                         </TouchableOpacity>
 
                                         <TouchableOpacity
                                             activeOpacity={0.85}
                                             style={styles.brandButton}
-                                            onPress={handleNext}
+                                            onPress={handleOtpNext}
                                         >
                                             <Text style={styles.brandButtonText}>Next</Text>
                                         </TouchableOpacity>
@@ -304,7 +336,7 @@ const ResetPin = () => {
                                 </View>
                             )}
 
-                            {step === 2 && (
+                            {step === 3 && (
                                 <View style={styles.stepContent}>
                                     <Text style={styles.fieldLabel}>New PIN</Text>
                                     <View style={styles.pinInputsGroupRow}>
@@ -392,7 +424,7 @@ const ResetPin = () => {
                                         <TouchableOpacity
                                             activeOpacity={0.7}
                                             style={styles.cancelButton}
-                                            onPress={handleCancel}
+                                            onPress={handleBackOrCancel}
                                         >
                                             <Text style={styles.cancelButtonText}>Back</Text>
                                         </TouchableOpacity>
