@@ -13,18 +13,19 @@ export default function ProfessionalLayout() {
                     headerShown: false 
                 }} 
             />
-            <Stack.Screen 
+            {/* <Stack.Screen 
                 name="favorites" 
                 options={{ 
                     title: 'Favorite Services' 
                 }} 
-            />
+            /> */}
             <Stack.Screen 
                 name="updateProfile" 
                 options={{ 
                     title: 'Update Profile' 
                 }} 
             />
+        
         </Stack>
     );
 }
