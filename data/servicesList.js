@@ -875,7 +875,7 @@ export const BookingsListProfessional = [
         id: 101,
         fullName: 'Pratigya Luitel',
         phone: '9841428133',
-        service: 'landscaping services',
+        service: serviceOfferedData[0].title, // Landscape Design
         location: 'Kathmandu, Paknajol',
         budget: 'Below NPR 5000',
         booking_date: '2026/08/01',
@@ -883,13 +883,16 @@ export const BookingsListProfessional = [
         endDate: '2026/08/10',
         approxDays: 5,
         specialRequest: 'Needs garden hedge trimming and soil rejuvenation.',
-        workStatus: 'OnGoing'
+        workStatus: 'OnGoing',
+        photos: [
+            require('../assets/images/bookings/101_1.jpg'),
+        ]
     },
     {
         id: 102,
         fullName: 'Aarav Shrestha',
         phone: '9801029384',
-        service: 'Lawn Mowing & Maintenance',
+        service: serviceOfferedData[8].title, // Lawn Care
         location: 'Lalitpur, Jhamsikhel',
         budget: 'NPR 5000 - 10000',
         booking_date: '2026/08/01',
@@ -897,13 +900,16 @@ export const BookingsListProfessional = [
         endDate: '2026/08/04',
         approxDays: 1,
         specialRequest: 'Bring specialized motorized lawn mower.',
-        workStatus: 'Cancelled'
+        workStatus: 'Cancelled',
+        photos: [
+            require('../assets/images/bookings/101_1.jpg'),
+        ]
     },
     {
         id: 103,
         fullName: 'Sita Sharma',
         phone: '9851092834',
-        service: 'Indoor Plant Styling',
+        service: serviceOfferedData[13].title, // Planting and Transplanting
         location: 'Bhaktapur, Suryabinayak',
         budget: 'Below NPR 5000',
         booking_date: '2026/08/02',
@@ -911,13 +917,16 @@ export const BookingsListProfessional = [
         endDate: '2026/08/05',
         approxDays: 1,
         specialRequest: 'Repotting succulent collection into ceramic pots.',
-        workStatus: 'Completed'
+        workStatus: 'Completed',
+        photos: [
+            require('../assets/images/bookings/101_1.jpg'),
+        ]
     },
     {
         id: 104,
         fullName: 'Rohan Adhikari',
         phone: '9812345678',
-        service: 'Tree Pruning & Cutting',
+        service: serviceOfferedData[10].title, // Tree Pruning & Removal
         location: 'Kathmandu, Baneshwor',
         budget: 'NPR 10000 - 20000',
         booking_date: '2026/08/05',
@@ -925,13 +934,16 @@ export const BookingsListProfessional = [
         endDate: '2026/08/09',
         approxDays: 2,
         specialRequest: 'Trim high branches near power cables safely.',
-        workStatus: 'New'
+        workStatus: 'New',
+        photos: [
+            require('../assets/images/bookings/101_1.jpg'),
+        ]
     },
     {
         id: 105,
         fullName: 'Kiran Thapa',
         phone: '9860112233',
-        service: 'Garden Irrigation Setup',
+        service: serviceOfferedData[16].title, // Irrigation Services
         location: 'Lalitpur, Sanepa',
         budget: 'Above NPR 20000',
         booking_date: '2026/08/06',
@@ -939,13 +951,16 @@ export const BookingsListProfessional = [
         endDate: '2026/08/12',
         approxDays: 5,
         specialRequest: 'Install automatic drip irrigation timer.',
-        workStatus: 'Dispute'
+        workStatus: 'Dispute',
+        photos: [
+            require('../assets/images/bookings/101_1.jpg'),
+        ]
     },
     {
         id: 106,
         fullName: 'Pooja Karki',
         phone: '9849876543',
-        service: 'Vertical Garden Installation',
+        service: serviceOfferedData[1].title, // Rooftop Gardening
         location: 'Kathmandu, Balaju',
         budget: 'NPR 10000 - 20000',
         booking_date: '2026/08/06',
@@ -953,13 +968,16 @@ export const BookingsListProfessional = [
         endDate: '2026/08/12',
         approxDays: 3,
         specialRequest: 'Balcony wall setup with creeping flowering plants.',
-        workStatus: 'New'
+        workStatus: 'New',
+        photos: [
+            require('../assets/images/bookings/101_1.jpg'),
+        ]
     },
     {
         id: 107,
         fullName: 'Bishal Gurung',
         phone: '9803456789',
-        service: 'Seasonal Flower Planting',
+        service: serviceOfferedData[9].title, // Flower Maintenance
         location: 'Kathmandu, Maharajgunj',
         budget: 'Below NPR 5000',
         booking_date: '2026/08/07',
@@ -967,13 +985,16 @@ export const BookingsListProfessional = [
         endDate: '2026/08/09',
         approxDays: 1,
         specialRequest: 'Plant marigolds and petunias along walkways.',
-        workStatus: 'OnGoing'
+        workStatus: 'OnGoing',
+        photos: [
+            require('../assets/images/bookings/101_1.jpg'),
+        ]
     },
     {
         id: 108,
         fullName: 'Anjali Giri',
         phone: '9818765432',
-        service: 'Pest Control & Spraying',
+        service: serviceOfferedData[17].title, // Pest and Disease Control
         location: 'Lalitpur, Imadol',
         budget: 'Below NPR 5000',
         booking_date: '2026/08/07',
@@ -981,13 +1002,16 @@ export const BookingsListProfessional = [
         endDate: '2026/08/08',
         approxDays: 1,
         specialRequest: 'Use organic, pet-safe pesticides only.',
-        workStatus: 'Completed'
+        workStatus: 'Completed',
+        photos: [
+            require('../assets/images/bookings/101_1.jpg'),
+        ]
     },
     {
         id: 109,
         fullName: 'Dipendra Basnet',
         phone: '9851123456',
-        service: 'Rooftop Organic Farm Design',
+        service: serviceOfferedData[1].title, // Rooftop Gardening
         location: 'Bhaktapur, Thimi',
         budget: 'Above NPR 20000',
         booking_date: '2026/08/08',
@@ -995,13 +1019,16 @@ export const BookingsListProfessional = [
         endDate: '2026/08/18',
         approxDays: 6,
         specialRequest: 'Set up raised beds for seasonal vegetable cultivation.',
-        workStatus: 'New'
+        workStatus: 'New',
+        photos: [
+            require('../assets/images/bookings/101_1.jpg'),
+        ]
     },
     {
         id: 110,
         fullName: 'Suman Rai',
         phone: '9865432109',
-        service: 'Landscape Lighting Design',
+        service: serviceOfferedData[3].title, // Landscape Lighting
         location: 'Kathmandu, Budhanilkantha',
         budget: 'NPR 10000 - 20000',
         booking_date: '2026/08/08',
@@ -1009,13 +1036,16 @@ export const BookingsListProfessional = [
         endDate: '2026/08/13',
         approxDays: 2,
         specialRequest: 'Install low-voltage solar garden spotlights.',
-        workStatus: 'OnGoing'
+        workStatus: 'OnGoing',
+        photos: [
+            require('../assets/images/bookings/101_1.jpg'),
+        ]
     },
     {
         id: 111,
         fullName: 'Nisha Khadka',
         phone: '9840011223',
-        service: 'Grass Turf Laying',
+        service: serviceOfferedData[5].title, // Turfing Service
         location: 'Kathmandu, Kirtipur',
         budget: 'NPR 10000 - 20000',
         booking_date: '2026/08/09',
@@ -1023,13 +1053,16 @@ export const BookingsListProfessional = [
         endDate: '2026/08/16',
         approxDays: 2,
         specialRequest: 'Level garden bed prior to Bermuda grass installation.',
-        workStatus: 'New'
+        workStatus: 'New',
+        photos: [
+            require('../assets/images/bookings/101_1.jpg'),
+        ]
     },
     {
         id: 112,
         fullName: 'Subash Tamang',
         phone: '9808123456',
-        service: 'Water Feature Maintenance',
+        service: serviceOfferedData[6].title, // Garden Maintenance
         location: 'Lalitpur, Kupondole',
         budget: 'Below NPR 5000',
         booking_date: '2026/08/09',
@@ -1037,13 +1070,16 @@ export const BookingsListProfessional = [
         endDate: '2026/08/10',
         approxDays: 1,
         specialRequest: 'Clean koi pond filter and balance water pH.',
-        workStatus: 'Completed'
+        workStatus: 'Completed',
+        photos: [
+            require('../assets/images/bookings/101_1.jpg'),
+        ]
     },
     {
         id: 113,
         fullName: 'Prashant Dahal',
         phone: '9811223344',
-        service: 'Soil Fertilization & Mulching',
+        service: serviceOfferedData[15].title, // Soil and Fertilizers
         location: 'Kathmandu, Chabahel',
         budget: 'Below NPR 5000',
         booking_date: '2026/08/10',
@@ -1051,13 +1087,16 @@ export const BookingsListProfessional = [
         endDate: '2026/08/13',
         approxDays: 1,
         specialRequest: 'Apply rich organic compost across fruit orchard.',
-        workStatus: 'New'
+        workStatus: 'New',
+        photos: [
+            require('../assets/images/bookings/101_1.jpg'),
+        ]
     },
     {
         id: 114,
         fullName: 'Mina Gautam',
         phone: '9861987654',
-        service: 'Bonsai Care & Pruning',
+        service: serviceOfferedData[6].title, // Garden Maintenance
         location: 'Kathmandu, Lazimpat',
         budget: 'NPR 5000 - 10000',
         booking_date: '2026/08/10',
@@ -1065,13 +1104,16 @@ export const BookingsListProfessional = [
         endDate: '2026/08/11',
         approxDays: 1,
         specialRequest: 'Precision wire training and root trimming.',
-        workStatus: 'Cancelled'
+        workStatus: 'Cancelled',
+        photos: [
+            require('../assets/images/bookings/101_1.jpg'),
+        ]
     },
     {
         id: 115,
         fullName: 'Rajesh Maharjan',
         phone: '9843344556',
-        service: 'Full Garden Renovation',
+        service: serviceOfferedData[0].title, // Landscape Design
         location: 'Lalitpur, Pulchowk',
         budget: 'Above NPR 20000',
         booking_date: '2026/08/11',
@@ -1079,7 +1121,10 @@ export const BookingsListProfessional = [
         endDate: '2026/08/22',
         approxDays: 7,
         specialRequest: 'Complete redesign including stone pathways and planting.',
-        workStatus: 'New'
+        workStatus: 'New',
+        photos: [
+            require('../assets/images/bookings/101_1.jpg'),
+        ]
     }
 ];
 
