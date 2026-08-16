@@ -1,10 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Print from 'expo-print';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useEffect, useState } from 'react';
 import {
     Alert,
+    Image,
+    Linking,
     Modal,
     ScrollView,
     StyleSheet,
@@ -17,22 +20,56 @@ import { BookingsListProfessional } from '../../../data/servicesList';
 
 const STATUS_OPTIONS = ['New', 'OnGoing', 'Completed', 'Cancelled', 'Dispute'];
 
+// Utility function to disguise phone numbers
+const maskPhoneNumber = (phone) => {
+    if (!phone) return '+977 98XXX28X47';
+    return phone.replace(/(\d{2})\d{4}(\d{2})\d(\d{1})/, '$1XXX$2X$3');
+};
+
+// Helper function to get ordinal suffix (e.g. 1 -> 1st, 2 -> 2nd, 10 -> 10th)
+const getOrdinalSuffix = (day) => {
+    if (day > 3 && day < 21) return 'th';
+    switch (day % 10) {
+        case 1:  return 'st';
+        case 2:  return 'nd';
+        case 3:  return 'rd';
+        default: return 'th';
+    }
+};
+
+// Formats date string into "10th July, 2026"
+const formatDateFormatted = (dateStr) => {
+    if (!dateStr) return '';
+    
+    const parsedDate = new Date(dateStr.replace(/\//g, '-'));
+    if (isNaN(parsedDate.getTime())) {
+        return dateStr;
+    }
+
+    const day = parsedDate.getDate();
+    const month = parsedDate.toLocaleString('en-US', { month: 'long' });
+    const year = parsedDate.getFullYear();
+
+    return `${day}${getOrdinalSuffix(day)} ${month}, ${year}`;
+};
+
 const IndividualBooking = () => {
     const { id, updatedStatus } = useLocalSearchParams();
 
     const booking = BookingsListProfessional.find((item) => item.id.toString() === id?.toString()) || {
         id: id || 'B34',
         fullName: 'Amir Lama',
-        phone: '+977 9712092736',
+        phone: '9823028547',
         service: 'Water Tank Cleaning',
         location: 'Sanepa, Lalitpur',
         budget: 'NPR 5,000 - 10,000',
-        booking_date: '28 July 2026, Tuesday',
-        startDate: '29 July 2026, Wednesday',
-        endDate: '29 July 2026, Wednesday',
-        approxDays: '1 Day',
+        booking_date: '2026/07/28',
+        startDate: '2026/07/29',
+        endDate: '2026/07/29',
+        approxDays: 1,
         specialRequest: 'Test.',
         workStatus: 'New',
+        photos: [],
     };
 
     const [currentStatus, setCurrentStatus] = useState(booking.workStatus || 'New');
@@ -42,7 +79,7 @@ const IndividualBooking = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [statusHistory, setStatusHistory] = useState({ from: '', to: '' });
 
-    // Update status automatically when returning from the pay screen
+    // Update status automatically when returning from payment screen
     useEffect(() => {
         if (updatedStatus) {
             setCurrentStatus(updatedStatus);
@@ -65,15 +102,54 @@ const IndividualBooking = () => {
         setIsModalVisible(false);
     };
 
-    const handlePayPress = () => {
+    // Open matching location in Google Maps using coordinates query
+    const handleOpenMap = async () => {
+        const query = encodeURIComponent(booking.location);
+        const webUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+
+        try {
+            const supported = await Linking.canOpenURL(webUrl);
+            if (supported) {
+                await Linking.openURL(webUrl);
+            } else {
+                Alert.alert('Error', 'Unable to open Google Maps');
+            }
+        } catch (error) {
+            console.error('Error opening maps:', error);
+        }
+    };
+
+    const handleAcceptOffer = () => {
         router.push({
             pathname: '/booking/pay',
             params: { bookingId: booking.id },
         });
     };
 
+    const handleRejectOffer = () => {
+        Alert.alert(
+            'Reject Booking',
+            'Are you sure you want to reject this offer?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Reject',
+                    style: 'destructive',
+                    onPress: () => {
+                        setCurrentStatus('Cancelled');
+                        setSelectedStatus('Cancelled');
+                    },
+                },
+            ]
+        );
+    };
+
+    // Helper check to determine if phone number should be masked
+    const isPhoneMasked = currentStatus === 'New' || currentStatus === 'Cancelled';
+
     const handleSharePDF = async () => {
         try {
+            const displayPhone = isPhoneMasked ? maskPhoneNumber(booking.phone) : (booking.phone || '+977 9823028547');
             const htmlContent = `
                 <!DOCTYPE html>
                 <html>
@@ -101,15 +177,15 @@ const IndividualBooking = () => {
 
                     <div class="card">
                         <div class="client-name">${booking.fullName}</div>
-                        ${currentStatus !== 'New' ? `<div class="phone"> ${booking.phone || '+977 9712092736'}</div>` : ''}
+                        <div class="phone">${displayPhone}</div>
 
                         <div class="row"><div class="label">Service</div><div class="value">${booking.service}</div></div>
                         <div class="row"><div class="label">Location</div><div class="value">${booking.location}</div></div>
                         <div class="row"><div class="label">Budget</div><div class="value">${booking.budget}</div></div>
-                        <div class="row"><div class="label">Booking Date</div><div class="value">${booking.booking_date}</div></div>
-                        <div class="row"><div class="label">Starting Date</div><div class="value">${booking.startDate || '29 July 2026, Wednesday'}</div></div>
-                        <div class="row"><div class="label">Ending Date</div><div class="value">${booking.endDate || '29 July 2026, Wednesday'}</div></div>
-                        <div class="row"><div class="label">Approx Days to Complete</div><div class="value">${booking.approxDays || '1 Day'}</div></div>
+                        <div class="row"><div class="label">Booking Date</div><div class="value">${formatDateFormatted(booking.booking_date)}</div></div>
+                        <div class="row"><div class="label">Starting Date</div><div class="value">${formatDateFormatted(booking.startDate)}</div></div>
+                        <div class="row"><div class="label">Ending Date</div><div class="value">${formatDateFormatted(booking.endDate)}</div></div>
+                        <div class="row"><div class="label">Approx Days to Complete</div><div class="value">${booking.approxDays} Days</div></div>
                         <div class="row"><div class="label">Special Request</div><div class="value">${booking.specialRequest || 'None'}</div></div>
                         <div class="row"><div class="label">Work Status</div><div class="value">${currentStatus}</div></div>
                     </div>
@@ -120,9 +196,15 @@ const IndividualBooking = () => {
             `;
 
             const { uri } = await Print.printToFileAsync({ html: htmlContent });
+            const customUri = `${FileSystem.documentDirectory}GardenSewa-${booking.id}.pdf`;
+
+            await FileSystem.copyAsync({
+                from: uri,
+                to: customUri,
+            });
 
             if (await Sharing.isAvailableAsync()) {
-                await Sharing.shareAsync(uri, {
+                await Sharing.shareAsync(customUri, {
                     mimeType: 'application/pdf',
                     dialogTitle: `Share Booking ${booking.id}`,
                     UTI: 'com.adobe.pdf',
@@ -153,50 +235,83 @@ const IndividualBooking = () => {
                 <View style={styles.card}>
                     <Text style={styles.clientName}>{booking.fullName}</Text>
 
-                    {currentStatus !== 'New' && (
-                        <View style={styles.phoneRow}>
-                            <Ionicons name="call-outline" size={14} color="#64748B" />
-                            <Text style={styles.phoneText}>{booking.phone || '+977 9712092736'}</Text>
-                        </View>
-                    )}
+                    {/* Masked phone for 'New' and 'Cancelled' statuses */}
+                    <View style={styles.phoneRow}>
+                        <Ionicons name="call-outline" size={16} color="#245d5a" />
+                        <Text style={styles.phoneText}>
+                            {isPhoneMasked
+                                ? maskPhoneNumber(booking.phone)
+                                : (booking.phone || '+977 9823028547')}
+                        </Text>
+                    </View>
 
                     <View style={styles.infoGroup}>
                         <Text style={styles.fieldLabel}>Service</Text>
                         <Text style={styles.fieldValue}>{booking.service}</Text>
 
                         <Text style={styles.fieldLabel}>Location</Text>
-                        <Text style={styles.fieldValue}>{booking.location}</Text>
+                        <TouchableOpacity style={styles.locationLinkRow} onPress={handleOpenMap} activeOpacity={0.7}>
+                            <Ionicons name="location-outline" size={18} color="#245d5a" />
+                            <Text style={styles.locationText}>{booking.location}</Text>
+                        </TouchableOpacity>
 
                         <Text style={styles.fieldLabel}>Budget</Text>
                         <Text style={styles.fieldValue}>{booking.budget}</Text>
 
                         <Text style={styles.fieldLabel}>Booking Date</Text>
-                        <Text style={styles.fieldValue}>{booking.booking_date}</Text>
+                        <Text style={styles.fieldValue}>{formatDateFormatted(booking.booking_date)}</Text>
 
                         <Text style={styles.fieldLabel}>Starting Date</Text>
-                        <Text style={styles.fieldValue}>{booking.startDate || '29 July 2026, Wednesday'}</Text>
+                        <Text style={styles.fieldValue}>{formatDateFormatted(booking.startDate)}</Text>
 
                         <Text style={styles.fieldLabel}>Ending Date</Text>
-                        <Text style={styles.fieldValue}>{booking.endDate || '29 July 2026, Wednesday'}</Text>
+                        <Text style={styles.fieldValue}>{formatDateFormatted(booking.endDate)}</Text>
 
                         <Text style={styles.fieldLabel}>Approx Days to Complete</Text>
-                        <Text style={styles.fieldValue}>{booking.approxDays || '1 Day'}</Text>
+                        <Text style={styles.fieldValue}>{booking.approxDays} Days</Text>
 
                         <Text style={styles.fieldLabel}>Special Request</Text>
                         <Text style={styles.fieldValue}>{booking.specialRequest || 'None'}</Text>
                     </View>
 
-                    {currentStatus === 'New' ? (
-                        <View style={styles.paySectionContainer}>
+                    {/* Flexible Photo Gallery Section */}
+                    {booking.photos && booking.photos.length > 0 && (
+                        <View style={styles.photosSection}>
+                            <Text style={styles.fieldLabel}>Attached Photos</Text>
+                            <View style={styles.photosGrid}>
+                                {booking.photos.map((photoSrc, index) => (
+                                    <Image
+                                        key={index}
+                                        source={photoSrc}
+                                        style={styles.photoItem}
+                                        resizeMode="cover"
+                                    />
+                                ))}
+                            </View>
+                        </View>
+                    )}
+
+                    {/* Pre-payment state: Accept / Reject Buttons */}
+                    {currentStatus === 'New' || currentStatus === 'Cancelled' ? (
+                        <View style={styles.actionButtonsContainer}>
                             <TouchableOpacity
-                                style={styles.payToViewBtn}
+                                style={styles.acceptBtn}
                                 activeOpacity={0.85}
-                                onPress={handlePayPress}
+                                onPress={handleAcceptOffer}
                             >
-                                <Text style={styles.payToViewBtnText}>Pay NPR 99 to View Contact</Text>
+                                <Text style={styles.acceptBtnText}>Accept This Offer</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.rejectBtn}
+                                activeOpacity={0.85}
+                                onPress={handleRejectOffer}
+                            >
+                                <Text style={styles.rejectBtnText}>Reject</Text>
                             </TouchableOpacity>
                         </View>
                     ) : (
+                        /* Post-payment state: Work Status Management */
                         <>
                             <View style={styles.divider} />
                             <Text style={styles.sectionHeading}>Work Status</Text>
@@ -226,7 +341,7 @@ const IndividualBooking = () => {
                 </View>
             </ScrollView>
 
-            {/* Dropdown Modal */}
+            {/* Status Dropdown Modal */}
             <Modal
                 visible={isDropdownOpen}
                 transparent={true}
@@ -264,7 +379,7 @@ const IndividualBooking = () => {
                 </TouchableWithoutFeedback>
             </Modal>
 
-            {/* Status Change Confirmation Modal */}
+            {/* Status Confirmation Modal */}
             <Modal
                 visible={isModalVisible}
                 transparent={true}
@@ -368,8 +483,10 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     phoneText: {
-        fontSize: 13,
-        color: '#64748B',
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#245d5a',
+        textDecorationLine: 'underline',
     },
     infoGroup: {
         gap: 4,
@@ -385,18 +502,64 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#1E293B',
     },
-    paySectionContainer: {
+    locationLinkRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        marginTop: 2,
+    },
+    locationText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#245d5a',
+        textDecorationLine: 'underline',
+    },
+    photosSection: {
+        marginTop: 6,
+    },
+    photosGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 10,
+        marginTop: 8,
+    },
+    photoItem: {
+        width: 80,
+        height: 80,
+        borderRadius: 8,
+        backgroundColor: '#E2E8F0',
+    },
+    actionButtonsContainer: {
+        flexDirection: 'row',
+        gap: 12,
         marginTop: 24,
     },
-    payToViewBtn: {
+    acceptBtn: {
+        flex: 1.4,
         backgroundColor: '#245d5a',
-        borderRadius: 8,
+        borderRadius: 10,
         paddingVertical: 14,
         alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 2,
     },
-    payToViewBtnText: {
+    acceptBtnText: {
         color: '#FFFFFF',
-        fontSize: 15,
+        fontSize: 14,
+        fontWeight: '700',
+    },
+    rejectBtn: {
+        flex: 1,
+        backgroundColor: '#EF4444',
+        borderRadius: 10,
+        paddingVertical: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 2,
+    },
+    rejectBtnText: {
+        color: '#FFFFFF',
+        fontSize: 14,
         fontWeight: '700',
     },
     divider: {
