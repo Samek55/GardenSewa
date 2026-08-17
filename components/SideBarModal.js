@@ -27,7 +27,7 @@ const SideBarModal = ({ onClose }) => {
             return pathname.startsWith('/services') || pathname.startsWith('/(tabs)/services');
         }
 
-        if (targetPath === '/(tabs)/notifications') {
+        if (targetPath === '/notifications') {
             return pathname.startsWith('/notifications') || pathname.startsWith('/(tabs)/notifications');
         }
 
@@ -103,7 +103,7 @@ const SideBarModal = ({ onClose }) => {
 
                     {renderMenuItem('/(tabs)', 'home-outline', 'Home')}
                     {renderMenuItem('/(tabs)/services', 'grid-outline', 'Services')}
-                    {renderMenuItem('/(tabs)/notifications', 'notifications-outline', 'Notifications')}
+                    {renderMenuItem('/notifications', 'notifications-outline', 'Notifications')}
                     {renderMenuItem('/book', 'calendar-outline', 'Book a Service')}
                     {renderMenuItem('/joinasaprofessional', 'person-add-outline', 'Join as a Professional')}
                 </View>
