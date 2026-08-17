@@ -21,7 +21,6 @@ function MainAppContent() {
 
   useEffect(() => {
     SplashScreen.hideAsync().catch(() => { });
-
     const startTime = Date.now();
 
     const interval = setInterval(() => {
@@ -33,6 +32,7 @@ function MainAppContent() {
       if (remainingMs <= 0) {
         clearInterval(interval);
         setIsAppReady(true);
+
       }
     }, 16);
 
