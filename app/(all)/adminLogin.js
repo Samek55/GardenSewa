@@ -40,6 +40,9 @@ const AdminLogin = () => {
     const handlePhoneChange = (text) => {
         const digitsOnly = text.replace(/[^0-9]/g, "").slice(0, 10);
         setRawPhone(digitsOnly);
+        if (digitsOnly.length === 10) {
+            pinRefs[0].current?.focus();
+        }
     };
 
     const handlePinChange = (text, index) => {
@@ -151,7 +154,9 @@ const AdminLogin = () => {
                         <Text style={styles.signInTitle}>Sign In</Text>
 
                         <View style={styles.phoneInputRow}>
-                            <NP width={26} height={18} style={styles.nepalFlag} />
+                            <View style={styles.iconWrapper}>
+                                <NP width={30} height={30} />
+                            </View>
                             <TextInput
                                 style={styles.phoneTextInput}
                                 value={formatPhone(rawPhone)}
@@ -191,13 +196,16 @@ const AdminLogin = () => {
                             ))}
                         </View>
 
-                        <TouchableOpacity
-                            activeOpacity={0.8}
-                            style={styles.loginSubmitButton}
-                            onPress={handleLogin}
-                        >
-                            <Text style={styles.loginButtonText}>Login</Text>
-                        </TouchableOpacity>
+                        <View style={{ width: '100%', alignItems: "center" }}>
+                            <TouchableOpacity
+                                activeOpacity={0.8}
+                                style={styles.loginSubmitButton}
+                                onPress={handleLogin}
+                            >
+                                <Text style={styles.loginButtonText}>Login</Text>
+                            </TouchableOpacity>
+                        </View>
+
 
                         <View style={[styles.horizontalDivider, { marginVertical: screenHeight * 0.03 }]} />
 
@@ -289,8 +297,16 @@ const styles = StyleSheet.create({
         height: 50,
         paddingHorizontal: 16,
     },
+    iconWrapper: {
+        paddingRight: 8,
+        borderRightWidth: 1,
+        borderRightColor: '#E0E0E0',
+        height: '60%',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
     nepalFlag: {
-        marginRight: 14,
+        marginRight: 4,
     },
     phoneTextInput: {
         flex: 1,
@@ -298,7 +314,8 @@ const styles = StyleSheet.create({
         color: "#000",
         fontWeight: "400",
         paddingVertical: 0,
-        height: '80%'
+        height: '80%',
+        marginLeft: 4
     },
     pinHeaderContainer: {
         flexDirection: "row",
@@ -335,6 +352,7 @@ const styles = StyleSheet.create({
         borderRadius: 14,
         justifyContent: "center",
         alignItems: "center",
+        width: '60%'
     },
     loginButtonText: {
         color: "#FFF",
