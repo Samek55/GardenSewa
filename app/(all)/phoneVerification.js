@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   },
   loginSubmitButton: {
     backgroundColor: "#2C5E5A",
-    width: "80%",
+    width: "60%",
     height: 52,
     borderRadius: 26,
     justifyContent: "center",
