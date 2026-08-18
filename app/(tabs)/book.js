@@ -31,11 +31,11 @@ const validationSchema = object({
     phone: string().required('Phone number is required').min(10, 'Invalid phone number'),
     service: string().required('Service is required'),
     startDate: string().required('Start date is required'),
-    endDate: string().required('End date is required'),
+    endDate: string(),
     preferredTime: string().required('Time is required'),
     city: string().required('City is required'),
     area: string().required('Area is required'),
-    priority: string().required('Priority is required'),
+    priority: string(),
     budget: string().required('Budget is required'),
     terms: boolean().isTrue('Must accept terms and conditions'),
 });
@@ -152,7 +152,7 @@ export default function Book() {
                 allowsEditing: true,
                 quality: 1,
                 selectionLimit: 5,
-                aspect:[1,1]
+                aspect: [1, 1]
             });
 
             if (!result.canceled) {
@@ -239,7 +239,9 @@ export default function Book() {
                             Phone Number <Text style={styles.asterisk}>*</Text>
                         </Text>
                         <View style={styles.phoneInputContainer}>
-                            <NP width={30} height={20} style={styles.flagIcon} />
+                            <View style={styles.flagWrapper}>
+                                <NP width={30} height={20} />
+                            </View>
                             <TextInput
                                 style={styles.flexInput}
                                 placeholder="Enter your phone number"
@@ -251,7 +253,6 @@ export default function Book() {
                                     formik.setFieldValue('phone', rawDigits);
                                 }}
                                 keyboardType="phone-pad"
-                                maxLength={12}
                             />
                         </View>
                     </View>
@@ -318,7 +319,7 @@ export default function Book() {
                     {/* End Date */}
                     <View style={styles.individualContainer}>
                         <Text style={styles.label}>
-                            Service Ending Date <Text style={styles.asterisk}>*</Text>
+                            Service Ending Date
                         </Text>
                         <TouchableOpacity
                             style={styles.dropdownTrigger}
@@ -405,16 +406,15 @@ export default function Book() {
                             <Text style={styles.label}>
                                 Area <Text style={styles.asterisk}>*</Text>
                             </Text>
-                            <Text style={{ color: '#151212', fontSize: 12, fontStyle: 'italic', marginVertical: 8 }}>
+                            {/* <Text style={{ color: '#151212', fontSize: 12, fontStyle: 'italic', marginVertical: 8 }}>
                                 Please select a city first.
-                            </Text>
+                            </Text> */}
                         </View>
                     }
 
                     {/* Priority */}
                     <CustomDropdown
                         label="Priority"
-                        required
                         value={formik.values.priority}
                         placeholder="Choose Priority"
                         data={priorityData}
@@ -602,9 +602,18 @@ const styles = StyleSheet.create({
     flagIcon: {
         marginRight: 10,
     },
+    flagWrapper: {
+        paddingRight: 8,
+        borderRightWidth: 1,
+        borderRightColor: '#E0E0E0',
+        height: '60%',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
     flexInput: {
         flex: 1,
         height: '100%',
+        paddingLeft: 10,
     },
     dropdownTrigger: {
         flexDirection: 'row',
