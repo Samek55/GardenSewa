@@ -410,7 +410,9 @@ export default function PartnerBook() {
                         Phone Number <Text style={styles.asterisk}>*</Text>
                     </Text>
                     <View style={styles.phoneInputContainer}>
-                        <NP width={30} height={20} style={styles.flagIcon} />
+                        <View style={styles.iconWrapper}>
+                            <NP width={30} height={20} />
+                        </View>
                         <TextInput
                             style={styles.flexInput}
                             placeholderTextColor={'#999'}
@@ -701,7 +703,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         height: 44,
     },
-    flagIcon: {
+    iconWrapper: {
+        paddingRight: 8,
+        borderRightWidth: 1,
+        borderRightColor: '#E0E0E0',
+        height: '60%',
+        justifyContent: 'center',
         marginRight: 10,
     },
     flexInput: {
