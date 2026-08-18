@@ -1,6 +1,6 @@
 import PopUpAd from '@/components/PopUpAd';
 import { Link, router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     Alert,
     Dimensions,
@@ -25,6 +25,11 @@ const TOP_CARD_WIDTH = (width - 36 - 2 - 24 - 10) / 2.6;
 export default function Index() {
     const [isAdVisible, setIsAdVisible] = useState(false);
     const [phone, setPhone] = useState('');
+    const [activeTopIndex, setActiveTopIndex] = useState(0);
+
+    const flatListRef = useRef(null);
+
+    const filteredServicesTop = services.filter(service => service.label === 'Top');
 
     // Trigger Pop-Up Ad when Home mounts
     useEffect(() => {
@@ -34,6 +39,23 @@ export default function Index() {
 
         return () => clearTimeout(timer);
     }, []);
+
+    useEffect(() => {
+        if (filteredServicesTop.length === 0) return;
+
+        const interval = setInterval(() => {
+            setActiveTopIndex((prevIndex) => {
+                const nextIndex = (prevIndex + 1) % filteredServicesTop.length;
+                flatListRef.current?.scrollToIndex({
+                    index: nextIndex,
+                    animated: true,
+                });
+                return nextIndex;
+            });
+        }, 2000); 
+
+        return () => clearInterval(interval);
+    }, [filteredServicesTop.length]);
 
     const onWhatsappOpen = async () => {
         const phoneNumber = "+ 977 9852024365";
@@ -50,8 +72,6 @@ export default function Index() {
             console.error("An error occurred", error);
         }
     };
-
-    const filteredServicesTop = services.filter(service => service.label === 'Top');
 
     const formattedPhoneValue = phone.length === 10
         ? `${phone.slice(0, 5)} ${phone.slice(5, 7)} ${phone.slice(7, 10)}`
@@ -134,12 +154,18 @@ export default function Index() {
 
             <View style={styles.listContainer}>
                 <FlatList
+                    ref={flatListRef}
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     data={filteredServicesTop}
                     keyExtractor={(item, index) => index.toString()}
                     contentContainerStyle={styles.horizontalListPadding}
                     ItemSeparatorComponent={() => <View style={{ width: 14 }} />}
+                    getItemLayout={(data, index) => ({
+                        length: TOP_CARD_WIDTH + 14,
+                        offset: (TOP_CARD_WIDTH + 14) * index,
+                        index,
+                    })}
                     renderItem={({ item }) => (
                         <ServiceCard
                             id={item.id}
@@ -209,7 +235,8 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     iconWrapper: {
-        paddingHorizontal: 14,
+        paddingRight: 8,
+        paddingLeft: 12,
         borderRightWidth: 1,
         borderRightColor: '#E0E0E0',
         height: '60%',
