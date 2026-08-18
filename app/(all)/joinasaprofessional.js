@@ -346,7 +346,9 @@ export default function JoinProfessional() {
                         Phone Number <Text style={styles.asterisk}>*</Text>
                     </Text>
                     <View style={styles.phoneInputContainer}>
-                        <NP width={30} height={20} style={styles.flagIcon} />
+                        <View style={styles.iconWrapper}>
+                            <NP width={30} height={20} />
+                        </View>
                         <TextInput
                             style={styles.flexInput}
                             placeholder="Enter your phone number"
@@ -513,9 +515,9 @@ export default function JoinProfessional() {
                         <Text style={styles.label}>
                             Area <Text style={styles.asterisk}>*</Text>
                         </Text>
-                        <Text style={{ color: '#666', fontSize: 12, fontStyle: 'italic', marginVertical: 4 }}>
+                        {/* <Text style={{ color: '#666', fontSize: 12, fontStyle: 'italic', marginVertical: 4 }}>
                             Please select a city first.
-                        </Text>
+                        </Text> */}
                     </View>
                 )}
 
@@ -525,7 +527,9 @@ export default function JoinProfessional() {
                         Emergency Contact Number <Text style={styles.asterisk}>*</Text>
                     </Text>
                     <View style={styles.phoneInputContainer}>
-                        <NP width={30} height={20} style={styles.flagIcon} />
+                        <View style={styles.iconWrapper}>
+                            <NP width={30} height={20} />
+                        </View>
                         <TextInput
                             style={styles.flexInput}
                             placeholderTextColor={'#999'}
@@ -545,7 +549,9 @@ export default function JoinProfessional() {
                 <View style={styles.individualContainer}>
                     <Text style={styles.label}>Referral Phone Number</Text>
                     <View style={styles.phoneInputContainer}>
-                        <NP width={30} height={20} style={styles.flagIcon} />
+                        <View style={styles.iconWrapper}>
+                            <NP width={30} height={20} />
+                        </View>
                         <TextInput
                             style={styles.flexInput}
                             placeholder="Enter phone number"
@@ -665,7 +671,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         height: 44,
     },
-    flagIcon: {
+    iconWrapper: {
+        paddingRight: 8,
+        borderRightWidth: 1,
+        borderRightColor: '#E0E0E0',
+        height: '60%',
+        justifyContent: 'center',
         marginRight: 10,
     },
     flexInput: {
