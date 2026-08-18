@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
 const Contact = () => {
   const onWhatsAppOpen = async () => {
     const phoneNumber = "9852024365";
@@ -92,22 +93,29 @@ const Contact = () => {
         </Text>
       </View>
 
-      <View style={styles.mapCard}>
-        <Image
-          source={require("../../assets/images/contact/map.png")}
-          style={styles.mapImage}
-          resizeMode="cover"
-        />
-        <TouchableOpacity
-          style={styles.buttonContainer}
-          activeOpacity={0.8}
-          onPress={onMapOpen}
-        >
-          <Ionicons name="map-outline" size={18} color="white" />
-          <Text style={styles.buttonText}>Open in Maps</Text>
-        </TouchableOpacity>
+      {/* Map Section Wrapper */}
+      <View style={styles.mapCardWrapper}>
+        <View style={styles.mapImageContainer}>
+          <Image
+            source={require("../../assets/images/contact/map.png")}
+            style={styles.mapImage}
+            resizeMode="cover"
+          />
+        </View>
+
+        {/* <View style={{width:'100%', alignItems:'start'}}>
+          <TouchableOpacity
+            style={styles.buttonContainer}
+            activeOpacity={0.8}
+            onPress={onMapOpen}
+          >
+            <Ionicons name="map-outline" size={18} color="white" />
+            <Text style={styles.buttonText}>Open in Maps</Text>
+          </TouchableOpacity>
+        </View> */}
+
       </View>
-      
+
       <View style={styles.sectionTextContainer}>
         <Text style={styles.sectionTitle}>Garden Sewa</Text>
         <Text style={styles.sectionSubtitle}>
@@ -116,7 +124,12 @@ const Contact = () => {
       </View>
 
       <View style={styles.listContainer}>
-        <View style={styles.cardContainer}>
+        {/* Visit Us Connected to Map */}
+        <TouchableOpacity
+          style={styles.cardContainer}
+          activeOpacity={0.7}
+          onPress={onMapOpen}
+        >
           <View style={styles.iconWrapper}>
             <Ionicons name="location-outline" size={22} color="#245d5a" />
           </View>
@@ -127,7 +140,8 @@ const Contact = () => {
               Kathmandu, Nepal
             </Text>
           </View>
-        </View>
+          {/* <Ionicons name="chevron-forward" size={18} color="#666" style={styles.arrowIcon} /> */}
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.cardContainer}
@@ -141,7 +155,6 @@ const Contact = () => {
             <Text style={styles.cardTitle}>Call / WhatsApp</Text>
             <Text style={styles.cardText}>+977 - 98520 24 365</Text>
           </View>
-          {/* <Ionicons name="chevron-forward" size={20} color="#666" style={styles.arrowIcon} /> */}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -156,7 +169,6 @@ const Contact = () => {
             <Text style={styles.cardTitle}>eMail Us</Text>
             <Text style={styles.cardText}>gardensewa@sriyog.com</Text>
           </View>
-          {/* <Ionicons name="chevron-forward" size={20} color="#666" style={styles.arrowIcon} /> */}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -171,7 +183,6 @@ const Contact = () => {
             <Text style={styles.cardTitle}>Website</Text>
             <Text style={styles.cardText}>www.gardensewa.com</Text>
           </View>
-          {/* <Ionicons name="chevron-forward" size={20} color="#666" style={styles.arrowIcon} /> */}
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -200,13 +211,16 @@ const styles = StyleSheet.create({
     color: "#444",
     marginTop: 4,
   },
-  mapCard: {
+  mapCardWrapper: {
+    marginBottom: 24,
+    gap: 12,
+  },
+  mapImageContainer: {
     borderRadius: 16,
     overflow: "hidden",
-    backgroundColor: "#fff",
-    marginBottom: 24,
     borderWidth: 1,
     borderColor: "#e2e8e8",
+    backgroundColor: "#fff",
   },
   mapImage: {
     width: "100%",
@@ -218,7 +232,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#245d5a",
     paddingVertical: 14,
+    borderRadius: 12,
     gap: 8,
+    width: "60%",
   },
   buttonText: {
     color: "white",
