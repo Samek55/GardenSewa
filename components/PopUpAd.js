@@ -1,22 +1,38 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const PopUpAd = ({ onClose }) => {
-    const [seconds, setSeconds] = useState(10);
+    const [countdown, setCountdown] = useState(5);
+    const [autoCloseSeconds, setAutoCloseSeconds] = useState(5);
 
     useEffect(() => {
-        if (seconds <= 0) {
-            onClose?.(); // Auto-dismiss when timer hits 0
-            return;
-        }
+        if (countdown <= 0) return;
 
         const timer = setInterval(() => {
-            setSeconds((prev) => prev - 1);
+            setCountdown((prev) => prev - 1);
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [seconds, onClose]);
+    }, [countdown]);
+
+    useEffect(() => {
+        if (countdown > 0) return;
+
+        if (autoCloseSeconds <= 0) {
+            onClose?.();
+            return;
+        }
+
+        const autoCloseTimer = setInterval(() => {
+            setAutoCloseSeconds((prev) => prev - 1);
+        }, 1000);
+
+        return () => clearInterval(autoCloseTimer);
+    }, [countdown, autoCloseSeconds, onClose]);
+
+    const showCloseButton = countdown === 0;
 
     return (
         <View style={styles.container}>
@@ -26,9 +42,19 @@ const PopUpAd = ({ onClose }) => {
                     style={styles.adImage}
                     resizeMode="cover" 
                 />
-                <View style={styles.badge}>
-                    <Text style={styles.badgeText}>{seconds}s</Text>
-                </View>
+                
+                {showCloseButton ? (
+                    <TouchableOpacity 
+                        style={styles.closeBadge} 
+                        onPress={() => onClose?.()}
+                    >
+                        <Ionicons name="close" size={20} color="#FFF" />
+                    </TouchableOpacity>
+                ) : (
+                    <View style={styles.badge}>
+                        <Text style={styles.badgeText}>{countdown}s</Text>
+                    </View>
+                )}
             </View>
 
             <Text style={styles.title}>Flat 20% discount off Landscape Lighting</Text>
@@ -51,14 +77,13 @@ const PopUpAd = ({ onClose }) => {
 
 export default PopUpAd;
 
-
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
     },
     imageWrapper: {
         width: '100%',
-        aspectRatio:1/1,
+        aspectRatio: 1 / 1,
         borderRadius: 12,
         overflow: 'hidden',
         position: 'relative',
@@ -73,10 +98,8 @@ const styles = StyleSheet.create({
         top: 8,
         right: 8,
         backgroundColor: 'rgba(34, 87, 84, 0.9)',
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        width:40,
-        height:40,
+        width: 40,
+        height: 40,
         borderRadius: 20,
         alignItems: 'center',
         justifyContent: 'center',
