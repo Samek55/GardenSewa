@@ -84,7 +84,7 @@ function MainAppContent() {
               headerStyle: { backgroundColor: "#245d5a" },
               headerTitleAlign: 'left',
               headerTitle: () => (
-                <View style={{ marginLeft: 8, paddingLeft: 8 }}>
+                <View style={{ marginLeft: 1, paddingLeft: 8 }}>
                   <Text style={{ color: "#fff", fontWeight: '600', fontSize: 24 }}>
                     GardenSewa
                   </Text>
@@ -103,13 +103,13 @@ function MainAppContent() {
                 }}>
                   <Image
                     source={require('@/assets/images/gardensewa.webp')}
-                    style={{ width: '100%', height: '100%', marginRight: 2 }}
+                    style={{ width: '100%', height: '100%'}}
                     resizeMode="cover"
                   />
                 </View>
               ),
               headerRight: () => (
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
                   <Pressable onPress={onWhatsappOpen}>
                     <Ionicons name="logo-whatsapp" size={24} color="white" />
                   </Pressable>

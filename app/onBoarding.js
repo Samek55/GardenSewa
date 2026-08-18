@@ -94,7 +94,6 @@ export default function OnBoardingScreen() {
           </View>
         </View>
 
-        {/* Content Section */}
         <View style={styles.contentSection}>
           <Text style={styles.title}>{item.title}</Text>
           <Text style={styles.description}>{item.description}</Text>
@@ -118,7 +117,6 @@ export default function OnBoardingScreen() {
         contentContainerStyle={{ flexGrow: 1 }}
       />
 
-      {/* Footer Area */}
       <View style={styles.footer}>
         <View style={styles.paginationContainer}>
           {SLIDES.map((_, index) => (
@@ -235,8 +233,8 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#245d5a',
-    paddingVertical: 16,
-    width: '100%',
+    paddingVertical: 14,
+    width: '60%', 
     alignItems: 'center',
     borderRadius: 14,
     shadowColor: '#245d5a',
