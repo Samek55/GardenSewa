@@ -1,4 +1,4 @@
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Feather, FontAwesome, Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -16,20 +16,16 @@ import { BookingsListProfessional } from '../../../data/servicesList';
 
 const STATUS_OPTIONS = ['New', 'Cancelled', 'OnGoing', 'Dispute', 'Completed', 'All'];
 
-// Safely normalizes slashes (2026/08/02), hyphens, or human-readable strings into standard YYYY-MM-DD
 const formatToISODate = (dateString) => {
   if (!dateString) return null;
 
-  // Replace forward slashes with hyphens: "2026/08/02" -> "2026-08-02"
   const cleanStr = String(dateString).trim().replace(/\//g, '-');
 
-  // Match YYYY-MM-DD pattern
   const match = cleanStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (match) {
     return `${match[1]}-${match[2]}-${match[3]}`;
   }
 
-  // Fallback for complex JS date strings
   const parsedDate = new Date(cleanStr);
   if (!isNaN(parsedDate.getTime())) {
     const year = parsedDate.getFullYear();
@@ -41,25 +37,53 @@ const formatToISODate = (dateString) => {
   return null;
 };
 
+const getOrdinalSuffix = (day) => {
+  if (day > 3 && day < 21) return 'th';
+  switch (day % 10) {
+    case 1:
+      return 'st';
+    case 2:
+      return 'nd';
+    case 3:
+      return 'rd';
+    default:
+      return 'th';
+  }
+};
+
+const getFormattedDateParts = (dateString) => {
+  const isoDate = formatToISODate(dateString);
+  const dateObj = isoDate ? new Date(`${isoDate}T00:00:00`) : new Date('2026-08-01T00:00:00');
+
+  const day = dateObj.getDate();
+  const suffix = getOrdinalSuffix(day);
+  const month = dateObj.toLocaleString('en-US', { month: 'long' });
+  const year = dateObj.getFullYear();
+
+  return { day, suffix, month, year };
+};
+
 const BookingSummaryPage = () => {
   const [selectedStatus, setSelectedStatus] = useState('New');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Calendar State (e.g. "2026-08-02")
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [selectedDateStr, setSelectedDateStr] = useState('');
 
-  // Filtering Logic
+  const handleDateSelect = (dateString) => {
+    setSelectedDateStr(dateString);
+    setSelectedStatus('All');
+    setIsCalendarOpen(false);
+  };
+
   const filteredBookings = BookingsListProfessional.filter((item) => {
-    // 1. Status Filter
     const matchesStatus =
       selectedStatus === 'All'
         ? true
         : item.workStatus?.toLowerCase() === selectedStatus.toLowerCase();
 
-    // 2. Search Query Filter
     const query = searchQuery.toLowerCase().trim();
     const matchesSearch =
       !query ||
@@ -67,7 +91,6 @@ const BookingSummaryPage = () => {
       item.service?.toLowerCase().includes(query) ||
       item.location?.toLowerCase().includes(query);
 
-    // 3. Date Filter Logic (Evaluates bookingDate / booking_date only)
     let matchesDate = true;
     if (selectedDateStr) {
       const selectedTimestamp = new Date(`${selectedDateStr}T00:00:00`).getTime();
@@ -86,7 +109,6 @@ const BookingSummaryPage = () => {
   const getMarkedDates = () => {
     const marked = {};
 
-    // Aggregate total bookings per bookingDate
     BookingsListProfessional.forEach((item) => {
       const rawBookingDate = item.bookingDate || item.booking_date;
       const singleISO = formatToISODate(rawBookingDate);
@@ -99,7 +121,6 @@ const BookingSummaryPage = () => {
       }
     });
 
-    // Handle Active Selection Highlight
     if (selectedDateStr) {
       marked[selectedDateStr] = {
         ...(marked[selectedDateStr] || { count: 0 }),
@@ -127,7 +148,8 @@ const BookingSummaryPage = () => {
 
   const renderBookingItem = ({ item }) => {
     const statusTheme = getStatusBadgeStyle(item.workStatus);
-    const displayDate = item.bookingDate || item.booking_date || '10 Aug 2026';
+    const rawDate = item.bookingDate || item.booking_date;
+    const { day, suffix, month, year } = getFormattedDateParts(rawDate);
 
     return (
       <TouchableOpacity
@@ -140,7 +162,13 @@ const BookingSummaryPage = () => {
             <Text style={styles.clientName} numberOfLines={1}>
               {item.fullName || 'Client Request'}
             </Text>
-            <Text style={styles.bookingDate}>{displayDate}</Text>
+            <Text
+              style={styles.bookingDate}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {`${day}${suffix} ${month}, ${year}`}
+            </Text>
           </View>
 
           <View style={[styles.statusBadge, { backgroundColor: statusTheme.bg }]}>
@@ -157,12 +185,12 @@ const BookingSummaryPage = () => {
           </Text>
         </View>
 
-        {/* Updated Footer Row: Budget & View More in the same row */}
+        {/* Footer Row: Budget & View More */}
         <View style={styles.footerRow}>
           <View style={styles.infoPill}>
-            <Ionicons name="cash-outline" size={15} color="#2D3748" />
+            <FontAwesome name="rupee" size={15} color="#2D3748" />
             <Text style={styles.infoPillText}>
-              Budget : {item.budget || 'NPR 5,000'}
+              {item.budget || 'NPR 5,000'}
             </Text>
           </View>
 
@@ -302,9 +330,11 @@ const BookingSummaryPage = () => {
             </View>
 
             <Calendar
+              showSixWeeks={true}
+              hideExtraDays={true}
+              firstDay={1}
               onDayPress={(day) => {
-                setSelectedDateStr(day.dateString);
-                setIsCalendarOpen(false);
+                handleDateSelect(day.dateString);
               }}
               markedDates={getMarkedDates()}
               dayComponent={({ date, state, marking }) => {
@@ -316,8 +346,7 @@ const BookingSummaryPage = () => {
                   <TouchableOpacity
                     onPress={() => {
                       if (!isDisabled) {
-                        setSelectedDateStr(date.dateString);
-                        setIsCalendarOpen(false);
+                        handleDateSelect(date.dateString);
                       }
                     }}
                     style={[
@@ -368,18 +397,20 @@ const BookingSummaryPage = () => {
               }}
             />
 
-            {/* Clear Date Filter Button at the Very Bottom */}
-            <TouchableOpacity
-              style={styles.clearDateBtn}
-              activeOpacity={0.8}
-              onPress={() => {
-                setSelectedDateStr('');
-                setIsCalendarOpen(false);
-              }}
-            >
-              <Ionicons name="refresh-outline" size={16} color="#EF4444" />
-              <Text style={styles.clearDateBtnText}>Clear Date Filter</Text>
-            </TouchableOpacity>
+            {/* Clear Date Filter Button */}
+            <View style={styles.clearButtonContainer}>
+              <TouchableOpacity
+                style={styles.clearDateBtn}
+                activeOpacity={0.8}
+                onPress={() => {
+                  setSelectedDateStr('');
+                  setIsCalendarOpen(false);
+                }}
+              >
+                <Ionicons name="refresh-outline" size={16} color="#EF4444" />
+                <Text style={styles.clearDateBtnText}>Clear Date Filter</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -559,6 +590,12 @@ const styles = StyleSheet.create({
   selectedCountText: {
     color: '#245d5a',
   },
+  clearButtonContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   clearDateBtn: {
     marginTop: 16,
     backgroundColor: '#FEF2F2',
@@ -570,6 +607,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+    width: '60%',
   },
   clearDateBtnText: {
     color: '#EF4444',
@@ -630,6 +668,7 @@ const styles = StyleSheet.create({
   },
   clientMeta: {
     flex: 1,
+    flexShrink: 1,
     paddingRight: 8,
   },
   clientName: {
@@ -640,7 +679,8 @@ const styles = StyleSheet.create({
   bookingDate: {
     fontSize: 12,
     color: '#64748B',
-    marginTop: 2,
+    marginTop: 4,
+    fontWeight: '500',
   },
   statusBadge: {
     paddingHorizontal: 10,

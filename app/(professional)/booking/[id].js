@@ -20,10 +20,9 @@ import { BookingsListProfessional } from '../../../data/servicesList';
 
 const STATUS_OPTIONS = ['New', 'OnGoing', 'Completed', 'Cancelled', 'Dispute'];
 
-// Utility function to disguise phone numbers
 const maskPhoneNumber = (phone) => {
-    if (!phone) return '+977 98XXX28X47';
-    return phone.replace(/(\d{2})\d{4}(\d{2})\d(\d{1})/, '$1XXX$2X$3');
+    if (!phone) return '+977 98XXX28XX47';
+    return phone.replace(/(\d{2})\d{4}(\d{2})\d(\d{1})$/, '$1XXX$2XX$3');
 };
 
 // Helper function to get ordinal suffix (e.g. 1 -> 1st, 2 -> 2nd, 10 -> 10th)
@@ -79,6 +78,12 @@ const IndividualBooking = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [statusHistory, setStatusHistory] = useState({ from: '', to: '' });
 
+    // Helper check to determine if phone number should be masked
+    const isPhoneMasked = currentStatus === 'New' || currentStatus === 'Cancelled';
+
+    // Helper to format Approx Days (1 Day vs 2 Days)
+    const formattedApproxDays = `${booking.approxDays || 1} ${Number(booking.approxDays) === 1 ? 'Day' : 'Days'}`;
+
     // Update status automatically when returning from payment screen
     useEffect(() => {
         if (updatedStatus) {
@@ -119,6 +124,25 @@ const IndividualBooking = () => {
         }
     };
 
+    // Open phone dialer with unmasked phone number
+    const handleCallPhone = async () => {
+        if (isPhoneMasked) return;
+
+        const phoneNum = booking.phone || '9823028547';
+        const phoneUrl = `tel:${phoneNum}`;
+
+        try {
+            const supported = await Linking.canOpenURL(phoneUrl);
+            if (supported) {
+                await Linking.openURL(phoneUrl);
+            } else {
+                Alert.alert('Error', 'Unable to open phone app');
+            }
+        } catch (error) {
+            console.error('Error opening phone dialer:', error);
+        }
+    };
+
     const handleAcceptOffer = () => {
         router.push({
             pathname: '/booking/pay',
@@ -131,9 +155,9 @@ const IndividualBooking = () => {
             'Reject Booking',
             'Are you sure you want to reject this offer?',
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: 'No', style: 'cancel' },
                 {
-                    text: 'Reject',
+                    text: 'Yes',
                     style: 'destructive',
                     onPress: () => {
                         setCurrentStatus('Cancelled');
@@ -143,9 +167,6 @@ const IndividualBooking = () => {
             ]
         );
     };
-
-    // Helper check to determine if phone number should be masked
-    const isPhoneMasked = currentStatus === 'New' || currentStatus === 'Cancelled';
 
     const handleSharePDF = async () => {
         try {
@@ -185,7 +206,7 @@ const IndividualBooking = () => {
                         <div class="row"><div class="label">Booking Date</div><div class="value">${formatDateFormatted(booking.booking_date)}</div></div>
                         <div class="row"><div class="label">Starting Date</div><div class="value">${formatDateFormatted(booking.startDate)}</div></div>
                         <div class="row"><div class="label">Ending Date</div><div class="value">${formatDateFormatted(booking.endDate)}</div></div>
-                        <div class="row"><div class="label">Approx Days to Complete</div><div class="value">${booking.approxDays} Days</div></div>
+                        <div class="row"><div class="label">Approx Days to Complete</div><div class="value">${formattedApproxDays}</div></div>
                         <div class="row"><div class="label">Special Request</div><div class="value">${booking.specialRequest || 'None'}</div></div>
                         <div class="row"><div class="label">Work Status</div><div class="value">${currentStatus}</div></div>
                     </div>
@@ -235,15 +256,19 @@ const IndividualBooking = () => {
                 <View style={styles.card}>
                     <Text style={styles.clientName}>{booking.fullName}</Text>
 
-                    {/* Masked phone for 'New' and 'Cancelled' statuses */}
-                    <View style={styles.phoneRow}>
+                    {/* Masked phone for 'New' and 'Cancelled', clickable for unmasked */}
+                    <TouchableOpacity 
+                        style={styles.phoneRow} 
+                        onPress={handleCallPhone}
+                        activeOpacity={isPhoneMasked ? 1 : 0.7}
+                    >
                         <Ionicons name="call-outline" size={16} color="#245d5a" />
                         <Text style={styles.phoneText}>
                             {isPhoneMasked
                                 ? maskPhoneNumber(booking.phone)
                                 : (booking.phone || '+977 9823028547')}
                         </Text>
-                    </View>
+                    </TouchableOpacity>
 
                     <View style={styles.infoGroup}>
                         <Text style={styles.fieldLabel}>Service</Text>
@@ -268,7 +293,7 @@ const IndividualBooking = () => {
                         <Text style={styles.fieldValue}>{formatDateFormatted(booking.endDate)}</Text>
 
                         <Text style={styles.fieldLabel}>Approx Days to Complete</Text>
-                        <Text style={styles.fieldValue}>{booking.approxDays} Days</Text>
+                        <Text style={styles.fieldValue}>{formattedApproxDays}</Text>
 
                         <Text style={styles.fieldLabel}>Special Request</Text>
                         <Text style={styles.fieldValue}>{booking.specialRequest || 'None'}</Text>
@@ -550,7 +575,7 @@ const styles = StyleSheet.create({
     },
     rejectBtn: {
         flex: 1,
-        backgroundColor: '#EF4444',
+        backgroundColor: '#DC143C', 
         borderRadius: 10,
         paddingVertical: 14,
         alignItems: 'center',
@@ -594,6 +619,8 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingVertical: 14,
         alignItems: 'center',
+        width: '60%',
+        alignSelf: 'center',
     },
     submitButtonDisabled: {
         backgroundColor: '#94A3B8',
