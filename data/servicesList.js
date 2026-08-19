@@ -894,7 +894,7 @@ export const BookingsListProfessional = [
         phone: '9801029384',
         service: serviceOfferedData[8].title, // Lawn Care
         location: 'Lalitpur, Jhamsikhel',
-        budget: 'NPR 5000 - 10000',
+        budget: 'Below NPR 10,000',
         booking_date: '2026/08/01',
         startDate: '2026/08/03',
         endDate: '2026/08/04',
@@ -928,7 +928,7 @@ export const BookingsListProfessional = [
         phone: '9812345678',
         service: serviceOfferedData[10].title, // Tree Pruning & Removal
         location: 'Kathmandu, Baneshwor',
-        budget: 'NPR 10000 - 20000',
+        budget: 'Between NPR 10,000 - 25,000',
         booking_date: '2026/08/05',
         startDate: '2026/08/08',
         endDate: '2026/08/09',
@@ -945,7 +945,7 @@ export const BookingsListProfessional = [
         phone: '9860112233',
         service: serviceOfferedData[16].title, // Irrigation Services
         location: 'Lalitpur, Sanepa',
-        budget: 'Above NPR 20000',
+        budget: 'Above NPR 50,000',
         booking_date: '2026/08/06',
         startDate: '2026/08/07',
         endDate: '2026/08/12',
@@ -962,7 +962,7 @@ export const BookingsListProfessional = [
         phone: '9849876543',
         service: serviceOfferedData[1].title, // Rooftop Gardening
         location: 'Kathmandu, Balaju',
-        budget: 'NPR 10000 - 20000',
+        budget: 'Between NPR 10,000 - 25,000',
         booking_date: '2026/08/06',
         startDate: '2026/08/10',
         endDate: '2026/08/12',
@@ -1013,7 +1013,7 @@ export const BookingsListProfessional = [
         phone: '9851123456',
         service: serviceOfferedData[1].title, // Rooftop Gardening
         location: 'Bhaktapur, Thimi',
-        budget: 'Above NPR 20000',
+        budget: 'Above NPR 50,000',
         booking_date: '2026/08/08',
         startDate: '2026/08/12',
         endDate: '2026/08/18',
@@ -1030,7 +1030,7 @@ export const BookingsListProfessional = [
         phone: '9865432109',
         service: serviceOfferedData[3].title, // Landscape Lighting
         location: 'Kathmandu, Budhanilkantha',
-        budget: 'NPR 10000 - 20000',
+        budget: 'Between NPR 10,000 - 25,000',
         booking_date: '2026/08/08',
         startDate: '2026/08/11',
         endDate: '2026/08/13',
@@ -1047,7 +1047,7 @@ export const BookingsListProfessional = [
         phone: '9840011223',
         service: serviceOfferedData[5].title, // Turfing Service
         location: 'Kathmandu, Kirtipur',
-        budget: 'NPR 10000 - 20000',
+        budget: 'Between NPR 25,000 - 50,000',
         booking_date: '2026/08/09',
         startDate: '2026/08/14',
         endDate: '2026/08/16',
@@ -1098,7 +1098,7 @@ export const BookingsListProfessional = [
         phone: '9861987654',
         service: serviceOfferedData[6].title, // Garden Maintenance
         location: 'Kathmandu, Lazimpat',
-        budget: 'NPR 5000 - 10000',
+        budget: 'Below NPR 10,000',
         booking_date: '2026/08/10',
         startDate: '2026/08/11',
         endDate: '2026/08/11',
@@ -1115,7 +1115,7 @@ export const BookingsListProfessional = [
         phone: '9843344556',
         service: serviceOfferedData[0].title, // Landscape Design
         location: 'Lalitpur, Pulchowk',
-        budget: 'Above NPR 20000',
+        budget: 'Above NPR 50,000',
         booking_date: '2026/08/11',
         startDate: '2026/08/15',
         endDate: '2026/08/22',
