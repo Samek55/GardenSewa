@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const PopUpAd = ({ onClose }) => {
-    const [countdown, setCountdown] = useState(5);
+    const [countdown, setCountdown] = useState(10);
     const [autoCloseSeconds, setAutoCloseSeconds] = useState(5);
 
     useEffect(() => {
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 24,
         borderRadius: 8,
-        width: '100%',
+        width: '60%',
         alignItems: 'center',
     },
     buttonText: {

@@ -1,12 +1,44 @@
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { notificationsData } from '../../data/servicesList'
+import { Ionicons } from '@expo/vector-icons'; // Ensure @expo/vector-icons or react-native-vector-icons is installed
+import { useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { notificationsData } from '../../data/servicesList';
 
 const FAQ = () => {
+    const [isMuted, setIsMuted] = useState(false)
+    const [hasUnread, setHasUnread] = useState(true)
+
+    const toggleMute = () => {
+        setIsMuted(prev => !prev)
+    }
+
+    const handleBellPress = () => {
+        setHasUnread(false)
+        toggleMute()
+    }
+
     return (
         <ScrollView style={styles.scrollview} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
             <View style={styles.fullContainer}>
-                <Text style={styles.pageHeader}>Notifications</Text>
+                {/* Header Row */}
+                <View style={styles.headerRow}>
+                    <Text style={styles.pageHeader}>Notifications</Text>
+                    
+                    <TouchableOpacity 
+                        style={styles.bellButton} 
+                        onPress={handleBellPress}
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons 
+                            name={isMuted ? 'notifications-off-outline' : 'notifications-outline'} 
+                            size={28} 
+                            color="#1a1a1a" 
+                        />
+                        {hasUnread && <View style={styles.unreadBadge} />}
+                    </TouchableOpacity>
+                </View>
+
                 <Text style={styles.subHeaderText}>Garden Sewa Notifications</Text>
+
                 {
                     notificationsData?.map((notification, key) => {
                         return (
@@ -43,11 +75,31 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 24
     },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
     pageHeader: {
         fontSize: 32,
         color: '#1a1a1a',
         fontWeight: '700',
-        marginBottom: 8
+    },
+    bellButton: {
+        position: 'relative',
+        padding: 4,
+    },
+    unreadBadge: {
+        position: 'absolute',
+        top: 4,
+        right: 4,
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: '#ff4d4f',
+        borderWidth: 1.5,
+        borderColor: '#ffffff',
     },
     subHeaderText: {
         fontSize: 14,

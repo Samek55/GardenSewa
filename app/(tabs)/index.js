@@ -126,7 +126,7 @@ export default function Index() {
 
             <Pressable style={styles.popularCardContainer} onPress={() => router.replace(`/services/${5}`)}>
                 <Image
-                    source={require('../../assets/images/home/lawn.jpg')}
+                    source={require('../../assets/images/services/9.jpg')}
                     style={styles.backgroundImage}
                     resizeMode="cover"
                 />
@@ -279,10 +279,12 @@ const styles = StyleSheet.create({
     ratingOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.38)',
+        // backgroundColor: 'rgba(206, 30, 30, 0.38)',
         alignItems: 'flex-end',
-        justifyContent: 'flex-end',
+        justifyContent: 'flex-start',
         gap: 4,
-        padding: 24
+        paddingHorizontal: 16,
+        paddingVertical: 16,
     },
     tagContainer: {
         alignSelf: 'flex-start',
@@ -334,7 +336,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
     },
     horizontalListPadding: {
-        paddingHorizontal: 8,
+        paddingHorizontal: 0,
         marginBottom: 8,
     },
     modalOverlay: {

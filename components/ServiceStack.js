@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#E2E8F0',
         borderRadius: 16,
-        padding: 12,
+        // paddingVertical: 12,
         marginVertical: 4,
         gap: 16,
     },
@@ -56,6 +56,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         gap: 4,
+        paddingRight:8
     },
     titleText: {
         fontSize: 16,

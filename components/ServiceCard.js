@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     image: {
         width: '100%',
         height: 80,
-        aspectRatio:16/9
+        // aspectRatio:16/9
     },
     textContainer: {
         paddingHorizontal: 12,

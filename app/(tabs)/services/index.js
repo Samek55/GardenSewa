@@ -22,13 +22,13 @@ export default function Services() {
         <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
             <View style={styles.heroContainer}>
                 <Image
-                    source={require('@/assets/images/services/garden2.jpg')}
+                    source={require('@/assets/images/services/17.jpg')}
                     style={styles.backgroundImage}
                     resizeMode="cover"
                 />
                 <View style={styles.overlay}>
-                    <Text style={styles.title}>SuperFast Services</Text>
-                    <Text style={styles.subTitle}>Professional gardening services in Nepal</Text>
+                    {/* <Text style={styles.title}>SuperFast Services</Text> */}
+                    <Text style={styles.title}>Professional gardening services in Nepal</Text>
                 </View>
             </View>
 
@@ -112,7 +112,7 @@ export default function Services() {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        backgroundColor: '#F8F9FA',
+        backgroundColor: '#FFFFFF',
     },
     heroContainer: {
         width: '100%',
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     title: {
         color: '#FFFFFF',
         fontWeight: 'bold',
-        fontSize: width * 0.08,
+        fontSize: width * 0.07,
     },
     subTitle: {
         color: '#E2E8F0',
@@ -145,9 +145,9 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     sectionContainer: {
-        marginTop: 20,
-        paddingHorizontal: 18,
-        marginBottom: 20,
+        marginTop: 16,
+        paddingHorizontal: 16,
+        // marginBottom: 16,
     },
     sectionHeading: {
         fontSize: 20,

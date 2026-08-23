@@ -19,21 +19,21 @@ const SLIDES = [
     id: '1',
     title: 'Effortless Garden Care',
     description:
-      'Book trusted local experts for lawn care, landscaping, and maintenance in just a few taps.',
+      'Book trusted gardeners for daily, weekly, monthly & yearly gardening services.',
     vectorAsset: require('../assets/images/onboarding/vector1.svg'),
   },
   {
     id: '2',
-    title: 'Grow Your Business',
+    title: 'Professional\nGardening Service',
     description:
-      'Set your own schedule, connect with local clients, and build a steady income on your terms.',
+      'Garden Sewa provides professional gardening services all over Nepal.',
     vectorAsset: require('../assets/images/onboarding/vector2.svg'),
   },
   {
     id: '3',
-    title: 'Supply & Partner',
+    title: 'Join as a Gardener ',
     description:
-      'Partner with us to supply plants, tools, and materials directly to our active gardening community.',
+      'Garden Sewa provides freelancing opportunity where you can work as a full time or a freelancer gardener.',
     vectorAsset: require('../assets/images/onboarding/vector3.svg'),
   },
 ];
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   illustrationSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    height: height * 0.38,
+    height: height * 0.30,
   },
   vectorBackgroundCircle: {
     width: width * 0.78,
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   contentSection: {
     alignItems: 'center',
     paddingHorizontal: 8,
-    marginBottom: 16,
+    marginBottom: 32,
   },
   title: {
     fontSize: 28,
@@ -207,13 +207,13 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingHorizontal: 28,
-    paddingBottom: 20,
+    paddingBottom: 60,
   },
   paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 44,
   },
   dot: {
     height: 8,
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#245d5a',
     paddingVertical: 14,
-    width: '60%', 
+    width: '50%', 
     alignItems: 'center',
     borderRadius: 14,
     shadowColor: '#245d5a',
