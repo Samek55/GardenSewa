@@ -4,13 +4,27 @@ import { AuthContext, AuthProvider } from '@/context/AuthContext';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
-import { useContext, useEffect, useState } from "react";
+import { memo, useContext, useEffect, useState } from "react";
 import { Alert, Image, Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 SplashScreen.preventAutoHideAsync().catch(() => { });
 
 const TOTAL_DURATION_MS = 3000;
+const INTERVAL_MS = 5;
+
+const SplashOverlay = memo(({ countdownDigits }) => (
+  <View style={styles.splashOverlay}>
+    <View style={styles.centerContent}>
+      <Image
+        source={require('@/assets/images/splash-icon-actual.png')}
+        style={styles.splashImage}
+        resizeMode="contain"
+      />
+      <Text style={styles.timerText}>{countdownDigits}</Text>
+    </View>
+  </View>
+));
 
 function MainAppContent() {
   const [isAppReady, setIsAppReady] = useState(false);
@@ -20,23 +34,26 @@ function MainAppContent() {
   const { isLoggedIn } = useContext(AuthContext);
 
   useEffect(() => {
-    SplashScreen.hideAsync().catch(() => { });
-    const startTime = Date.now();
+    const hideNative = () => {
+      SplashScreen.hideAsync().catch(() => { });
+    };
+    const timer = setTimeout(hideNative, 100);
 
+    const startTime = Date.now();
     const interval = setInterval(() => {
       const elapsedMs = Date.now() - startTime;
       const remainingMs = Math.max(0, TOTAL_DURATION_MS - elapsedMs);
-
-      setCountdownDigits(Math.floor(remainingMs).toString().padStart(4, '0'));
-
-      if (remainingMs <= 0) {
+      setCountdownDigits(remainingMs.toString().padStart(4, '0'));
+      if (remainingMs === 0) {
         clearInterval(interval);
         setIsAppReady(true);
-
       }
-    }, 16);
+    }, INTERVAL_MS);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, []);
 
   const onMenuOpen = () => setIsModalOpen(true);
@@ -60,23 +77,16 @@ function MainAppContent() {
 
   return (
     <SafeAreaProvider>
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
         <Stack>
           <Stack.Screen
             name="index"
-            options={{
-              headerShown: false,
-            }}
+            options={{ headerShown: false }}
           />
-
           <Stack.Screen
             name="onBoarding"
-            options={{
-              headerShown: false,
-              animation: 'fade',
-            }}
+            options={{ headerShown: false, animation: 'fade' }}
           />
-
           <Stack.Screen
             name="(tabs)"
             options={{
@@ -90,16 +100,11 @@ function MainAppContent() {
                   </Text>
                 </View>
               ),
-              headerTitleStyle: { color: "#fff", fontWeight: '600' },
               headerLeft: () => (
                 <View style={{
-                  width: 36,
-                  height: 36,
-                  backgroundColor: "#fff",
-                  borderRadius: 18,
-                  overflow: 'hidden',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  width: 36, height: 36, backgroundColor: "#fff",
+                  borderRadius: 18, overflow: 'hidden',
+                  alignItems: 'center', justifyContent: 'center',
                 }}>
                   <Image
                     source={require('@/assets/images/gardensewa.webp')}
@@ -120,7 +125,6 @@ function MainAppContent() {
               )
             }}
           />
-
           <Stack.Screen
             name="(professional)"
             options={{
@@ -134,16 +138,11 @@ function MainAppContent() {
                   </Text>
                 </View>
               ),
-              headerTitleStyle: { color: "#fff", fontWeight: '600' },
               headerLeft: () => (
                 <View style={{
-                  width: 36,
-                  height: 36,
-                  backgroundColor: "#fff",
-                  borderRadius: 18,
-                  overflow: 'hidden',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  width: 36, height: 36, backgroundColor: "#fff",
+                  borderRadius: 18, overflow: 'hidden',
+                  alignItems: 'center', justifyContent: 'center',
                 }}>
                   <Image
                     source={require('@/assets/images/gardensewa.webp')}
@@ -177,16 +176,11 @@ function MainAppContent() {
                   </Text>
                 </View>
               ),
-              headerTitleStyle: { color: "#fff", fontWeight: '600' },
               headerLeft: () => (
                 <View style={{
-                  width: 36,
-                  height: 36,
-                  backgroundColor: "#fff",
-                  borderRadius: 18,
-                  overflow: 'hidden',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  width: 36, height: 36, backgroundColor: "#fff",
+                  borderRadius: 18, overflow: 'hidden',
+                  alignItems: 'center', justifyContent: 'center',
                 }}>
                   <Image
                     source={require('@/assets/images/gardensewa.webp')}
@@ -209,18 +203,7 @@ function MainAppContent() {
           />
         </Stack>
 
-        {!isAppReady && (
-          <View style={styles.splashOverlay}>
-            <View style={styles.centerContent}>
-              <Image
-                source={require('@/assets/images/splash-icon-actual.png')}
-                style={styles.splashImage}
-                resizeMode="contain"
-              />
-              <Text style={styles.timerText}>{countdownDigits}</Text>
-            </View>
-          </View>
-        )}
+        {!isAppReady && <SplashOverlay countdownDigits={countdownDigits} />}
 
         {isModalOpen && (
           <View style={[StyleSheet.absoluteFillObject, { zIndex: 9999 }]}>

@@ -29,9 +29,9 @@ const maskPhoneNumber = (phone) => {
 const getOrdinalSuffix = (day) => {
     if (day > 3 && day < 21) return 'th';
     switch (day % 10) {
-        case 1:  return 'st';
-        case 2:  return 'nd';
-        case 3:  return 'rd';
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
         default: return 'th';
     }
 };
@@ -49,32 +49,48 @@ const formatDateFormatted = (dateStr) => {
 };
 
 const IndividualBooking = () => {
-    const { id, updatedStatus } = useLocalSearchParams();
+    const params = useLocalSearchParams();
+    const {
+        id,
+        fullName,
+        updatedStatus,
+        shouldEditSchedule,
+        updatedBudget,
+        updatedStartDate,
+        updatedEndDate
+    } = params;
 
-    const booking = BookingsListProfessional.find((item) => item.id.toString() === id?.toString()) || {
+    const foundBooking = BookingsListProfessional.find((item) => item.id.toString() === id?.toString());
+
+    const booking = {
         id: id || 'B34',
-        fullName: 'Amir Lama',
-        phone: '9823028547',
-        service: 'Water Tank Cleaning',
-        location: 'Sanepa, Lalitpur',
-        budget: 'NPR 5,000 - 10,000',
-        booking_date: '2026/07/28',
-        startDate: '2026/07/29',
-        endDate: '2026/07/29',
-        approxDays: 1,
-        specialRequest: 'Test.',
-        workStatus: 'New',
-        photos: [],
+        fullName: fullName || foundBooking?.fullName || 'Rohan Adhikari',
+        phone: foundBooking?.phone || '9823028547',
+        service: foundBooking?.service || 'Water Tank Cleaning',
+        location: foundBooking?.location || 'Sanepa, Lalitpur',
+        budget: foundBooking?.budget || 'NPR 5,000 - 10,000',
+        booking_date: foundBooking?.booking_date || '2026/07/28',
+        startDate: foundBooking?.startDate || '2026/07/29',
+        endDate: foundBooking?.endDate || '2026/07/29',
+        approxDays: foundBooking?.approxDays || 1,
+        specialRequest: foundBooking?.specialRequest || 'Test.',
+        workStatus: foundBooking?.workStatus || 'New',
+        photos: foundBooking?.photos || [],
     };
 
-    const [currentStatus, setCurrentStatus] = useState(booking.workStatus || 'New');
-    const [selectedStatus, setSelectedStatus] = useState(booking.workStatus || 'New');
+    const [currentBudget, setCurrentBudget] = useState(booking.budget);
+    const [currentStartDate, setCurrentStartDate] = useState(booking.startDate);
+    const [currentEndDate, setCurrentEndDate] = useState(booking.endDate);
+
+    const [currentStatus, setCurrentStatus] = useState(booking.workStatus);
+    const [selectedStatus, setSelectedStatus] = useState(booking.workStatus);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [statusHistory, setStatusHistory] = useState({ from: '', to: '' });
 
-    // --- OTP Verification States ---
+    const [selectedPhoto, setSelectedPhoto] = useState(null);
+
     const [isOtpModalVisible, setIsOtpModalVisible] = useState(false);
     const [generatedOtp, setGeneratedOtp] = useState('');
     const [otp, setOtp] = useState(['', '', '', '']);
@@ -82,16 +98,34 @@ const IndividualBooking = () => {
     const [canResend, setCanResend] = useState(false);
     const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
 
-    // Mask phone number whenever status is New or Cancelled
     const isPhoneMasked = currentStatus === 'New' || currentStatus === 'Cancelled';
-    const formattedApproxDays = `${booking.approxDays || 1} ${Number(booking.approxDays) === 1 ? 'Day' : 'Days'}`;
+    const formattedApproxDays = `${booking.approxDays} ${Number(booking.approxDays) === 1 ? 'Day' : 'Days'}`;
 
     useEffect(() => {
         if (updatedStatus) {
             setCurrentStatus(updatedStatus);
             setSelectedStatus(updatedStatus);
         }
-    }, [updatedStatus]);
+
+        if (updatedBudget) setCurrentBudget(updatedBudget);
+        if (updatedStartDate) setCurrentStartDate(updatedStartDate);
+        if (updatedEndDate) setCurrentEndDate(updatedEndDate);
+
+        if (shouldEditSchedule === 'true') {
+            router.setParams({ shouldEditSchedule: 'false' });
+
+            router.push({
+                pathname: '/booking/editSchedule',
+                params: {
+                    bookingId: booking.id,
+                    fullName: booking.fullName,
+                    budget: updatedBudget || currentBudget,
+                    startDate: updatedStartDate || currentStartDate,
+                    endDate: updatedEndDate || currentEndDate,
+                },
+            });
+        }
+    }, [updatedStatus, shouldEditSchedule, updatedBudget, updatedStartDate, updatedEndDate]);
 
     useEffect(() => {
         let interval = null;
@@ -112,12 +146,6 @@ const IndividualBooking = () => {
         setOtp(['', '', '', '']);
         setTimer(60);
         setCanResend(false);
-
-        // Alert.alert(
-        //     'SMS Sent to Client',
-        //     `OTP sent via SMS to ${booking.phone || '9823028547'}. Enter OTP to authorize status change.`,
-        //     [{ text: 'OK' }]
-        // );
     };
 
     const handleSubmitStatus = () => {
@@ -164,7 +192,21 @@ const IndividualBooking = () => {
         if (userEnteredOtp === generatedOtp) {
             setCurrentStatus(selectedStatus);
             setIsOtpModalVisible(false);
-            Alert.alert('Success', `Status successfully updated to ${selectedStatus}`);
+
+            if (selectedStatus === 'OnGoing') {
+                router.push({
+                    pathname: '/booking/editSchedule',
+                    params: {
+                        bookingId: booking.id,
+                        fullName: booking.fullName,
+                        budget: currentBudget,
+                        startDate: currentStartDate,
+                        endDate: currentEndDate,
+                    },
+                });
+            } else {
+                Alert.alert('Success', `Status successfully updated to ${selectedStatus}`);
+            }
         } else {
             Alert.alert('Invalid OTP', 'The code entered does not match. Please try again.');
         }
@@ -184,8 +226,7 @@ const IndividualBooking = () => {
 
     const handleCallPhone = async () => {
         if (isPhoneMasked) return;
-        const phoneNum = booking.phone || '9823028547';
-        const phoneUrl = `tel:${phoneNum}`;
+        const phoneUrl = `tel:${booking.phone}`;
         try {
             const supported = await Linking.canOpenURL(phoneUrl);
             if (supported) await Linking.openURL(phoneUrl);
@@ -196,14 +237,11 @@ const IndividualBooking = () => {
     };
 
     const handleAcceptOffer = () => {
-        setCurrentStatus('OnGoing');
-        setSelectedStatus('OnGoing');
-
         router.push({
             pathname: '/booking/pay',
-            params: { 
+            params: {
                 bookingId: booking.id,
-                updatedStatus: 'OnGoing' 
+                fullName: booking.fullName,
             },
         });
     };
@@ -224,7 +262,7 @@ const IndividualBooking = () => {
 
     const handleSharePDF = async () => {
         try {
-            const displayPhone = isPhoneMasked ? maskPhoneNumber(booking.phone) : (booking.phone || '9823028547');
+            const displayPhone = isPhoneMasked ? maskPhoneNumber(booking.phone) : booking.phone;
             const htmlContent = `
                 <!DOCTYPE html>
                 <html>
@@ -256,10 +294,10 @@ const IndividualBooking = () => {
 
                         <div class="row"><div class="label">Service</div><div class="value">${booking.service}</div></div>
                         <div class="row"><div class="label">Location</div><div class="value">${booking.location}</div></div>
-                        <div class="row"><div class="label">Budget</div><div class="value">${booking.budget}</div></div>
+                        <div class="row"><div class="label">Budget</div><div class="value">${currentBudget}</div></div>
                         <div class="row"><div class="label">Booking Date</div><div class="value">${formatDateFormatted(booking.booking_date)}</div></div>
-                        <div class="row"><div class="label">Starting Date</div><div class="value">${formatDateFormatted(booking.startDate)}</div></div>
-                        <div class="row"><div class="label">Ending Date</div><div class="value">${formatDateFormatted(booking.endDate)}</div></div>
+                        <div class="row"><div class="label">Starting Date</div><div class="value">${formatDateFormatted(currentStartDate)}</div></div>
+                        <div class="row"><div class="label">Ending Date</div><div class="value">${formatDateFormatted(currentEndDate)}</div></div>
                         <div class="row"><div class="label">Approx Days to Complete</div><div class="value">${formattedApproxDays}</div></div>
                         <div class="row"><div class="label">Special Request</div><div class="value">${booking.specialRequest || 'None'}</div></div>
                         <div class="row"><div class="label">Work Status</div><div class="value">${currentStatus}</div></div>
@@ -300,7 +338,7 @@ const IndividualBooking = () => {
                         <Ionicons name="arrow-back" size={22} color="#1E293B" />
                     </TouchableOpacity>
                     <Text style={styles.bookingIdTitle}>Booking ID: {booking.id}</Text>
-                    
+
                     <TouchableOpacity style={styles.shareBtn} onPress={handleSharePDF}>
                         <Ionicons name="share-outline" size={22} color="#1E293B" />
                     </TouchableOpacity>
@@ -309,16 +347,14 @@ const IndividualBooking = () => {
                 <View style={styles.card}>
                     <Text style={styles.clientName}>{booking.fullName}</Text>
 
-                    <TouchableOpacity 
-                        style={styles.phoneRow} 
+                    <TouchableOpacity
+                        style={styles.phoneRow}
                         onPress={handleCallPhone}
                         activeOpacity={isPhoneMasked ? 1 : 0.7}
                     >
                         <Ionicons name="call-outline" size={16} color="#245d5a" />
                         <Text style={styles.phoneText}>
-                            {isPhoneMasked
-                                ? maskPhoneNumber(booking.phone)
-                                : (booking.phone || '9823028547')}
+                            {isPhoneMasked ? maskPhoneNumber(booking.phone) : booking.phone}
                         </Text>
                     </TouchableOpacity>
 
@@ -333,16 +369,16 @@ const IndividualBooking = () => {
                         </TouchableOpacity>
 
                         <Text style={styles.fieldLabel}>Budget</Text>
-                        <Text style={styles.fieldValue}>{booking.budget}</Text>
+                        <Text style={styles.fieldValue}>{currentBudget}</Text>
 
                         <Text style={styles.fieldLabel}>Booking Date</Text>
                         <Text style={styles.fieldValue}>{formatDateFormatted(booking.booking_date)}</Text>
 
                         <Text style={styles.fieldLabel}>Starting Date</Text>
-                        <Text style={styles.fieldValue}>{formatDateFormatted(booking.startDate)}</Text>
+                        <Text style={styles.fieldValue}>{formatDateFormatted(currentStartDate)}</Text>
 
                         <Text style={styles.fieldLabel}>Ending Date</Text>
-                        <Text style={styles.fieldValue}>{formatDateFormatted(booking.endDate)}</Text>
+                        <Text style={styles.fieldValue}>{formatDateFormatted(currentEndDate)}</Text>
 
                         <Text style={styles.fieldLabel}>Approx Days to Complete</Text>
                         <Text style={styles.fieldValue}>{formattedApproxDays}</Text>
@@ -356,12 +392,17 @@ const IndividualBooking = () => {
                             <Text style={styles.fieldLabel}>Attached Photos</Text>
                             <View style={styles.photosGrid}>
                                 {booking.photos.map((photoSrc, index) => (
-                                    <Image key={index} source={photoSrc} style={styles.photoItem} resizeMode="cover" />
+                                    <TouchableOpacity
+                                        key={index}
+                                        activeOpacity={0.8}
+                                        onPress={() => setSelectedPhoto(photoSrc)}
+                                    >
+                                        <Image source={photoSrc} style={styles.photoItem} resizeMode="cover" />
+                                    </TouchableOpacity>
                                 ))}
                             </View>
                         </View>
                     )}
-
                     {currentStatus === 'New' || currentStatus === 'Cancelled' ? (
                         <View style={styles.actionButtonsContainer}>
                             <TouchableOpacity style={styles.acceptBtn} activeOpacity={0.85} onPress={handleAcceptOffer}>
@@ -373,6 +414,26 @@ const IndividualBooking = () => {
                         </View>
                     ) : (
                         <>
+                            {currentStatus === 'OnGoing' && (
+                                <TouchableOpacity
+                                    style={styles.editScheduleDirectBtn}
+                                    activeOpacity={0.85}
+                                    onPress={() => router.push({
+                                        pathname: '/booking/editSchedule',
+                                        params: {
+                                            bookingId: booking.id,
+                                            fullName: booking.fullName,
+                                            budget: currentBudget,
+                                            startDate: currentStartDate,
+                                            endDate: currentEndDate,
+                                        },
+                                    })}
+                                >
+                                    <Ionicons name="create-outline" size={18} color="#245d5a" />
+                                    <Text style={styles.editScheduleDirectBtnText}>Edit Schedule & Budget</Text>
+                                </TouchableOpacity>
+                            )}
+
                             <View style={styles.divider} />
                             <Text style={styles.sectionHeading}>Work Status</Text>
 
@@ -401,7 +462,27 @@ const IndividualBooking = () => {
                 </View>
             </ScrollView>
 
-            {/* Status Dropdown Modal */}
+            <Modal
+                visible={!!selectedPhoto}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setSelectedPhoto(null)}
+            >
+                <View style={styles.imageViewerOverlay}>
+                    <TouchableOpacity
+                        style={styles.closeViewerBtn}
+                        onPress={() => setSelectedPhoto(null)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                        <Ionicons name="close" size={28} color="#FFFFFF" />
+                    </TouchableOpacity>
+
+                    {selectedPhoto && (
+                        <Image source={selectedPhoto} style={styles.fullScreenImage} resizeMode="contain" />
+                    )}
+                </View>
+            </Modal>
+
             <Modal
                 visible={isDropdownOpen}
                 transparent={true}
@@ -439,7 +520,6 @@ const IndividualBooking = () => {
                 </TouchableWithoutFeedback>
             </Modal>
 
-            {/* Initial Status Confirmation Modal */}
             <Modal
                 visible={isModalVisible}
                 transparent={true}
@@ -466,7 +546,7 @@ const IndividualBooking = () => {
                         </View>
 
                         <Text style={styles.confirmSubtext}>
-                            Changing status requires client authorization. {'\n'}An SMS OTP will be sent to the client's registered number.
+                            Changing status requires customer authorization. {'\n'}An SMS OTP will be sent to the customer's registered number.
                         </Text>
 
                         <View style={styles.modalActionButtons}>
@@ -488,7 +568,6 @@ const IndividualBooking = () => {
                 </View>
             </Modal>
 
-            {/* OTP Verification Modal */}
             <Modal
                 visible={isOtpModalVisible}
                 transparent={true}
@@ -504,9 +583,7 @@ const IndividualBooking = () => {
                         <Text style={styles.confirmTitle}>Verify Client OTP</Text>
                         <Text style={styles.confirmSubtext}>
                             Enter the 4-digit OTP code sent to{' '}
-                            <Text style={styles.phoneHighlightText}>
-                                {booking.phone || '9823028547'}
-                            </Text>
+                            <Text style={styles.phoneHighlightText}>{booking.phone}</Text>
                         </Text>
 
                         <View style={styles.pinInputsGroupRow}>
@@ -567,340 +644,68 @@ const IndividualBooking = () => {
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#F8FAFC',
-    },
-    scrollContent: {
-        paddingHorizontal: 16,
-        paddingBottom: 30,
-    },
-    navHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginVertical: 16,
-    },
-    backBtn: {
-        padding: 4,
-    },
-    bookingIdTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#1E293B',
-    },
-    shareBtn: {
-        padding: 4,
-    },
-    card: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 16,
-        padding: 20,
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-    },
-    clientName: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#0F172A',
-    },
-    phoneRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        marginTop: 4,
-        marginBottom: 16,
-    },
-    phoneText: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#245d5a',
-        textDecorationLine: 'underline',
-    },
-    infoGroup: {
-        gap: 4,
-    },
-    fieldLabel: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#94A3B8',
-        marginTop: 8,
-    },
-    fieldValue: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#1E293B',
-    },
-    locationLinkRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-        marginTop: 2,
-    },
-    locationText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#245d5a',
-        textDecorationLine: 'underline',
-    },
-    photosSection: {
-        marginTop: 6,
-    },
-    photosGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 10,
-        marginTop: 8,
-    },
-    photoItem: {
-        width: 80,
-        height: 80,
-        borderRadius: 8,
-        backgroundColor: '#E2E8F0',
-    },
-    actionButtonsContainer: {
-        flexDirection: 'row',
-        gap: 12,
-        marginTop: 24,
-    },
-    acceptBtn: {
-        flex: 1,
-        backgroundColor: '#245d5a',
-        borderRadius: 10,
-        paddingVertical: 14,
-        alignItems: 'center',
-        justifyContent: 'center',
-        elevation: 2,
-    },
-    acceptBtnText: {
-        color: '#FFFFFF',
-        fontSize: 14,
-        fontWeight: '700',
-    },
-    rejectBtn: {
-        flex: 1,
-        backgroundColor: '#DC143C',
-        borderRadius: 10,
-        paddingVertical: 14,
-        alignItems: 'center',
-        justifyContent: 'center',
-        elevation: 2,
-    },
-    rejectBtnText: {
-        color: '#FFFFFF',
-        fontSize: 14,
-        fontWeight: '700',
-    },
-    divider: {
-        height: 1,
-        backgroundColor: '#E2E8F0',
-        marginVertical: 20,
-    },
-    sectionHeading: {
-        fontSize: 15,
-        fontWeight: '700',
-        color: '#0F172A',
-        marginBottom: 10,
-    },
-    dropdownTrigger: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderWidth: 1,
-        borderColor: '#245d5a',
-        borderRadius: 8,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        marginBottom: 16,
-    },
-    dropdownTriggerText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#1E293B',
-    },
-    submitButton: {
-        backgroundColor: '#245d5a',
-        borderRadius: 8,
-        paddingVertical: 14,
-        alignItems: 'center',
-        width: '60%',
-        alignSelf: 'center',
-    },
-    submitButtonDisabled: {
-        backgroundColor: '#94A3B8',
-    },
-    submitButtonText: {
-        color: '#FFFFFF',
-        fontSize: 15,
-        fontWeight: '700',
-    },
-    modalOverlayCenter: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.4)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-    dropdownModalCard: {
-        width: '85%',
-        backgroundColor: '#FFFFFF',
-        borderRadius: 16,
-        padding: 20,
-        elevation: 8,
-    },
-    modalHeading: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#0F172A',
-        marginBottom: 12,
-    },
-    statusOptionRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F1F5F9',
-    },
-    statusOptionText: {
-        fontSize: 14,
-        color: '#334155',
-    },
-    selectedOptionText: {
-        fontWeight: '700',
-        color: '#245d5a',
-    },
-    confirmationCard: {
-        width: '90%',
-        backgroundColor: '#FFFFFF',
-        borderRadius: 20,
-        padding: 24,
-        alignItems: 'center',
-        elevation: 10,
-    },
-    confirmIconBadge: {
-        backgroundColor: '#E8F4F3',
-        padding: 16,
-        borderRadius: 50,
-        marginBottom: 12,
-    },
-    confirmTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#1E293B',
-        marginBottom: 16,
-    },
-    statusChangeContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 12,
-        backgroundColor: '#F8FAFC',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        borderRadius: 12,
-        marginBottom: 16,
-        width: '100%',
-    },
-    badgeBox: {
-        alignItems: 'center',
-    },
-    badgeBoxLabel: {
-        fontSize: 10,
-        fontWeight: '700',
-        color: '#94A3B8',
-        marginBottom: 2,
-    },
-    badgeBoxTextFrom: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#EF4444',
-    },
-    badgeBoxTextTo: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#10B981',
-    },
-    confirmSubtext: {
-        fontSize: 13,
-        color: '#64748B',
-        textAlign: 'center',
-        lineHeight: 18,
-        marginBottom: 12,
-    },
-    phoneHighlightText: {
-        fontWeight: '700',
-        color: '#245d5a',
-    },
-    pinInputsGroupRow: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 12,
-        marginBottom: 16,
-        gap: 12,
-    },
-    singlePinBox: {
-        width: 46,
-        height: 54,
-        backgroundColor: '#FFF',
-        fontSize: 20,
-        fontWeight: '700',
-        color: '#000',
-        borderWidth: 1.5,
-        borderColor: '#C5CEE0',
-        paddingVertical: 0,
-        borderRadius: 10,
-    },
-    resendContainer: {
-        marginBottom: 20,
-        alignItems: 'center',
-    },
-    resendTimerText: {
-        fontSize: 13,
-        color: '#64748B',
-    },
-    timerBold: {
-        fontWeight: '700',
-        color: '#245d5a',
-    },
-    resendActiveText: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#245d5a',
-        textDecorationLine: 'underline',
-    },
-    modalActionButtons: {
-        flexDirection: 'row',
-        gap: 12,
-        width: '100%',
-    },
-    cancelBtn: {
-        flex: 1,
-        backgroundColor: '#F1F5F9',
-        paddingVertical: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    cancelBtnText: {
-        color: '#64748B',
-        fontWeight: '700',
-        fontSize: 14,
-    },
-    confirmBtn: {
-        flex: 1,
-        backgroundColor: '#245d5a',
-        paddingVertical: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    confirmBtnText: {
-        color: '#FFFFFF',
-        fontWeight: '700',
-        fontSize: 14,
-    },
+    safeArea: { flex: 1, backgroundColor: '#F8FAFC' },
+    scrollContent: { paddingHorizontal: 16, paddingBottom: 30 },
+    navHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: 16 },
+    backBtn: { padding: 4 },
+    bookingIdTitle: { fontSize: 18, fontWeight: '700', color: '#1E293B' },
+    shareBtn: { padding: 4 },
+    card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
+    clientName: { fontSize: 18, fontWeight: '700', color: '#0F172A' },
+    phoneRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4, marginBottom: 16 },
+    phoneText: { fontSize: 14, fontWeight: '700', color: '#245d5a', textDecorationLine: 'underline' },
+    infoGroup: { gap: 4 },
+    fieldLabel: { fontSize: 12, fontWeight: '600', color: '#94A3B8', marginTop: 8 },
+    fieldValue: { fontSize: 14, fontWeight: '600', color: '#1E293B' },
+    locationLinkRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
+    locationText: { fontSize: 14, fontWeight: '600', color: '#245d5a', textDecorationLine: 'underline' },
+    photosSection: { marginTop: 6 },
+    photosGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 8 },
+    photoItem: { width: 80, height: 80, borderRadius: 8, backgroundColor: '#E2E8F0' },
+    imageViewerOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.9)', justifyContent: 'center', alignItems: 'center' },
+    closeViewerBtn: { position: 'absolute', top: 50, right: 20, zIndex: 10, backgroundColor: 'rgba(255, 255, 255, 0.2)', padding: 8, borderRadius: 20 },
+    fullScreenImage: { width: '100%', height: '80%' },
+    actionButtonsContainer: { flexDirection: 'row', gap: 12, marginTop: 24 },
+    acceptBtn: { flex: 1, backgroundColor: '#245d5a', borderRadius: 10, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', elevation: 2 },
+    acceptBtnText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
+    rejectBtn: { flex: 1, backgroundColor: '#DC143C', borderRadius: 10, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', elevation: 2 },
+    rejectBtnText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
+    editScheduleDirectBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 18, borderWidth: 1, borderColor: '#245d5a', borderRadius: 8, paddingVertical: 10 },
+    editScheduleDirectBtnText: { color: '#245d5a', fontWeight: '700', fontSize: 14 },
+    divider: { height: 1, backgroundColor: '#E2E8F0', marginVertical: 20 },
+    sectionHeading: { fontSize: 15, fontWeight: '700', color: '#0F172A', marginBottom: 10 },
+    dropdownTrigger: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: '#245d5a', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 12, marginBottom: 16 },
+    dropdownTriggerText: { fontSize: 14, fontWeight: '600', color: '#1E293B' },
+    submitButton: { backgroundColor: '#245d5a', borderRadius: 8, paddingVertical: 14, alignItems: 'center', width: '60%', alignSelf: 'center' },
+    submitButtonDisabled: { backgroundColor: '#94A3B8' },
+    submitButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+    modalOverlayCenter: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+    dropdownModalCard: { width: '85%', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20, elevation: 8 },
+    modalHeading: { fontSize: 16, fontWeight: '700', color: '#0F172A', marginBottom: 12 },
+    statusOptionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
+    statusOptionText: { fontSize: 14, color: '#334155' },
+    selectedOptionText: { fontWeight: '700', color: '#245d5a' },
+    confirmationCard: { width: '90%', backgroundColor: '#FFFFFF', borderRadius: 20, padding: 24, alignItems: 'center', elevation: 10 },
+    confirmIconBadge: { backgroundColor: '#E8F4F3', padding: 16, borderRadius: 50, marginBottom: 12 },
+    confirmTitle: { fontSize: 18, fontWeight: '700', color: '#1E293B', marginBottom: 16 },
+    statusChangeContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: '#F8FAFC', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12, marginBottom: 16, width: '100%' },
+    badgeBox: { alignItems: 'center' },
+    badgeBoxLabel: { fontSize: 10, fontWeight: '700', color: '#94A3B8', marginBottom: 2 },
+    badgeBoxTextFrom: { fontSize: 14, fontWeight: '700', color: '#EF4444' },
+    badgeBoxTextTo: { fontSize: 14, fontWeight: '700', color: '#10B981' },
+    confirmSubtext: { fontSize: 13, color: '#64748B', textAlign: 'center', lineHeight: 18, marginBottom: 12 },
+    phoneHighlightText: { fontWeight: '700', color: '#245d5a' },
+    pinInputsGroupRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 12, marginBottom: 16, gap: 12 },
+    singlePinBox: { width: 46, height: 54, backgroundColor: '#FFF', fontSize: 20, fontWeight: '700', color: '#000', borderWidth: 1.5, borderColor: '#C5CEE0', paddingVertical: 0, borderRadius: 10 },
+    resendContainer: { marginBottom: 20, alignItems: 'center' },
+    resendTimerText: { fontSize: 13, color: '#64748B' },
+    timerBold: { fontWeight: '700', color: '#245d5a' },
+    resendActiveText: { fontSize: 14, fontWeight: '700', color: '#245d5a', textDecorationLine: 'underline' },
+    modalActionButtons: { flexDirection: 'row', gap: 12, width: '100%' },
+    cancelBtn: { flex: 1, backgroundColor: '#F1F5F9', paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
+    cancelBtnText: { color: '#64748B', fontWeight: '700', fontSize: 14 },
+    confirmBtn: { flex: 1, backgroundColor: '#245d5a', paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
+    confirmBtnText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
 });
 
 export default IndividualBooking;

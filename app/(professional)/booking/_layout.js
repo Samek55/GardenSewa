@@ -31,6 +31,12 @@ export default function BookingLayout() {
                     headerShown:false
                 }} 
             />
+            <Stack.Screen 
+                name="editSchedule" 
+                options={{ 
+                    headerShown:false
+                }} 
+            />
         </Stack>
     );
 }
