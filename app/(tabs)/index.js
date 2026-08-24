@@ -6,6 +6,7 @@ import {
     Dimensions,
     FlatList,
     Image,
+    InteractionManager,
     Linking,
     Modal,
     Pressable,
@@ -28,33 +29,43 @@ export default function Index() {
     const [activeTopIndex, setActiveTopIndex] = useState(0);
 
     const flatListRef = useRef(null);
+    const intervalRef = useRef(null);
 
     const filteredServicesTop = services.filter(service => service.label === 'Top');
 
-    // Trigger Pop-Up Ad when Home mounts
     useEffect(() => {
         const timer = setTimeout(() => {
             setIsAdVisible(true);
         }, 500);
-
         return () => clearTimeout(timer);
     }, []);
 
     useEffect(() => {
         if (filteredServicesTop.length === 0) return;
 
-        const interval = setInterval(() => {
-            setActiveTopIndex((prevIndex) => {
-                const nextIndex = (prevIndex + 1) % filteredServicesTop.length;
-                flatListRef.current?.scrollToIndex({
-                    index: nextIndex,
-                    animated: true,
+        const startAutoScroll = () => {
+            intervalRef.current = setInterval(() => {
+                setActiveTopIndex((prevIndex) => {
+                    const nextIndex = (prevIndex + 1) % filteredServicesTop.length;
+                    flatListRef.current?.scrollToIndex({
+                        index: nextIndex,
+                        animated: true,
+                    });
+                    return nextIndex;
                 });
-                return nextIndex;
-            });
-        }, 2000); 
+            }, 2000);
+        };
 
-        return () => clearInterval(interval);
+        InteractionManager.runAfterInteractions(() => {
+            startAutoScroll();
+        });
+
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
     }, [filteredServicesTop.length]);
 
     const onWhatsappOpen = async () => {
@@ -279,7 +290,6 @@ const styles = StyleSheet.create({
     ratingOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.38)',
-        // backgroundColor: 'rgba(206, 30, 30, 0.38)',
         alignItems: 'flex-end',
         justifyContent: 'flex-start',
         gap: 4,

@@ -331,8 +331,9 @@ const BookingSummaryPage = () => {
 
             <Calendar
               showSixWeeks={true}
-              hideExtraDays={true}
-              firstDay={1}
+              // Remove hideExtraDays={true} or set it to false 
+              hideExtraDays={false}
+              firstDay={0}
               onDayPress={(day) => {
                 handleDateSelect(day.dateString);
               }}
@@ -396,7 +397,6 @@ const BookingSummaryPage = () => {
                 textDayHeaderFontWeight: '600',
               }}
             />
-
             {/* Clear Date Filter Button */}
             <View style={styles.clearButtonContainer}>
               <TouchableOpacity

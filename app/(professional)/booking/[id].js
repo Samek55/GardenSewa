@@ -3,7 +3,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as Print from 'expo-print';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     Alert,
     Image,
@@ -12,6 +12,7 @@ import {
     ScrollView,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     TouchableWithoutFeedback,
     View,
@@ -25,7 +26,6 @@ const maskPhoneNumber = (phone) => {
     return phone.replace(/(\d{2})\d{4}(\d{2})\d(\d{1})$/, '$1XXX$2XX$3');
 };
 
-// Helper function to get ordinal suffix (e.g. 1 -> 1st, 2 -> 2nd, 10 -> 10th)
 const getOrdinalSuffix = (day) => {
     if (day > 3 && day < 21) return 'th';
     switch (day % 10) {
@@ -36,14 +36,10 @@ const getOrdinalSuffix = (day) => {
     }
 };
 
-// Formats date string into "10th July, 2026"
 const formatDateFormatted = (dateStr) => {
     if (!dateStr) return '';
-    
     const parsedDate = new Date(dateStr.replace(/\//g, '-'));
-    if (isNaN(parsedDate.getTime())) {
-        return dateStr;
-    }
+    if (isNaN(parsedDate.getTime())) return dateStr;
 
     const day = parsedDate.getDate();
     const month = parsedDate.toLocaleString('en-US', { month: 'long' });
@@ -78,19 +74,51 @@ const IndividualBooking = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [statusHistory, setStatusHistory] = useState({ from: '', to: '' });
 
-    // Helper check to determine if phone number should be masked
-    const isPhoneMasked = currentStatus === 'New' || currentStatus === 'Cancelled';
+    // --- OTP Verification States ---
+    const [isOtpModalVisible, setIsOtpModalVisible] = useState(false);
+    const [generatedOtp, setGeneratedOtp] = useState('');
+    const [otp, setOtp] = useState(['', '', '', '']);
+    const [timer, setTimer] = useState(60);
+    const [canResend, setCanResend] = useState(false);
+    const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
 
-    // Helper to format Approx Days (1 Day vs 2 Days)
+    // Mask phone number whenever status is New or Cancelled
+    const isPhoneMasked = currentStatus === 'New' || currentStatus === 'Cancelled';
     const formattedApproxDays = `${booking.approxDays || 1} ${Number(booking.approxDays) === 1 ? 'Day' : 'Days'}`;
 
-    // Update status automatically when returning from payment screen
     useEffect(() => {
         if (updatedStatus) {
             setCurrentStatus(updatedStatus);
             setSelectedStatus(updatedStatus);
         }
     }, [updatedStatus]);
+
+    useEffect(() => {
+        let interval = null;
+        if (isOtpModalVisible && timer > 0) {
+            interval = setInterval(() => {
+                setTimer((prev) => prev - 1);
+            }, 1000);
+        } else if (timer === 0) {
+            setCanResend(true);
+            clearInterval(interval);
+        }
+        return () => clearInterval(interval);
+    }, [isOtpModalVisible, timer]);
+
+    const sendOtpCode = () => {
+        const otpCode = __DEV__ ? '1234' : Math.floor(1000 + Math.random() * 9000).toString();
+        setGeneratedOtp(otpCode);
+        setOtp(['', '', '', '']);
+        setTimer(60);
+        setCanResend(false);
+
+        // Alert.alert(
+        //     'SMS Sent to Client',
+        //     `OTP sent via SMS to ${booking.phone || '9823028547'}. Enter OTP to authorize status change.`,
+        //     [{ text: 'OK' }]
+        // );
+    };
 
     const handleSubmitStatus = () => {
         if (selectedStatus === currentStatus) return;
@@ -102,75 +130,101 @@ const IndividualBooking = () => {
         setIsModalVisible(true);
     };
 
-    const confirmStatusChange = () => {
-        setCurrentStatus(selectedStatus);
+    const handleInitiateStatusChange = () => {
         setIsModalVisible(false);
+        sendOtpCode();
+        setIsOtpModalVisible(true);
     };
 
-    // Open matching location in Google Maps using coordinates query
+    const handleResendOtp = () => {
+        if (canResend) {
+            sendOtpCode();
+        }
+    };
+
+    const handleOtpChange = (text, index) => {
+        const cleaned = text.replace(/[^0-9]/g, '');
+        const newOtp = [...otp];
+        newOtp[index] = cleaned.slice(-1);
+        setOtp(newOtp);
+
+        if (cleaned.length > 0 && index < 3) {
+            inputRefs[index + 1].current?.focus();
+        }
+    };
+
+    const handleKeyPress = (e, index) => {
+        if (e.nativeEvent.key === 'Backspace' && otp[index] === '' && index > 0) {
+            inputRefs[index - 1].current?.focus();
+        }
+    };
+
+    const handleVerifyOtpAndConfirm = () => {
+        const userEnteredOtp = otp.join('');
+        if (userEnteredOtp === generatedOtp) {
+            setCurrentStatus(selectedStatus);
+            setIsOtpModalVisible(false);
+            Alert.alert('Success', `Status successfully updated to ${selectedStatus}`);
+        } else {
+            Alert.alert('Invalid OTP', 'The code entered does not match. Please try again.');
+        }
+    };
+
     const handleOpenMap = async () => {
         const query = encodeURIComponent(booking.location);
         const webUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
-
         try {
             const supported = await Linking.canOpenURL(webUrl);
-            if (supported) {
-                await Linking.openURL(webUrl);
-            } else {
-                Alert.alert('Error', 'Unable to open Google Maps');
-            }
+            if (supported) await Linking.openURL(webUrl);
+            else Alert.alert('Error', 'Unable to open Google Maps');
         } catch (error) {
             console.error('Error opening maps:', error);
         }
     };
 
-    // Open phone dialer with unmasked phone number
     const handleCallPhone = async () => {
         if (isPhoneMasked) return;
-
         const phoneNum = booking.phone || '9823028547';
         const phoneUrl = `tel:${phoneNum}`;
-
         try {
             const supported = await Linking.canOpenURL(phoneUrl);
-            if (supported) {
-                await Linking.openURL(phoneUrl);
-            } else {
-                Alert.alert('Error', 'Unable to open phone app');
-            }
+            if (supported) await Linking.openURL(phoneUrl);
+            else Alert.alert('Error', 'Unable to open phone app');
         } catch (error) {
             console.error('Error opening phone dialer:', error);
         }
     };
 
     const handleAcceptOffer = () => {
+        setCurrentStatus('OnGoing');
+        setSelectedStatus('OnGoing');
+
         router.push({
             pathname: '/booking/pay',
-            params: { bookingId: booking.id },
+            params: { 
+                bookingId: booking.id,
+                updatedStatus: 'OnGoing' 
+            },
         });
     };
 
     const handleRejectOffer = () => {
-        Alert.alert(
-            'Reject Booking',
-            'Are you sure you want to reject this offer?',
-            [
-                { text: 'No', style: 'cancel' },
-                {
-                    text: 'Yes',
-                    style: 'destructive',
-                    onPress: () => {
-                        setCurrentStatus('Cancelled');
-                        setSelectedStatus('Cancelled');
-                    },
+        Alert.alert('Reject Booking', 'Are you sure you want to reject this offer?', [
+            { text: 'No', style: 'cancel' },
+            {
+                text: 'Yes',
+                style: 'destructive',
+                onPress: () => {
+                    setCurrentStatus('Cancelled');
+                    setSelectedStatus('Cancelled');
                 },
-            ]
-        );
+            },
+        ]);
     };
 
     const handleSharePDF = async () => {
         try {
-            const displayPhone = isPhoneMasked ? maskPhoneNumber(booking.phone) : (booking.phone || '+977 9823028547');
+            const displayPhone = isPhoneMasked ? maskPhoneNumber(booking.phone) : (booking.phone || '9823028547');
             const htmlContent = `
                 <!DOCTYPE html>
                 <html>
@@ -219,10 +273,7 @@ const IndividualBooking = () => {
             const { uri } = await Print.printToFileAsync({ html: htmlContent });
             const customUri = `${FileSystem.documentDirectory}GardenSewa-${booking.id}.pdf`;
 
-            await FileSystem.copyAsync({
-                from: uri,
-                to: customUri,
-            });
+            await FileSystem.copyAsync({ from: uri, to: customUri });
 
             if (await Sharing.isAvailableAsync()) {
                 await Sharing.shareAsync(customUri, {
@@ -238,6 +289,8 @@ const IndividualBooking = () => {
             Alert.alert('Error', 'Failed to generate PDF for sharing');
         }
     };
+
+    const fullOtpEntered = otp.join('').length === 4;
 
     return (
         <View style={styles.safeArea}>
@@ -256,7 +309,6 @@ const IndividualBooking = () => {
                 <View style={styles.card}>
                     <Text style={styles.clientName}>{booking.fullName}</Text>
 
-                    {/* Masked phone for 'New' and 'Cancelled', clickable for unmasked */}
                     <TouchableOpacity 
                         style={styles.phoneRow} 
                         onPress={handleCallPhone}
@@ -266,7 +318,7 @@ const IndividualBooking = () => {
                         <Text style={styles.phoneText}>
                             {isPhoneMasked
                                 ? maskPhoneNumber(booking.phone)
-                                : (booking.phone || '+977 9823028547')}
+                                : (booking.phone || '9823028547')}
                         </Text>
                     </TouchableOpacity>
 
@@ -299,44 +351,27 @@ const IndividualBooking = () => {
                         <Text style={styles.fieldValue}>{booking.specialRequest || 'None'}</Text>
                     </View>
 
-                    {/* Flexible Photo Gallery Section */}
                     {booking.photos && booking.photos.length > 0 && (
                         <View style={styles.photosSection}>
                             <Text style={styles.fieldLabel}>Attached Photos</Text>
                             <View style={styles.photosGrid}>
                                 {booking.photos.map((photoSrc, index) => (
-                                    <Image
-                                        key={index}
-                                        source={photoSrc}
-                                        style={styles.photoItem}
-                                        resizeMode="cover"
-                                    />
+                                    <Image key={index} source={photoSrc} style={styles.photoItem} resizeMode="cover" />
                                 ))}
                             </View>
                         </View>
                     )}
 
-                    {/* Pre-payment state: Accept / Reject Buttons */}
                     {currentStatus === 'New' || currentStatus === 'Cancelled' ? (
                         <View style={styles.actionButtonsContainer}>
-                            <TouchableOpacity
-                                style={styles.acceptBtn}
-                                activeOpacity={0.85}
-                                onPress={handleAcceptOffer}
-                            >
-                                <Text style={styles.acceptBtnText}>Accept This Offer</Text>
+                            <TouchableOpacity style={styles.acceptBtn} activeOpacity={0.85} onPress={handleAcceptOffer}>
+                                <Text style={styles.acceptBtnText}>Accept Offer</Text>
                             </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={styles.rejectBtn}
-                                activeOpacity={0.85}
-                                onPress={handleRejectOffer}
-                            >
+                            <TouchableOpacity style={styles.rejectBtn} activeOpacity={0.85} onPress={handleRejectOffer}>
                                 <Text style={styles.rejectBtnText}>Reject</Text>
                             </TouchableOpacity>
                         </View>
                     ) : (
-                        /* Post-payment state: Work Status Management */
                         <>
                             <View style={styles.divider} />
                             <Text style={styles.sectionHeading}>Work Status</Text>
@@ -404,7 +439,7 @@ const IndividualBooking = () => {
                 </TouchableWithoutFeedback>
             </Modal>
 
-            {/* Status Confirmation Modal */}
+            {/* Initial Status Confirmation Modal */}
             <Modal
                 visible={isModalVisible}
                 transparent={true}
@@ -416,7 +451,6 @@ const IndividualBooking = () => {
                         <View style={styles.confirmIconBadge}>
                             <Ionicons name="sync-outline" size={32} color="#245d5a" />
                         </View>
-
                         <Text style={styles.confirmTitle}>Update Work Status</Text>
 
                         <View style={styles.statusChangeContainer}>
@@ -424,9 +458,7 @@ const IndividualBooking = () => {
                                 <Text style={styles.badgeBoxLabel}>FROM</Text>
                                 <Text style={styles.badgeBoxTextFrom}>{statusHistory.from}</Text>
                             </View>
-
                             <Ionicons name="arrow-forward" size={20} color="#64748B" />
-
                             <View style={styles.badgeBox}>
                                 <Text style={styles.badgeBoxLabel}>TO</Text>
                                 <Text style={styles.badgeBoxTextTo}>{statusHistory.to}</Text>
@@ -434,7 +466,7 @@ const IndividualBooking = () => {
                         </View>
 
                         <Text style={styles.confirmSubtext}>
-                            Are you sure you want to change the work status for this booking request?
+                            Changing status requires client authorization. {'\n'}An SMS OTP will be sent to the client's registered number.
                         </Text>
 
                         <View style={styles.modalActionButtons}>
@@ -448,8 +480,83 @@ const IndividualBooking = () => {
                                 <Text style={styles.cancelBtnText}>Cancel</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.confirmBtn} onPress={confirmStatusChange}>
-                                <Text style={styles.confirmBtnText}>Confirm Change</Text>
+                            <TouchableOpacity style={styles.confirmBtn} onPress={handleInitiateStatusChange}>
+                                <Text style={styles.confirmBtnText}>Send OTP</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* OTP Verification Modal */}
+            <Modal
+                visible={isOtpModalVisible}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setIsOtpModalVisible(false)}
+            >
+                <View style={styles.modalOverlayCenter}>
+                    <View style={styles.confirmationCard}>
+                        <View style={styles.confirmIconBadge}>
+                            <Ionicons name="key-outline" size={32} color="#245d5a" />
+                        </View>
+
+                        <Text style={styles.confirmTitle}>Verify Client OTP</Text>
+                        <Text style={styles.confirmSubtext}>
+                            Enter the 4-digit OTP code sent to{' '}
+                            <Text style={styles.phoneHighlightText}>
+                                {booking.phone || '9823028547'}
+                            </Text>
+                        </Text>
+
+                        <View style={styles.pinInputsGroupRow}>
+                            {otp.map((digit, index) => (
+                                <TextInput
+                                    key={index}
+                                    ref={inputRefs[index]}
+                                    style={styles.singlePinBox}
+                                    value={digit}
+                                    onChangeText={(text) => handleOtpChange(text, index)}
+                                    onKeyPress={(e) => handleKeyPress(e, index)}
+                                    keyboardType="number-pad"
+                                    maxLength={1}
+                                    textAlign="center"
+                                />
+                            ))}
+                        </View>
+
+                        <View style={styles.resendContainer}>
+                            {canResend ? (
+                                <TouchableOpacity onPress={handleResendOtp}>
+                                    <Text style={styles.resendActiveText}>Resend Code</Text>
+                                </TouchableOpacity>
+                            ) : (
+                                <Text style={styles.resendTimerText}>
+                                    Resend code in <Text style={styles.timerBold}>{timer}s</Text>
+                                </Text>
+                            )}
+                        </View>
+
+                        <View style={styles.modalActionButtons}>
+                            <TouchableOpacity
+                                style={styles.cancelBtn}
+                                onPress={() => {
+                                    setIsOtpModalVisible(false);
+                                    setSelectedStatus(currentStatus);
+                                }}
+                            >
+                                <Text style={styles.cancelBtnText}>Cancel</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[
+                                    styles.confirmBtn,
+                                    !fullOtpEntered && styles.submitButtonDisabled,
+                                ]}
+                                disabled={!fullOtpEntered}
+                                onPress={handleVerifyOtpAndConfirm}
+                            >
+                                <Text style={styles.confirmBtnText}>Verify</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -560,7 +667,7 @@ const styles = StyleSheet.create({
         marginTop: 24,
     },
     acceptBtn: {
-        flex: 1.4,
+        flex: 1,
         backgroundColor: '#245d5a',
         borderRadius: 10,
         paddingVertical: 14,
@@ -575,7 +682,7 @@ const styles = StyleSheet.create({
     },
     rejectBtn: {
         flex: 1,
-        backgroundColor: '#DC143C', 
+        backgroundColor: '#DC143C',
         borderRadius: 10,
         paddingVertical: 14,
         alignItems: 'center',
@@ -722,7 +829,48 @@ const styles = StyleSheet.create({
         color: '#64748B',
         textAlign: 'center',
         lineHeight: 18,
+        marginBottom: 12,
+    },
+    phoneHighlightText: {
+        fontWeight: '700',
+        color: '#245d5a',
+    },
+    pinInputsGroupRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 12,
+        marginBottom: 16,
+        gap: 12,
+    },
+    singlePinBox: {
+        width: 46,
+        height: 54,
+        backgroundColor: '#FFF',
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#000',
+        borderWidth: 1.5,
+        borderColor: '#C5CEE0',
+        paddingVertical: 0,
+        borderRadius: 10,
+    },
+    resendContainer: {
         marginBottom: 20,
+        alignItems: 'center',
+    },
+    resendTimerText: {
+        fontSize: 13,
+        color: '#64748B',
+    },
+    timerBold: {
+        fontWeight: '700',
+        color: '#245d5a',
+    },
+    resendActiveText: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#245d5a',
+        textDecorationLine: 'underline',
     },
     modalActionButtons: {
         flexDirection: 'row',

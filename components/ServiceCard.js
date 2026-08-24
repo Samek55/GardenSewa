@@ -14,7 +14,9 @@ const ServiceCard = ({ id, imageSource, title, description, cardWidth }) => {
             <Image
                 source={imageSource}
                 style={styles.image}
-                resizeMode="cover"
+                contentFit="cover"
+                cachePolicy="disk"
+                priority="normal"
             />
             <View style={styles.textContainer}>
                 <Text style={styles.title} numberOfLines={1}>

@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Image, Pressable, StyleSheet, Text, View, } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 const ServiceStack = ({ id, imageSource, description, title }) => {
     const router = useRouter()
@@ -14,7 +14,9 @@ const ServiceStack = ({ id, imageSource, description, title }) => {
                 <Image
                     source={imageSource}
                     style={styles.image}
-                    resizeMode="cover"
+                    contentFit="cover"
+                    cachePolicy="disk"
+                    priority="normal"
                 />
             </Pressable>
             <View style={styles.textContainer}>

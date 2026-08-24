@@ -3,7 +3,7 @@ import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
-const IS_DEV = true; 
+const IS_DEV = false; 
 
 export default function Index() {
   const [targetRoute, setTargetRoute] = useState(null);

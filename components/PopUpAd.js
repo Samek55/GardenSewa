@@ -1,52 +1,76 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const PopUpAd = ({ onClose }) => {
     const [countdown, setCountdown] = useState(10);
     const [autoCloseSeconds, setAutoCloseSeconds] = useState(5);
+    const isClosing = useRef(false);
+    const mounted = useRef(true);
+    const autoCloseStarted = useRef(false);
 
+    // Initial 10s countdown
     useEffect(() => {
         if (countdown <= 0) return;
-
         const timer = setInterval(() => {
             setCountdown((prev) => prev - 1);
         }, 1000);
-
         return () => clearInterval(timer);
     }, [countdown]);
 
+    // When countdown finishes, start the 5s auto‑close timer (only once)
     useEffect(() => {
-        if (countdown > 0) return;
-
-        if (autoCloseSeconds <= 0) {
-            onClose?.();
-            return;
+        if (countdown === 0 && !autoCloseStarted.current && mounted.current) {
+            autoCloseStarted.current = true;
+            const timer = setInterval(() => {
+                setAutoCloseSeconds((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(timer);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+            return () => clearInterval(timer);
         }
+    }, [countdown]);
 
-        const autoCloseTimer = setInterval(() => {
-            setAutoCloseSeconds((prev) => prev - 1);
-        }, 1000);
+    // When autoCloseSeconds reaches 0, close the modal
+    useEffect(() => {
+        if (autoCloseSeconds === 0 && mounted.current && !isClosing.current) {
+            isClosing.current = true;
+            onClose?.();
+        }
+    }, [autoCloseSeconds, onClose]);
 
-        return () => clearInterval(autoCloseTimer);
-    }, [countdown, autoCloseSeconds, onClose]);
+    // Cleanup mounted flag
+    useEffect(() => {
+        return () => {
+            mounted.current = false;
+        };
+    }, []);
 
     const showCloseButton = countdown === 0;
 
     return (
         <View style={styles.container}>
             <View style={styles.imageWrapper}>
-                <Image 
-                    source={require('../assets/images/services/15.jpg')} 
+                <Image
+                    source={require('../assets/images/services/15.jpg')}
                     style={styles.adImage}
-                    resizeMode="cover" 
+                    resizeMode="cover"
                 />
-                
+
                 {showCloseButton ? (
-                    <TouchableOpacity 
-                        style={styles.closeBadge} 
-                        onPress={() => onClose?.()}
+                    <TouchableOpacity
+                        style={styles.closeBadge}
+                        onPress={() => {
+                            if (!isClosing.current) {
+                                isClosing.current = true;
+                                onClose?.();
+                            }
+                        }}
                     >
                         <Ionicons name="close" size={20} color="#FFF" />
                     </TouchableOpacity>
@@ -62,9 +86,11 @@ const PopUpAd = ({ onClose }) => {
                 Book a service for landscape lighting before the flash price disappears, same-day slots across Kathmandu, Lalitpur & Bhaktapur.
             </Text>
 
-            <TouchableOpacity 
+            <TouchableOpacity
                 style={styles.button}
                 onPress={() => {
+                    if (isClosing.current) return;
+                    isClosing.current = true;
                     onClose?.();
                     router.push(`/services/${19}`);
                 }}
