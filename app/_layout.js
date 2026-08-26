@@ -10,8 +10,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 SplashScreen.preventAutoHideAsync().catch(() => { });
 
-const TOTAL_DURATION_MS = 3000;
-const INTERVAL_MS = 5;
+const TOTAL_DURATION_MS = 3002;
+const INTERVAL_MS = 2;
 
 const SplashOverlay = memo(({ countdownDigits }) => (
   <View style={styles.splashOverlay}>

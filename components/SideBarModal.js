@@ -99,11 +99,11 @@ const SideBarModal = ({ onClose }) => {
                 contentContainerStyle={styles.scrollContent}
             >
                 <View style={styles.primaryLinks}>
-                    <Text style={styles.sectionTitle}>Menu</Text>
+                    {/* <Text style={styles.sectionTitle}>Menu</Text> */}
 
                     {renderMenuItem('/(tabs)', 'home-outline', 'Home')}
                     {renderMenuItem('/(tabs)/services', 'grid-outline', 'Services')}
-                    {renderMenuItem('/notifications', 'notifications-outline', 'Notifications')}
+                    {/* {renderMenuItem('/notifications', 'notifications-outline', 'Notifications')} */}
                     {renderMenuItem('/book', 'calendar-outline', 'Book a Service')}
                     {renderMenuItem('/joinasaprofessional', 'person-add-outline', 'Join as a Professional')}
                 </View>
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 60,
         left: 16,
-        bottom: 30,
+        bottom: 60,
         width: SIDEBAR_WIDTH,
         backgroundColor: 'white',
         borderRadius: 28,
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
     },
     primaryLinks: {
-        gap: 2,
+        gap: 4,
         paddingHorizontal: 20,
     },
     sectionTitle: {

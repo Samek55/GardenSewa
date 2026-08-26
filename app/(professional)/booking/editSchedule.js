@@ -1,87 +1,20 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     Alert,
     Modal,
-    ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
     TouchableWithoutFeedback,
-    View,
+    View
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { budgetData } from '../../../data/servicesList';
 
 const today = new Date().toISOString().split('T')[0];
-
-const CustomDropdown = ({ label, value, placeholder, data, isOpen, onToggle, onSelect, required = false }) => {
-    const [query, setQuery] = useState('');
-
-    const filteredData = data.filter((item) =>
-        (item.name || item.title || item).toLowerCase().includes(query.toLowerCase())
-    );
-
-    return (
-        <View style={styles.individualContainer}>
-            <Text style={styles.label}>
-                {label} {required && <Text style={styles.asterisk}>*</Text>}
-            </Text>
-            <TouchableOpacity style={styles.dropdownTrigger} activeOpacity={0.8} onPress={onToggle}>
-                <Text style={[styles.triggerText, !value && styles.placeholderText]}>
-                    {value || placeholder}
-                </Text>
-                <Ionicons name={isOpen ? 'chevron-up' : 'chevron-down'} size={20} color="#666" />
-            </TouchableOpacity>
-
-            {isOpen && (
-                <View style={styles.dropdownContainer}>
-                    <View style={styles.searchBarContainer}>
-                        <TextInput
-                            style={styles.searchInput}
-                            placeholder={`Search ${label.toLowerCase()}...`}
-                            placeholderTextColor="#999"
-                            value={query}
-                            onChangeText={setQuery}
-                        />
-                        {query.length > 0 && (
-                            <TouchableOpacity onPress={() => setQuery('')}>
-                                <Ionicons name="close-circle" size={18} color="#999" />
-                            </TouchableOpacity>
-                        )}
-                    </View>
-
-                    <ScrollView style={styles.itemsList} nestedScrollEnabled>
-                        {filteredData.length > 0 ? (
-                            filteredData.map((item, idx) => {
-                                const itemLabel = item.name || item.title || item;
-                                return (
-                                    <TouchableOpacity
-                                        key={item.id || idx}
-                                        style={styles.dropdownItem}
-                                        onPress={() => {
-                                            onSelect(itemLabel);
-                                            setQuery('');
-                                        }}
-                                    >
-                                        <Text style={styles.dropdownItemText}>{itemLabel}</Text>
-                                    </TouchableOpacity>
-                                );
-                            })
-                        ) : (
-                            <View style={styles.noResultsContainer}>
-                                <Text style={styles.noResultsText}>No items found</Text>
-                            </View>
-                        )}
-                    </ScrollView>
-                </View>
-            )}
-        </View>
-    );
-};
 
 const EditSchedule = () => {
     const {
@@ -90,17 +23,44 @@ const EditSchedule = () => {
         budget: initialBudget,
         startDate: initialStart,
         endDate: initialEnd,
+        scopeOfWork: initialScope,
+        phone,
     } = useLocalSearchParams();
 
     const [budget, setBudget] = useState(initialBudget || '');
+    const [scopeOfWork, setScopeOfWork] = useState(initialScope || '');
     const [startDate, setStartDate] = useState(initialStart || '');
     const [endDate, setEndDate] = useState(initialEnd || '');
 
-    const [activeDropdown, setActiveDropdown] = useState(null);
     const [activeCalendarModal, setActiveCalendarModal] = useState(null);
 
-    const toggleDropdown = (name) => {
-        setActiveDropdown((prev) => (prev === name ? null : name));
+    // OTP Modal States
+    const [isOtpModalVisible, setIsOtpModalVisible] = useState(false);
+    const [generatedOtp, setGeneratedOtp] = useState('');
+    const [otp, setOtp] = useState(['', '', '', '']);
+    const [timer, setTimer] = useState(60);
+    const [canResend, setCanResend] = useState(false);
+    const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
+
+    useEffect(() => {
+        let interval = null;
+        if (isOtpModalVisible && timer > 0) {
+            interval = setInterval(() => {
+                setTimer((prev) => prev - 1);
+            }, 1000);
+        } else if (timer === 0) {
+            setCanResend(true);
+            clearInterval(interval);
+        }
+        return () => clearInterval(interval);
+    }, [isOtpModalVisible, timer]);
+
+    const sendOtpCode = () => {
+        const otpCode = __DEV__ ? '1234' : Math.floor(1000 + Math.random() * 9000).toString();
+        setGeneratedOtp(otpCode);
+        setOtp(['', '', '', '']);
+        setTimer(60);
+        setCanResend(false);
     };
 
     const handleUpdate = () => {
@@ -113,17 +73,56 @@ const EditSchedule = () => {
             return;
         }
 
-        router.dismissTo({
-            pathname: `/booking/${bookingId}`,
-            params: {
-                fullName: fullName,
-                updatedBudget: budget,
-                updatedStartDate: startDate,
-                updatedEndDate: endDate,
-                shouldEditSchedule: 'false',
-            },
-        });
+        // Trigger OTP modal step
+        sendOtpCode();
+        setIsOtpModalVisible(true);
     };
+
+    const handleOtpChange = (text, index) => {
+        const cleaned = text.replace(/[^0-9]/g, '');
+        const newOtp = [...otp];
+        newOtp[index] = cleaned.slice(-1);
+        setOtp(newOtp);
+
+        if (cleaned.length > 0 && index < 3) {
+            inputRefs[index + 1].current?.focus();
+        }
+    };
+
+    const handleKeyPress = (e, index) => {
+        if (e.nativeEvent.key === 'Backspace' && otp[index] === '' && index > 0) {
+            inputRefs[index - 1].current?.focus();
+        }
+    };
+
+    const handleResendOtp = () => {
+        if (canResend) {
+            sendOtpCode();
+        }
+    };
+
+    const handleVerifyOtpAndConfirm = () => {
+        const userEnteredOtp = otp.join('');
+        if (userEnteredOtp === generatedOtp) {
+            setIsOtpModalVisible(false);
+
+            router.dismissTo({
+                pathname: `/booking/${bookingId}`,
+                params: {
+                    fullName: fullName,
+                    updatedBudget: budget,
+                    updatedScopeOfWork: scopeOfWork,
+                    updatedStartDate: startDate,
+                    updatedEndDate: endDate,
+                    shouldEditSchedule: 'false',
+                },
+            });
+        } else {
+            Alert.alert('Invalid OTP', 'The code entered does not match. Please try again.');
+        }
+    };
+
+    const fullOtpEntered = otp.join('').length === 4;
 
     return (
         <KeyboardAwareScrollView
@@ -152,58 +151,72 @@ const EditSchedule = () => {
 
                 {/* Main Form Inputs Container */}
                 <View style={styles.inputsSection}>
-                    {/* Start Date Trigger */}
-                    <View style={styles.individualContainer}>
+                    <View style={styles.dateContainer}>
+                        {/* Start Date Trigger */}
+                        <View style={styles.individualContainer}>
+                            <Text style={styles.label}>
+                                Start Date <Text style={styles.asterisk}>*</Text>
+                            </Text>
+                            <TouchableOpacity
+                                style={styles.dropdownTrigger}
+                                activeOpacity={0.8}
+                                onPress={() => {
+                                    setActiveCalendarModal('startDate');
+                                }}
+                            >
+                                <Text style={[styles.triggerText, !startDate && styles.placeholderText]}>
+                                    {startDate || 'Select Start Date'}
+                                </Text>
+                                <Ionicons name="calendar-clear-outline" size={20} color="#666" />
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* End Date Trigger */}
+                        <View style={styles.individualContainer}>
+                            <Text style={styles.label}>End Date</Text>
+                            <TouchableOpacity
+                                style={styles.dropdownTrigger}
+                                activeOpacity={0.8}
+                                onPress={() => {
+                                    setActiveCalendarModal('endDate');
+                                }}
+                            >
+                                <Text style={[styles.triggerText, !endDate && styles.placeholderText]}>
+                                    {endDate || 'Select End Date'}
+                                </Text>
+                                <Ionicons name="calendar-clear-outline" size={20} color="#666" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    {/* Full Width Budget Field */}
+                    <View style={styles.individualContainerFull}>
                         <Text style={styles.label}>
-                            Start Date <Text style={styles.asterisk}>*</Text>
+                            Budget <Text style={styles.asterisk}>*</Text>
                         </Text>
-                        <TouchableOpacity
-                            style={styles.dropdownTrigger}
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                setActiveDropdown(null);
-                                setActiveCalendarModal('startDate');
-                            }}
-                        >
-                            <Text style={[styles.triggerText, !startDate && styles.placeholderText]}>
-                                {startDate || 'Select Start Date'}
-                            </Text>
-                            <Ionicons name="calendar-clear-outline" size={20} color="#666" />
-                        </TouchableOpacity>
+                        <TextInput
+                            style={styles.textInput}
+                            placeholder="Enter your budget (e.g. NPR 5,000)"
+                            placeholderTextColor={'#999'}
+                            value={budget}
+                            onChangeText={setBudget}
+                        />
                     </View>
 
-                    {/* End Date Trigger */}
-                    <View style={styles.individualContainer}>
-                        <Text style={styles.label}>End Date</Text>
-                        <TouchableOpacity
-                            style={styles.dropdownTrigger}
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                setActiveDropdown(null);
-                                setActiveCalendarModal('endDate');
-                            }}
-                        >
-                            <Text style={[styles.triggerText, !endDate && styles.placeholderText]}>
-                                {endDate || 'Select End Date'}
-                            </Text>
-                            <Ionicons name="calendar-clear-outline" size={20} color="#666" />
-                        </TouchableOpacity>
+                    {/* Full Width Scope of Work Field */}
+                    <View style={styles.individualContainerFull}>
+                        <Text style={styles.label}>Scope of Work</Text>
+                        <TextInput
+                            style={[styles.textInput, styles.textAreaInput]}
+                            placeholder="Describe scope of work..."
+                            placeholderTextColor={'#999'}
+                            value={scopeOfWork}
+                            onChangeText={setScopeOfWork}
+                            multiline={true}
+                            numberOfLines={4}
+                            textAlignVertical="top"
+                        />
                     </View>
-
-                    {/* Budget Dropdown */}
-                    <CustomDropdown
-                        label="Budget"
-                        required
-                        value={budget}
-                        placeholder="Choose Budget"
-                        data={budgetData}
-                        isOpen={activeDropdown === 'budget'}
-                        onToggle={() => toggleDropdown('budget')}
-                        onSelect={(val) => {
-                            setBudget(val);
-                            setActiveDropdown(null);
-                        }}
-                    />
                 </View>
 
                 {/* Bottom Action Buttons */}
@@ -293,6 +306,76 @@ const EditSchedule = () => {
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
+
+            {/* OTP Verification Modal */}
+            <Modal
+                visible={isOtpModalVisible}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setIsOtpModalVisible(false)}
+            >
+                <View style={styles.modalOverlayCenter}>
+                    <View style={styles.confirmationCard}>
+                        <View style={styles.confirmIconBadge}>
+                            <Ionicons name="key-outline" size={32} color="#245d5a" />
+                        </View>
+
+                        <Text style={styles.confirmTitle}>Verify Client OTP</Text>
+                        <Text style={styles.confirmSubtext}>
+                            Enter the 4-digit OTP code sent to{' '}
+                            <Text style={styles.phoneHighlightText}>{phone || 'the customer'}</Text>
+                        </Text>
+
+                        <View style={styles.pinInputsGroupRow}>
+                            {otp.map((digit, index) => (
+                                <TextInput
+                                    key={index}
+                                    ref={inputRefs[index]}
+                                    style={styles.singlePinBox}
+                                    value={digit}
+                                    onChangeText={(text) => handleOtpChange(text, index)}
+                                    onKeyPress={(e) => handleKeyPress(e, index)}
+                                    keyboardType="number-pad"
+                                    maxLength={1}
+                                    textAlign="center"
+                                />
+                            ))}
+                        </View>
+
+                        <View style={styles.resendContainer}>
+                            {canResend ? (
+                                <TouchableOpacity onPress={handleResendOtp}>
+                                    <Text style={styles.resendActiveText}>Resend Code</Text>
+                                </TouchableOpacity>
+                            ) : (
+                                <Text style={styles.resendTimerText}>
+                                    Resend code in <Text style={styles.timerBold}>{timer}s</Text>
+                                </Text>
+                            )}
+                        </View>
+
+                        <View style={styles.modalActionButtons}>
+                            <TouchableOpacity
+                                style={styles.cancelBtn}
+                                onPress={() => setIsOtpModalVisible(false)}
+                            >
+                                <Text style={styles.cancelBtnText}>Cancel</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[
+                                    styles.confirmBtn,
+                                    !fullOtpEntered && styles.submitButtonDisabled,
+                                ]}
+                                disabled={!fullOtpEntered}
+                                onPress={handleVerifyOtpAndConfirm}
+                            >
+                                <Text style={styles.confirmBtnText}>Verify</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </KeyboardAwareScrollView>
     );
 };
@@ -353,8 +436,12 @@ const styles = StyleSheet.create({
         marginVertical: 6,
     },
     individualContainer: {
+        width: '48%',
+        gap: 8,
+    },
+    individualContainerFull: {
         width: '100%',
-        gap: 6,
+        gap: 8,
     },
     label: {
         fontWeight: '500',
@@ -363,6 +450,20 @@ const styles = StyleSheet.create({
     asterisk: {
         color: '#d9534f',
         fontWeight: 'bold',
+    },
+    textInput: {
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 6,
+        paddingHorizontal: 12,
+        height: 48,
+        backgroundColor: '#fff',
+        fontSize: 14,
+        color: '#000',
+    },
+    textAreaInput: {
+        height: 100,
+        paddingTop: 12,
     },
     dropdownTrigger: {
         flexDirection: 'row',
@@ -381,50 +482,6 @@ const styles = StyleSheet.create({
     },
     placeholderText: {
         color: '#999',
-    },
-    dropdownContainer: {
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 6,
-        marginTop: 4,
-        backgroundColor: '#fff',
-        maxHeight: 250,
-        elevation: 3,
-    },
-    searchBarContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-        paddingHorizontal: 8,
-        height: 40,
-        backgroundColor: '#f9f9f9',
-    },
-    searchInput: {
-        flex: 1,
-        height: '100%',
-        fontSize: 14,
-    },
-    itemsList: {
-        maxHeight: 200,
-    },
-    dropdownItem: {
-        paddingVertical: 12,
-        paddingHorizontal: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f5f5f5',
-    },
-    dropdownItemText: {
-        fontSize: 14,
-        color: '#333',
-    },
-    noResultsContainer: {
-        padding: 16,
-        alignItems: 'center',
-    },
-    noResultsText: {
-        color: '#999',
-        fontSize: 14,
     },
     bottomContainer: {
         flexDirection: 'row',
@@ -487,6 +544,30 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#1E293B',
     },
+    dateContainer: {
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    modalOverlayCenter: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+    confirmationCard: { width: '90%', backgroundColor: '#FFFFFF', borderRadius: 20, padding: 24, alignItems: 'center', elevation: 10 },
+    confirmIconBadge: { backgroundColor: '#E8F4F3', padding: 16, borderRadius: 50, marginBottom: 12 },
+    confirmTitle: { fontSize: 18, fontWeight: '700', color: '#1E293B', marginBottom: 16 },
+    confirmSubtext: { fontSize: 13, color: '#64748B', textAlign: 'center', lineHeight: 18, marginBottom: 12 },
+    phoneHighlightText: { fontWeight: '700', color: '#245d5a' },
+    pinInputsGroupRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 12, marginBottom: 16, gap: 12 },
+    singlePinBox: { width: 46, height: 54, backgroundColor: '#FFF', fontSize: 20, fontWeight: '700', color: '#000', borderWidth: 1.5, borderColor: '#C5CEE0', paddingVertical: 0, borderRadius: 10 },
+    resendContainer: { marginBottom: 20, alignItems: 'center' },
+    resendTimerText: { fontSize: 13, color: '#64748B' },
+    timerBold: { fontWeight: '700', color: '#245d5a' },
+    resendActiveText: { fontSize: 14, fontWeight: '700', color: '#245d5a', textDecorationLine: 'underline' },
+    modalActionButtons: { flexDirection: 'row', gap: 12, width: '100%' },
+    cancelBtn: { flex: 1, backgroundColor: '#F1F5F9', paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
+    cancelBtnText: { color: '#64748B', fontWeight: '700', fontSize: 14 },
+    confirmBtn: { flex: 1, backgroundColor: '#245d5a', paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
+    confirmBtnText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
+    submitButtonDisabled: { backgroundColor: '#94A3B8' },
 });
 
 export default EditSchedule;
