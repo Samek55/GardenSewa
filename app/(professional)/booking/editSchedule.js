@@ -550,24 +550,114 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
     },
-    modalOverlayCenter: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-    confirmationCard: { width: '90%', backgroundColor: '#FFFFFF', borderRadius: 20, padding: 24, alignItems: 'center', elevation: 10 },
-    confirmIconBadge: { backgroundColor: '#E8F4F3', padding: 16, borderRadius: 50, marginBottom: 12 },
-    confirmTitle: { fontSize: 18, fontWeight: '700', color: '#1E293B', marginBottom: 16 },
-    confirmSubtext: { fontSize: 13, color: '#64748B', textAlign: 'center', lineHeight: 18, marginBottom: 12 },
-    phoneHighlightText: { fontWeight: '700', color: '#245d5a' },
-    pinInputsGroupRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 12, marginBottom: 16, gap: 12 },
-    singlePinBox: { width: 46, height: 54, backgroundColor: '#FFF', fontSize: 20, fontWeight: '700', color: '#000', borderWidth: 1.5, borderColor: '#C5CEE0', paddingVertical: 0, borderRadius: 10 },
-    resendContainer: { marginBottom: 20, alignItems: 'center' },
-    resendTimerText: { fontSize: 13, color: '#64748B' },
-    timerBold: { fontWeight: '700', color: '#245d5a' },
-    resendActiveText: { fontSize: 14, fontWeight: '700', color: '#245d5a', textDecorationLine: 'underline' },
-    modalActionButtons: { flexDirection: 'row', gap: 12, width: '100%' },
-    cancelBtn: { flex: 1, backgroundColor: '#F1F5F9', paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
-    cancelBtnText: { color: '#64748B', fontWeight: '700', fontSize: 14 },
-    confirmBtn: { flex: 1, backgroundColor: '#245d5a', paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
-    confirmBtnText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
-    submitButtonDisabled: { backgroundColor: '#94A3B8' },
+    modalOverlayCenter: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20
+    },
+    confirmationCard: {
+        width: '90%',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 20,
+        padding: 24,
+        alignItems: 'center',
+        elevation: 10
+    },
+    confirmIconBadge: {
+        backgroundColor: '#E8F4F3',
+        padding: 16,
+        borderRadius: 50,
+        marginBottom: 12
+    },
+    confirmTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#1E293B',
+        marginBottom: 16
+    },
+    confirmSubtext: {
+        fontSize: 13,
+        color: '#64748B',
+        textAlign: 'center',
+        lineHeight: 18,
+        marginBottom: 12
+    },
+    phoneHighlightText: {
+        fontWeight: '700',
+        color: '#245d5a'
+    },
+    pinInputsGroupRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 12,
+        marginBottom: 16,
+        gap: 12
+    },
+    singlePinBox: {
+        width: 46,
+        height: 54,
+        backgroundColor: '#FFF',
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#000',
+        borderWidth: 1.5,
+        borderColor: '#C5CEE0',
+        paddingVertical: 0,
+        borderRadius: 10
+    },
+
+    resendContainer: {
+        marginBottom: 20,
+        alignItems: 'center'
+    },
+    resendTimerText: {
+        fontSize: 13,
+        color: '#64748B'
+    },
+    timerBold: {
+        fontWeight: '700',
+        color: '#245d5a'
+    },
+    resendActiveText: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#245d5a',
+        textDecorationLine: 'underline'
+    },
+    modalActionButtons: {
+        flexDirection: 'row',
+        gap: 12,
+        width: '100%'
+    },
+    cancelBtn: {
+        flex: 1,
+        backgroundColor: '#F1F5F9',
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center'
+    },
+    cancelBtnText: {
+        color: '#64748B',
+        fontWeight: '700',
+        fontSize: 14
+    },
+    confirmBtn: {
+        flex: 1,
+        backgroundColor: '#245d5a',
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center'
+    },
+    confirmBtnText: {
+        color: '#FFFFFF',
+        fontWeight: '700',
+        fontSize: 14
+    },
+    submitButtonDisabled: {
+        backgroundColor: '#94A3B8'
+    },
 });
 
 export default EditSchedule;
