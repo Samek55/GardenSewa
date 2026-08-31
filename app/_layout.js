@@ -2,16 +2,15 @@ import SideBarModalLoggedIn from '@/components/LoggedInSideBar';
 import SideBarModal from '@/components/SideBarModal';
 import { AuthContext, AuthProvider } from '@/context/AuthContext';
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { Asset } from 'expo-asset';
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import { memo, useContext, useEffect, useState } from "react";
 import { Alert, Image, Linking, Pressable, StyleSheet, Text, View } from "react-native";
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 SplashScreen.preventAutoHideAsync().catch(() => { });
 
-const TOTAL_DURATION_MS = 3002;
-const INTERVAL_MS = 2;
+const TOTAL_DURATION_MS = 3000;
 
 const SplashOverlay = memo(({ countdownDigits }) => (
   <View style={styles.splashOverlay}>
@@ -34,25 +33,62 @@ function MainAppContent() {
   const { isLoggedIn } = useContext(AuthContext);
 
   useEffect(() => {
-    const hideNative = () => {
-      SplashScreen.hideAsync().catch(() => { });
-    };
-    const timer = setTimeout(hideNative, 100);
+    let animFrameId;
 
-    const startTime = Date.now();
-    const interval = setInterval(() => {
-      const elapsedMs = Date.now() - startTime;
-      const remainingMs = Math.max(0, TOTAL_DURATION_MS - elapsedMs);
-      setCountdownDigits(remainingMs.toString().padStart(4, '0'));
-      if (remainingMs === 0) {
-        clearInterval(interval);
-        setIsAppReady(true);
-      }
-    }, INTERVAL_MS);
+    async function prepareApp() {
+      SplashScreen.hideAsync().catch(() => { });
+
+      Asset.loadAsync([
+        require('@/assets/images/home/hero.jpg'),
+        require('@/assets/images/splash-icon-actual.png'),
+        require('@/assets/images/gardensewa.webp'),
+        require('@/assets/images/services/9.jpg'),
+        require('@/assets/images/services/19.jpg'),
+        require('@/assets/images/services/7.jpg'),
+        require('@/assets/images/services/15.jpg'),
+        require('@/assets/images/services/21.jpg'),
+        require('@/assets/images/services/16.jpg'),
+        require('@/assets/images/services/3.jpg'),
+        require('@/assets/images/services/20.jpg'),
+        require('@/assets/images/services/18.jpg'),
+        require('@/assets/images/services/14.jpg'),
+        require('@/assets/images/services/17.jpg'),
+        require('@/assets/images/services/8.jpg'),
+        require('@/assets/images/services/2.jpg'),
+        require('@/assets/images/services/4.jpg'),
+        require('@/assets/images/services/12.jpg'),
+        require('@/assets/images/services/5.jpg'),
+        require('@/assets/images/services/6.jpg'),
+        require('@/assets/images/services/11.jpg'),
+        require('@/assets/images/services/10.jpg'),
+        require('@/assets/images/services/13.jpg'),
+        require('@/assets/images/about/garden4.jpg'),
+        require('@/assets/images/contact/map.png'),
+        require('@/assets/images/bookings/101_1.jpg'),
+      ]).catch((e) => console.warn(e));
+
+      const startTime = Date.now();
+
+      const tick = () => {
+        const elapsedMs = Date.now() - startTime;
+        const remainingMs = Math.max(0, TOTAL_DURATION_MS - elapsedMs);
+
+        setCountdownDigits(remainingMs.toString().padStart(4, '0'));
+
+        if (remainingMs > 0) {
+          animFrameId = requestAnimationFrame(tick);
+        } else {
+          setIsAppReady(true);
+        }
+      };
+
+      animFrameId = requestAnimationFrame(tick);
+    }
+
+    prepareApp();
 
     return () => {
-      clearTimeout(timer);
-      clearInterval(interval);
+      if (animFrameId) cancelAnimationFrame(animFrameId);
     };
   }, []);
 
@@ -76,149 +112,64 @@ function MainAppContent() {
   };
 
   return (
-    <SafeAreaProvider>
-      <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
-        <Stack>
-          <Stack.Screen
-            name="index"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="onBoarding"
-            options={{ headerShown: false, animation: 'fade' }}
-          />
-          <Stack.Screen
-            name="(tabs)"
-            options={{
-              headerShown: true,
-              headerStyle: { backgroundColor: "#245d5a" },
-              headerTitleAlign: 'left',
-              headerTitle: () => (
-                <View style={{ paddingLeft: 8 }}>
-                  <Text style={{ color: "#fff", fontWeight: '600', fontSize: 24 }}>
-                    GardenSewa
-                  </Text>
-                </View>
-              ),
-              headerLeft: () => (
-                <View style={{
-                  width: 36, height: 36, backgroundColor: "#fff",
-                  borderRadius: 18, overflow: 'hidden',
-                  alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <Image
-                    source={require('@/assets/images/gardensewa.webp')}
-                    style={{ width: '100%', height: '100%' }}
-                    resizeMode="cover"
-                  />
-                </View>
-              ),
-              headerRight: () => (
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <Pressable onPress={onWhatsappOpen}>
-                    <Ionicons name="logo-whatsapp" size={24} color="white" />
-                  </Pressable>
-                  <Pressable onPress={onMenuOpen}>
-                    <Ionicons name="menu" size={24} color="white" />
-                  </Pressable>
-                </View>
-              )
-            }}
-          />
-          <Stack.Screen
-            name="(professional)"
-            options={{
-              headerShown: true,
-              headerStyle: { backgroundColor: "#245d5a" },
-              headerTitleAlign: 'left',
-              headerTitle: () => (
-                <View style={{ paddingLeft: 8 }}>
-                  <Text style={{ color: "#fff", fontWeight: '600', fontSize: 24 }}>
-                    GardenSewa
-                  </Text>
-                </View>
-              ),
-              headerLeft: () => (
-                <View style={{
-                  width: 36, height: 36, backgroundColor: "#fff",
-                  borderRadius: 18, overflow: 'hidden',
-                  alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <Image
-                    source={require('@/assets/images/gardensewa.webp')}
-                    style={{ width: '100%', height: '100%' }}
-                    resizeMode="cover"
-                  />
-                </View>
-              ),
-              headerRight: () => (
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <Pressable onPress={onWhatsappOpen}>
-                    <Ionicons name="logo-whatsapp" size={24} color="white" />
-                  </Pressable>
-                  <Pressable onPress={onMenuOpen}>
-                    <Ionicons name="menu" size={24} color="white" />
-                  </Pressable>
-                </View>
-              )
-            }}
-          />
-          <Stack.Screen
-            name="(all)"
-            options={{
-              headerShown: true,
-              headerStyle: { backgroundColor: "#245d5a" },
-              headerTitleAlign: 'left',
-              headerTitle: () => (
-                <View style={{ paddingLeft: 8 }}>
-                  <Text style={{ color: "#fff", fontWeight: '600', fontSize: 24 }}>
-                    GardenSewa
-                  </Text>
-                </View>
-              ),
-              headerLeft: () => (
-                <View style={{
-                  width: 36, height: 36, backgroundColor: "#fff",
-                  borderRadius: 18, overflow: 'hidden',
-                  alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <Image
-                    source={require('@/assets/images/gardensewa.webp')}
-                    style={{ width: '100%', height: '100%' }}
-                    resizeMode="cover"
-                  />
-                </View>
-              ),
-              headerRight: () => (
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <Pressable onPress={onWhatsappOpen}>
-                    <Ionicons name="logo-whatsapp" size={24} color="white" />
-                  </Pressable>
-                  <Pressable onPress={onMenuOpen}>
-                    <Ionicons name="menu" size={24} color="white" />
-                  </Pressable>
-                </View>
-              )
-            }}
-          />
-        </Stack>
-
-        {!isAppReady && <SplashOverlay countdownDigits={countdownDigits} />}
-
-        {isModalOpen && (
-          <View style={[StyleSheet.absoluteFillObject, { zIndex: 9999 }]}>
-            <Pressable style={StyleSheet.absoluteFillObject} onPress={onClose}>
-              <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }} />
-            </Pressable>
-            {isLoggedIn ? (
-              <SideBarModalLoggedIn onClose={onClose} />
-            ) : (
-              <SideBarModal onClose={onClose} />
-            )}
+    <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      <Stack screenOptions={{
+        headerShown: true,
+        headerStyle: { backgroundColor: "#245d5a" },
+        headerTitleAlign: 'left',
+        headerTitle: () => (
+          <View style={{ paddingLeft: 8 }}>
+            <Text style={{ color: "#fff", fontWeight: '600', fontSize: 24 }}>
+              GardenSewa
+            </Text>
           </View>
-        )}
-      </View>
-    </SafeAreaProvider>
+        ),
+        headerLeft: () => (
+          <View style={{
+            width: 36, height: 36, backgroundColor: "#fff",
+            borderRadius: 18, overflow: 'hidden',
+            alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Image
+              source={require('@/assets/images/gardensewa.webp')}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
+            />
+          </View>
+        ),
+        headerRight: () => (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Pressable onPress={onWhatsappOpen}>
+              <Ionicons name="logo-whatsapp" size={24} color="white" />
+            </Pressable>
+            <Pressable onPress={onMenuOpen}>
+              <Ionicons name="menu" size={24} color="white" />
+            </Pressable>
+          </View>
+        )
+      }}>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="onBoarding" options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(professional)" />
+        <Stack.Screen name="(all)" />
+      </Stack>
+
+      {isModalOpen && (
+        <View style={[StyleSheet.absoluteFillObject, { zIndex: 9999 }]}>
+          <Pressable style={StyleSheet.absoluteFillObject} onPress={onClose}>
+            <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }} />
+          </Pressable>
+          {isLoggedIn ? (
+            <SideBarModalLoggedIn onClose={onClose} />
+          ) : (
+            <SideBarModal onClose={onClose} />
+          )}
+        </View>
+      )}
+
+      {!isAppReady && <SplashOverlay countdownDigits={countdownDigits} />}
+    </View>
   );
 }
 
@@ -236,7 +187,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 9998,
+    zIndex: 99999,
   },
   centerContent: {
     alignItems: 'center',

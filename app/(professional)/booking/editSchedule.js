@@ -73,7 +73,6 @@ const EditSchedule = () => {
             return;
         }
 
-        // Trigger OTP modal step
         sendOtpCode();
         setIsOtpModalVisible(true);
     };
@@ -124,6 +123,69 @@ const EditSchedule = () => {
 
     const fullOtpEntered = otp.join('').length === 4;
 
+    // Custom render component to differentiate previous vs next month extra days
+    const renderCustomDay = ({ date, state, marking, onDayPress, minDate }) => {
+        const isSelected = marking?.selected;
+        const isToday = date.dateString === today;
+        const isDisabledByMinDate = minDate && date.dateString < minDate;
+
+        if (state === 'disabled') {
+            const dayNum = date.day;
+            const isPreviousMonth = dayNum > 15; 
+
+            if (isPreviousMonth) {
+                return (
+                    <View style={styles.dayContainer}>
+                        <Text style={styles.previousMonthDayText}>{date.day}</Text>
+                    </View>
+                );
+            }
+
+            return (
+                <TouchableOpacity
+                    style={[
+                        styles.dayContainer,
+                        isSelected && { backgroundColor: marking.selectedColor || '#245d5a', borderRadius: 20 },
+                    ]}
+                    disabled={isDisabledByMinDate}
+                    onPress={() => !isDisabledByMinDate && onDayPress(date)}
+                >
+                    <Text
+                        style={[
+                            styles.normalDayText,
+                            isDisabledByMinDate && styles.previousMonthDayText,
+                            isSelected && { color: marking.selectedTextColor || '#fff', fontWeight: 'bold' },
+                        ]}
+                    >
+                        {date.day}
+                    </Text>
+                </TouchableOpacity>
+            );
+        }
+
+        return (
+            <TouchableOpacity
+                style={[
+                    styles.dayContainer,
+                    isSelected && { backgroundColor: marking.selectedColor || '#245d5a', borderRadius: 20 },
+                ]}
+                disabled={isDisabledByMinDate}
+                onPress={() => !isDisabledByMinDate && onDayPress(date)}
+            >
+                <Text
+                    style={[
+                        styles.normalDayText,
+                        isToday && { color: '#245d5a', fontWeight: 'bold' },
+                        isDisabledByMinDate && styles.previousMonthDayText,
+                        isSelected && { color: marking.selectedTextColor || '#fff', fontWeight: 'bold' },
+                    ]}
+                >
+                    {date.day}
+                </Text>
+            </TouchableOpacity>
+        );
+    };
+
     return (
         <KeyboardAwareScrollView
             style={styles.scrollview}
@@ -160,9 +222,7 @@ const EditSchedule = () => {
                             <TouchableOpacity
                                 style={styles.dropdownTrigger}
                                 activeOpacity={0.8}
-                                onPress={() => {
-                                    setActiveCalendarModal('startDate');
-                                }}
+                                onPress={() => setActiveCalendarModal('startDate')}
                             >
                                 <Text style={[styles.triggerText, !startDate && styles.placeholderText]}>
                                     {startDate || 'Select Start Date'}
@@ -177,9 +237,7 @@ const EditSchedule = () => {
                             <TouchableOpacity
                                 style={styles.dropdownTrigger}
                                 activeOpacity={0.8}
-                                onPress={() => {
-                                    setActiveCalendarModal('endDate');
-                                }}
+                                onPress={() => setActiveCalendarModal('endDate')}
                             >
                                 <Text style={[styles.triggerText, !endDate && styles.placeholderText]}>
                                     {endDate || 'Select End Date'}
@@ -192,14 +250,15 @@ const EditSchedule = () => {
                     {/* Full Width Budget Field */}
                     <View style={styles.individualContainerFull}>
                         <Text style={styles.label}>
-                            Budget <Text style={styles.asterisk}>*</Text>
+                            Budget in NPR <Text style={styles.asterisk}>*</Text>
                         </Text>
                         <TextInput
                             style={styles.textInput}
-                            placeholder="Enter your budget (e.g. NPR 5,000)"
+                            placeholder="12,750"
                             placeholderTextColor={'#999'}
                             value={budget}
                             onChangeText={setBudget}
+                            onFocus={() => setBudget('')}
                         />
                     </View>
 
@@ -254,6 +313,9 @@ const EditSchedule = () => {
                                 {activeCalendarModal === 'startDate' ? (
                                     <Calendar
                                         minDate={today}
+                                        show6Weeks={true}
+                                        hideExtraDays={false}
+                                        enableSwipeMonths={true}
                                         onDayPress={(day) => {
                                             setStartDate(day.dateString);
                                             if (endDate && day.dateString > endDate) {
@@ -275,11 +337,29 @@ const EditSchedule = () => {
                                                 },
                                             }),
                                         }}
+                                        dayComponent={({ date, state, marking }) =>
+                                            renderCustomDay({
+                                                date,
+                                                state,
+                                                marking,
+                                                minDate: today,
+                                                onDayPress: (d) => {
+                                                    setStartDate(d.dateString);
+                                                    if (endDate && d.dateString > endDate) {
+                                                        setEndDate(d.dateString);
+                                                    }
+                                                    setActiveCalendarModal(null);
+                                                },
+                                            })
+                                        }
                                         theme={{ todayTextColor: '#245d5a', arrowColor: '#245d5a' }}
                                     />
                                 ) : (
                                     <Calendar
                                         minDate={startDate || today}
+                                        show6Weeks={true}
+                                        hideExtraDays={false}
+                                        enableSwipeMonths={true}
                                         onDayPress={(day) => {
                                             setEndDate(day.dateString);
                                             setActiveCalendarModal(null);
@@ -298,6 +378,18 @@ const EditSchedule = () => {
                                                 },
                                             }),
                                         }}
+                                        dayComponent={({ date, state, marking }) =>
+                                            renderCustomDay({
+                                                date,
+                                                state,
+                                                marking,
+                                                minDate: startDate || today,
+                                                onDayPress: (d) => {
+                                                    setEndDate(d.dateString);
+                                                    setActiveCalendarModal(null);
+                                                },
+                                            })
+                                        }
                                         theme={{ todayTextColor: '#245d5a', arrowColor: '#245d5a' }}
                                     />
                                 )}
@@ -523,6 +615,7 @@ const styles = StyleSheet.create({
     },
     calendarModalCard: {
         width: '95%',
+        minHeight:450,
         backgroundColor: '#FFFFFF',
         borderRadius: 16,
         padding: 16,
@@ -555,7 +648,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.4)',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 20
+        padding: 20,
     },
     confirmationCard: {
         width: '90%',
@@ -563,37 +656,37 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         padding: 24,
         alignItems: 'center',
-        elevation: 10
+        elevation: 10,
     },
     confirmIconBadge: {
         backgroundColor: '#E8F4F3',
         padding: 16,
         borderRadius: 50,
-        marginBottom: 12
+        marginBottom: 12,
     },
     confirmTitle: {
         fontSize: 18,
         fontWeight: '700',
         color: '#1E293B',
-        marginBottom: 16
+        marginBottom: 16,
     },
     confirmSubtext: {
         fontSize: 13,
         color: '#64748B',
         textAlign: 'center',
         lineHeight: 18,
-        marginBottom: 12
+        marginBottom: 12,
     },
     phoneHighlightText: {
         fontWeight: '700',
-        color: '#245d5a'
+        color: '#245d5a',
     },
     pinInputsGroupRow: {
         flexDirection: 'row',
         justifyContent: 'center',
         marginTop: 12,
         marginBottom: 16,
-        gap: 12
+        gap: 12,
     },
     singlePinBox: {
         width: 46,
@@ -605,58 +698,71 @@ const styles = StyleSheet.create({
         borderWidth: 1.5,
         borderColor: '#C5CEE0',
         paddingVertical: 0,
-        borderRadius: 10
+        borderRadius: 10,
     },
-
     resendContainer: {
         marginBottom: 20,
-        alignItems: 'center'
+        alignItems: 'center',
     },
     resendTimerText: {
         fontSize: 13,
-        color: '#64748B'
+        color: '#64748B',
     },
     timerBold: {
         fontWeight: '700',
-        color: '#245d5a'
+        color: '#245d5a',
     },
     resendActiveText: {
         fontSize: 14,
         fontWeight: '700',
         color: '#245d5a',
-        textDecorationLine: 'underline'
+        textDecorationLine: 'underline',
     },
     modalActionButtons: {
         flexDirection: 'row',
         gap: 12,
-        width: '100%'
+        width: '100%',
     },
     cancelBtn: {
         flex: 1,
         backgroundColor: '#F1F5F9',
         paddingVertical: 12,
         borderRadius: 8,
-        alignItems: 'center'
+        alignItems: 'center',
     },
     cancelBtnText: {
         color: '#64748B',
         fontWeight: '700',
-        fontSize: 14
+        fontSize: 14,
     },
     confirmBtn: {
         flex: 1,
         backgroundColor: '#245d5a',
         paddingVertical: 12,
         borderRadius: 8,
-        alignItems: 'center'
+        alignItems: 'center',
     },
     confirmBtnText: {
         color: '#FFFFFF',
         fontWeight: '700',
-        fontSize: 14
+        fontSize: 14,
     },
     submitButtonDisabled: {
-        backgroundColor: '#94A3B8'
+        backgroundColor: '#94A3B8',
+    },
+    dayContainer: {
+        width: 32,
+        height: 32,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    normalDayText: {
+        fontSize: 14,
+        color: '#000',
+    },
+    previousMonthDayText: {
+        fontSize: 14,
+        color: '#D3D3D3',
     },
 });
 

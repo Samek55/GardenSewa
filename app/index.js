@@ -1,33 +1,43 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Redirect } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 
-const IS_DEV = false; 
+const IS_DEV = false;
 
 export default function Index() {
-  const [targetRoute, setTargetRoute] = useState(null);
+    const router = useRouter();
 
-  useEffect(() => {
-    const determineRoute = async () => {
-      try {
-        if (IS_DEV) {
-          setTargetRoute('/onBoarding');
-          return;
+    useEffect(() => {
+        let isMounted = true;
+
+        async function routeAfterSplash() {
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+
+            if (!isMounted) return;
+
+            if (IS_DEV) {
+                router.replace('/onBoarding');
+            } else {
+                try {
+                    const hasSeen = await AsyncStorage.getItem('hasSeenOnboarding');
+                    if (hasSeen === 'true') {
+                        router.replace('/(tabs)');
+                    } else {
+                        router.replace('/onBoarding');
+                    }
+                } catch (e) {
+                    router.replace('/(tabs)');
+                }
+            }
         }
-        const hasSeen = await AsyncStorage.getItem('hasSeenOnboarding');
-        setTargetRoute(hasSeen ? '/(tabs)' : '/onBoarding');
-      } catch (e) {
-        setTargetRoute('/(tabs)');
-      }
-    };
 
-    determineRoute();
-  }, []);
+        routeAfterSplash();
 
-  if (!targetRoute) {
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
     return <View style={{ flex: 1, backgroundColor: '#ffffff' }} />;
-  }
-
-  return <Redirect href={targetRoute} />;
 }
