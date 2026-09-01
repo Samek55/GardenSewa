@@ -1,5 +1,6 @@
 import SideBarModalLoggedIn from '@/components/LoggedInSideBar';
 import SideBarModal from '@/components/SideBarModal';
+import { AdminAuthProvider } from '@/context/AdminAuthContext';
 import { AuthContext, AuthProvider } from '@/context/AuthContext';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Asset } from 'expo-asset';
@@ -152,6 +153,7 @@ function MainAppContent() {
         <Stack.Screen name="onBoarding" options={{ headerShown: false, animation: 'fade' }} />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(professional)" />
+        <Stack.Screen name="(admin)" />
         <Stack.Screen name="(all)" />
       </Stack>
 
@@ -176,7 +178,9 @@ function MainAppContent() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <MainAppContent />
+      <AdminAuthProvider>
+        <MainAppContent />
+      </AdminAuthProvider>
     </AuthProvider>
   );
 }

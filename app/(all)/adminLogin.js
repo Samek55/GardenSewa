@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useContext, useRef, useState } from "react";
 import {
+    ActivityIndicator,
     Alert,
     KeyboardAvoidingView,
     Platform,
@@ -15,15 +16,16 @@ import {
 } from "react-native";
 import { NP } from "react-native-country-flag-icons";
 
-import { AuthContext } from "../../context/AuthContext";
-import { MOCK_PROFESSIONALS } from "../../data/servicesList";
+import { adminLogin as adminLoginRequest } from "../../api/PostApiAdmin";
+import { AdminAuthContext } from "../../context/AdminAuthContext";
 
 const AdminLogin = () => {
     const [rawPhone, setRawPhone] = useState("");
     const [pin, setPin] = useState(["", "", "", ""]);
     const [showPin, setShowPin] = useState(false);
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-    const { login } = useContext(AuthContext);
+    const { adminLoginSuccess } = useContext(AdminAuthContext);
 
     const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
@@ -75,28 +77,29 @@ const AdminLogin = () => {
             return;
         }
 
-        const matchedProfessional = MOCK_PROFESSIONALS.find(
-            (prof) => prof.phone === rawPhone && prof.pin === fullPin
-        );
+        setIsLoggingIn(true);
+        try {
+            const result = await adminLoginRequest(rawPhone, fullPin);
 
-        if (matchedProfessional) {
-            await login(matchedProfessional);
+            if (!result.success) {
+                Alert.alert(
+                    "Access Denied",
+                    result.message || "Invalid phone number or PIN. Please check your credentials and try again."
+                );
+                return;
+            }
 
-            Alert.alert(
-                "Login Successful",
-                `Welcome back, ${matchedProfessional.name}!`,
-                [
-                    {
-                        text: "OK",
-                        onPress: () => router.replace("/booking"),
-                    },
-                ]
-            );
-        } else {
-            Alert.alert(
-                "Access Denied",
-                "Invalid phone number or PIN. Please check your credentials and try again."
-            );
+            await adminLoginSuccess({
+                sessionToken: result.sessionToken,
+                role: result.role,
+                displayName: result.displayName,
+            });
+
+            router.replace("/(admin)/gardenerApplications");
+        } catch (error) {
+            Alert.alert("Login Failed", error.message || "Something went wrong. Please try again.");
+        } finally {
+            setIsLoggingIn(false);
         }
     };
 
@@ -201,8 +204,13 @@ const AdminLogin = () => {
                                 activeOpacity={0.8}
                                 style={styles.loginSubmitButton}
                                 onPress={handleLogin}
+                                disabled={isLoggingIn}
                             >
-                                <Text style={styles.loginButtonText}>Login</Text>
+                                {isLoggingIn ? (
+                                    <ActivityIndicator color="#fff" />
+                                ) : (
+                                    <Text style={styles.loginButtonText}>Login</Text>
+                                )}
                             </TouchableOpacity>
                         </View>
 
