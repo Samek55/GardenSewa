@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
+import { OneSignal } from 'react-native-onesignal';
 
 export const AdminAuthContext = createContext();
 
@@ -31,7 +33,7 @@ export const AdminAuthProvider = ({ children }) => {
         loadAdminAuthState();
     }, []);
 
-    const adminLoginSuccess = async ({ sessionToken, role, displayName }) => {
+    const adminLoginSuccess = async ({ sessionToken, role, displayName, phone }) => {
         setIsAdminLoggedIn(true);
         setAdminRole(role);
         setAdminDisplayName(displayName);
@@ -39,6 +41,15 @@ export const AdminAuthProvider = ({ children }) => {
         await AsyncStorage.setItem('adminSessionToken', sessionToken);
         await AsyncStorage.setItem('adminRole', role);
         await AsyncStorage.setItem('adminDisplayName', displayName || '');
+
+        // Associates this device with the admin's phone (OneSignal external_id) so
+        // send-notification can target them directly — see its 'gardener-application-
+        // received' purpose, which looks up admin phones by role and pushes via
+        // include_aliases rather than a broad tag filter.
+        if (Platform.OS !== 'web' && phone) {
+            OneSignal.login(phone);
+            OneSignal.User.addTag('role', role);
+        }
     };
 
     const adminLogoutLocal = async () => {
@@ -47,6 +58,10 @@ export const AdminAuthProvider = ({ children }) => {
         setAdminDisplayName(null);
 
         await AsyncStorage.multiRemove(['adminSessionToken', 'adminRole', 'adminDisplayName']);
+
+        if (Platform.OS !== 'web') {
+            OneSignal.logout();
+        }
     };
 
     return (

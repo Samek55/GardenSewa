@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -13,14 +14,17 @@ import {
   View,
 } from "react-native";
 import SuccessAfterVerification from "../../components/SuccessModal";
+import { sendOtp, verifyOtp } from "../../api/PostApiOtp";
 
 const PhoneVerification = () => {
   const router = useRouter();
 
-  const { phone, requestType } = useLocalSearchParams();
+  const { phone, requestType, otpPurpose } = useLocalSearchParams();
 
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [otp, setOtp] = useState(["", "", "", ""]);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
 
   const [seconds, setSeconds] = useState(60);
@@ -61,22 +65,45 @@ const PhoneVerification = () => {
     }
   };
 
-  const handleResend = () => {
-    if (!canResend) return;
-    setSeconds(60);
-    setCanResend(false);
-    setOtp(["", "", "", ""]);
-    inputRefs[0].current?.focus();
-    Alert.alert("Code Sent", `A new OTP has been sent to ${phone || "your number"}`);
+  const handleResend = async () => {
+    if (!canResend || isResending) return;
+    setIsResending(true);
+    try {
+      await sendOtp(phone, otpPurpose);
+      setSeconds(60);
+      setCanResend(false);
+      setOtp(["", "", "", ""]);
+      inputRefs[0].current?.focus();
+      Alert.alert("Code Sent", `A new OTP has been sent to ${phone || "your number"}`);
+    } catch (error) {
+      Alert.alert("Could Not Resend", error.message || "Something went wrong. Please try again.");
+    } finally {
+      setIsResending(false);
+    }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const fullOtp = otp.join("");
     if (fullOtp.length < 4) {
       Alert.alert("Incomplete Code", "Please enter the complete 4-digit verification code.");
       return;
     }
-    setIsOpenModal(true);
+    if (isVerifying) return;
+    setIsVerifying(true);
+    try {
+      const result = await verifyOtp(phone, otpPurpose, fullOtp);
+      if (result.verified) {
+        setIsOpenModal(true);
+      } else {
+        Alert.alert("Verification Failed", result.message || "Incorrect OTP");
+        setOtp(["", "", "", ""]);
+        inputRefs[0].current?.focus();
+      }
+    } catch (error) {
+      Alert.alert("Verification Failed", error.message || "Something went wrong. Please try again.");
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const handleClearForm = () => {
@@ -145,8 +172,10 @@ const PhoneVerification = () => {
 
             <View style={styles.resendContainer}>
               {canResend ? (
-                <TouchableOpacity onPress={handleResend} style={styles.resendButton}>
-                  <Text style={styles.resendBtnText}> Didn't get code? Resend Code</Text>
+                <TouchableOpacity onPress={handleResend} style={styles.resendButton} disabled={isResending}>
+                  <Text style={styles.resendBtnText}>
+                    {isResending ? "Sending..." : " Didn't get code? Resend Code"}
+                  </Text>
                 </TouchableOpacity>
               ) : (
                 <Text style={styles.resendText}>
@@ -159,8 +188,13 @@ const PhoneVerification = () => {
               activeOpacity={0.8}
               style={styles.loginSubmitButton}
               onPress={handleSubmit}
+              disabled={isVerifying}
             >
-              <Text style={styles.loginButtonText}>Submit</Text>
+              {isVerifying ? (
+                <ActivityIndicator color="#FFF" />
+              ) : (
+                <Text style={styles.loginButtonText}>Submit</Text>
+              )}
             </TouchableOpacity>
           </View>
         </ScrollView>

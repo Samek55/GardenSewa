@@ -21,6 +21,8 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { array, boolean, object, string } from 'yup';
 
 import { createGardenerApplication } from '../../api/PostApiGardener';
+import { notifyGardenerApplicationReceived } from '../../api/PostApiNotification';
+import { sendOtp } from '../../api/PostApiOtp';
 import { uploadPrivateDocument, uploadPublicFile } from '../../api/uploadToStorage';
 import { categories, cityData } from '../../data/servicesList';
 
@@ -446,10 +448,26 @@ export default function JoinProfessional() {
             });
 
             const phone = v.phone;
+
+            // The application is already saved at this point — a failed OTP send
+            // (e.g. SMS provider hiccup) shouldn't block the user from proceeding,
+            // just prevent them from completing verification until they hit Resend.
+            try {
+                await sendOtp(phone, 'join-gardener', v.full_name);
+            } catch (otpError) {
+                console.error('send-otp error:', otpError);
+            }
+
+            try {
+                await notifyGardenerApplicationReceived(v.full_name);
+            } catch (notifyError) {
+                console.error('send-notification error:', notifyError);
+            }
+
             handleClearForm();
             router.push({
                 pathname: '/phoneVerification',
-                params: { phone, requestType: 'Join as a Gardener' },
+                params: { phone, requestType: 'Join as a Gardener', otpPurpose: 'join-gardener' },
             });
         } catch (error) {
             Alert.alert('Submission Failed', error.message || 'Something went wrong. Please try again.');

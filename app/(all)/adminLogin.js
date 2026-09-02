@@ -93,6 +93,7 @@ const AdminLogin = () => {
                 sessionToken: result.sessionToken,
                 role: result.role,
                 displayName: result.displayName,
+                phone: rawPhone,
             });
 
             router.replace("/(admin)/gardenerApplications");

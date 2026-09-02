@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "274296041548",
+    "project_id": "gardensewa-5aa52",
+    "storage_bucket": "gardensewa-5aa52.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:274296041548:android:03911582ec22b80ecbc4e9",
+        "android_client_info": {
+          "package_name": "com.pratigyaluitel.gardensewa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANufciWf5PPlHoWWNtPbkgIFJeVJg6DCM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

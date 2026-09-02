@@ -27,7 +27,8 @@
         "backgroundColor": "#ffffff"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.pratigyaluitel.gardensewa"
+      "package": "com.pratigyaluitel.gardensewa",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
@@ -74,6 +75,12 @@
               ]
             }
           }
+        }
+      ],
+      [
+        "onesignal-expo-plugin",
+        {
+          "mode": "development"
         }
       ]
     ],
