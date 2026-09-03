@@ -83,6 +83,17 @@ const SideBarModal = ({ onClose }) => {
             <View style={styles.adminButtonWrapper}>
                 <TouchableOpacity
                     style={[
+                        styles.customerLoginButton,
+                        isActive('/customerLogin') && styles.adminActiveButton
+                    ]}
+                    activeOpacity={0.8}
+                    onPress={() => handleNavigation('/customerLogin')}
+                >
+                    <Ionicons name="person-circle-outline" size={18} color="#FFFFFF" />
+                    <Text style={styles.adminButtonText}>Login / Sign Up</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[
                         styles.adminLoginButton,
                         isActive('/adminLogin') && styles.adminActiveButton
                     ]}
@@ -233,6 +244,17 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
         paddingTop: 16,
         backgroundColor: '#ffffff',
+        gap: 10,
+    },
+    customerLoginButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        backgroundColor: '#245d5a',
+        paddingVertical: 12,
+        borderRadius: 14,
+        width: '100%'
     },
     adminLoginButton: {
         flexDirection: 'row',

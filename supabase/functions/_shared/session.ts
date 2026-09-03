@@ -1,8 +1,14 @@
 import { supabaseAdmin } from './supabaseAdmin.ts';
 
+// adminId is set for the four back-office roles, gardenerAccountId for a
+// logged-in gardener — admin_sessions' own check constraint guarantees
+// exactly one is non-null, never both. Existing callers that only ever
+// checked session.role against the back-office role set are unaffected: a
+// gardener session simply never matches those checks.
 export interface AdminSession {
-  adminId: string;
-  role: 'super_admin' | 'admin' | 'bdm' | 'call_center';
+  adminId: string | null;
+  gardenerAccountId: string | null;
+  role: 'super_admin' | 'admin' | 'bdm' | 'call_center' | 'gardener';
 }
 
 // Reads the session token from the `x-admin-session-token` header — never
@@ -15,11 +21,11 @@ export async function verifySession(req: Request): Promise<AdminSession | null> 
 
   const { data } = await supabaseAdmin
     .from('admin_sessions')
-    .select('admin_id, role, expires_at')
+    .select('admin_id, gardener_account_id, role, expires_at')
     .eq('token', token)
     .maybeSingle();
 
   if (!data || new Date(data.expires_at) < new Date()) return null;
 
-  return { adminId: data.admin_id, role: data.role };
+  return { adminId: data.admin_id, gardenerAccountId: data.gardener_account_id, role: data.role };
 }

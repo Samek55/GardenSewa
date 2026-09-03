@@ -22,3 +22,15 @@ export const rejectGardener = (id, reason) =>
 
 export const getGardenerDocumentUrl = (id) =>
     invokeEdgeFunction('get-gardener-document-url', { id }, 'Could not open document', { requireSession: true });
+
+export const listAdmins = () =>
+    invokeEdgeFunction('list-admins', {}, 'Could not load admin accounts', { requireSession: true });
+
+export const createAdmin = (phone, fullName, pin, role, allowedCities) =>
+    invokeEdgeFunction('admin-create', { phone, fullName, pin, role, allowedCities }, 'Could not create account', { requireSession: true });
+
+export const toggleAdminStatus = (id, status) =>
+    invokeEdgeFunction('toggle-admin-status', { id, status }, 'Could not update status', { requireSession: true });
+
+export const updateAdminCities = (id, allowedCities) =>
+    invokeEdgeFunction('update-admin-cities', { id, allowedCities }, 'Could not save', { requireSession: true });

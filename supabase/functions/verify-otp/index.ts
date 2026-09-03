@@ -1,12 +1,6 @@
 import { corsHeaders, json } from '../_shared/cors.ts';
-import { supabaseAdmin, cleanPhone } from '../_shared/supabaseAdmin.ts';
-
-const MAX_ATTEMPTS = 5;
-
-const sha256 = async (text: string) => {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-};
+import { cleanPhone } from '../_shared/supabaseAdmin.ts';
+import { checkOtp } from '../_shared/otp.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -18,35 +12,8 @@ Deno.serve(async (req) => {
       return json({ verified: false, message: 'Invalid request' }, 400);
     }
 
-    const { data: row } = await supabaseAdmin
-      .from('otp_codes')
-      .select('id, code_hash, attempts, expires_at')
-      .eq('phone', cleaned)
-      .eq('purpose', purpose)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (!row) return json({ verified: false, message: 'No OTP found. Please request a new one.' }, 404);
-    if (new Date(row.expires_at) < new Date()) {
-      return json({ verified: false, message: 'OTP expired. Please request a new one.' }, 410);
-    }
-    if (row.attempts >= MAX_ATTEMPTS) {
-      return json({ verified: false, message: 'Too many attempts. Please request a new OTP.' }, 429);
-    }
-
-    const codeHash = await sha256(String(code));
-    if (codeHash !== row.code_hash) {
-      // Atomic increment — a plain read-then-write here would let parallel
-      // guesses all read the same stale `attempts`, so MAX_ATTEMPTS would never
-      // actually trip under concurrent brute force.
-      await supabaseAdmin.rpc('increment_otp_attempts', { p_id: row.id });
-      return json({ verified: false, message: 'Incorrect OTP' });
-    }
-
-    // Consume the code so it can't be replayed.
-    await supabaseAdmin.from('otp_codes').delete().eq('id', row.id);
-    return json({ verified: true });
+    const result = await checkOtp(cleaned, purpose, code);
+    return json({ verified: result.verified, message: result.message }, result.status);
   } catch (e) {
     console.error('verify-otp error:', e);
     return json({ verified: false, message: 'Verification failed' }, 500);

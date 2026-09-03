@@ -38,6 +38,13 @@ export default function AllLayout() {
                 }}
             />
             <Stack.Screen
+                name="customerLogin"
+                options={{
+                    title: "Login",
+                    href: null
+                }}
+            />
+            <Stack.Screen
                 name="becomeAPartner"
                 options={{
                     title: "Become a Partner",

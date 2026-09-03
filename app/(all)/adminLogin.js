@@ -96,7 +96,11 @@ const AdminLogin = () => {
                 phone: rawPhone,
             });
 
-            router.replace("/(admin)/gardenerApplications");
+            if (result.role === "gardener") {
+                router.replace("/(professional)/booking");
+            } else {
+                router.replace("/(admin)/gardenerApplications");
+            }
         } catch (error) {
             Alert.alert("Login Failed", error.message || "Something went wrong. Please try again.");
         } finally {

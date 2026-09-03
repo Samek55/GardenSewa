@@ -11,11 +11,17 @@ const SIDEBAR_WIDTH = Math.min(width * 0.75, 300);
 const SideBarModalLoggedIn = ({ onClose }) => {
     const router = useRouter();
     const pathname = usePathname();
-    const { user } = useContext(AuthContext);
+    const { user, logout } = useContext(AuthContext);
 
     const handleNavigation = (path) => {
         onClose();
         router.push(path);
+    };
+
+    const handleLogout = async () => {
+        onClose();
+        await logout();
+        router.replace('/(tabs)');
     };
 
     const isActive = (targetPath) => {
@@ -80,8 +86,8 @@ const SideBarModalLoggedIn = ({ onClose }) => {
                     resizeMode="cover"
                 />
                 <View style={styles.profileDetails}>
-                    <Text style={styles.profileName}>{user?.name || 'Pratigya Luitel'}</Text>
-                    <Text style={styles.profilePhone}>+977 {user?.phone || '+977 9860443954'}</Text>
+                    <Text style={styles.profileName}>{user?.name || 'Garden Sewa Customer'}</Text>
+                    <Text style={styles.profilePhone}>+977 {user?.phone || ''}</Text>
                 </View>
             </View>
 
@@ -102,7 +108,7 @@ const SideBarModalLoggedIn = ({ onClose }) => {
                 </View>
             </ScrollView>
 
-            {/* Bottom Update Profile Button */}
+            {/* Bottom Update Profile / Logout Buttons */}
             <View style={styles.bottomButtonWrapper}>
                 <TouchableOpacity
                     style={styles.updateProfileButton}
@@ -111,6 +117,14 @@ const SideBarModalLoggedIn = ({ onClose }) => {
                 >
                     <Ionicons name="person-outline" size={18} color="#FFFFFF" />
                     <Text style={styles.updateProfileButtonText}>Update Profile</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.logoutButton}
+                    activeOpacity={0.8}
+                    onPress={handleLogout}
+                >
+                    <Ionicons name="log-out-outline" size={18} color="#245d5a" />
+                    <Text style={styles.logoutButtonText}>Logout</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -232,6 +246,22 @@ const styles = StyleSheet.create({
     },
     updateProfileButtonText: {
         color: '#FFFFFF',
+        fontWeight: '700',
+        fontSize: 15,
+    },
+    logoutButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        backgroundColor: '#F0F0F0',
+        paddingVertical: 12,
+        borderRadius: 25,
+        width: '100%',
+        marginTop: 10,
+    },
+    logoutButtonText: {
+        color: '#245d5a',
         fontWeight: '700',
         fontSize: 15,
     },

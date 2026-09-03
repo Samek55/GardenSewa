@@ -216,9 +216,16 @@ export default function GardenerApplications() {
                     <Text style={styles.headerTitle}>Gardener Applications</Text>
                     <Text style={styles.headerSubtitle}>{adminDisplayName} · {roleLabel(adminRole)}</Text>
                 </View>
-                <TouchableOpacity onPress={handleLogout}>
-                    <Ionicons name="log-out-outline" size={26} color="#fff" />
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                    {adminRole === 'super_admin' && (
+                        <TouchableOpacity onPress={() => router.push('/(admin)/manageStaff')}>
+                            <Ionicons name="people-outline" size={24} color="#fff" />
+                        </TouchableOpacity>
+                    )}
+                    <TouchableOpacity onPress={handleLogout}>
+                        <Ionicons name="log-out-outline" size={26} color="#fff" />
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <View style={styles.tabsRow}>

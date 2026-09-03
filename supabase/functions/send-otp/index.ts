@@ -12,10 +12,12 @@ const sha256 = async (text: string) => {
 };
 
 // One entry per OTP purpose in the app. Add new purposes here as new flows
-// need OTP (e.g. a future customer login) — mirrors HomeSewa's send-otp shape.
+// need OTP — mirrors HomeSewa's send-otp shape.
 const MESSAGES: Record<string, (code: string, name: string) => string> = {
   'join-gardener': (code, name) =>
     `Dear ${name}, your Garden Sewa Gardener application OTP code is ${code}.\n\nThank you for using Garden Sewa\n( www.gardensewa.com )`,
+  'customer-login': (code) =>
+    `Your Garden Sewa login OTP code is ${code}.\n\nThank you for using Garden Sewa\n( www.gardensewa.com )`,
 };
 
 Deno.serve(async (req) => {
