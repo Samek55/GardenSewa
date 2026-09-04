@@ -5,6 +5,7 @@ export default function AdminLayout() {
         <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="gardenerApplications" />
             <Stack.Screen name="manageStaff" />
+            <Stack.Screen name="leadUnlockRequests" />
         </Stack>
     );
 }

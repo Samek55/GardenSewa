@@ -34,3 +34,17 @@ export const toggleAdminStatus = (id, status) =>
 
 export const updateAdminCities = (id, allowedCities) =>
     invokeEdgeFunction('update-admin-cities', { id, allowedCities }, 'Could not save', { requireSession: true });
+
+export const listLeadUnlockRequests = (status) =>
+    invokeEdgeFunction(
+        `list-lead-unlock-requests${status ? `?status=${encodeURIComponent(status)}` : ''}`,
+        {},
+        'Could not load payment requests',
+        { requireSession: true }
+    );
+
+export const approveLeadUnlock = (id) =>
+    invokeEdgeFunction('approve-lead-unlock', { id }, 'Could not approve this request', { requireSession: true });
+
+export const rejectLeadUnlock = (id) =>
+    invokeEdgeFunction('reject-lead-unlock', { id }, 'Could not reject this request', { requireSession: true });

@@ -1,6 +1,6 @@
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const BookingSummaryCard = ({ name, phone, service, startDate, endDate, preferredTime, city, area, priority, budget, message, onBack, onConfirm }) => {
+const BookingSummaryCard = ({ name, phone, service, startDate, endDate, preferredTime, city, area, priority, budget, message, onBack, onConfirm, isSubmitting }) => {
     return (
         <ScrollView style={styles.container}>
             <Text style={styles.title}>Booking Summary</Text>
@@ -35,12 +35,18 @@ const BookingSummaryCard = ({ name, phone, service, startDate, endDate, preferre
                 <TouchableOpacity
                     style={[styles.button, styles.confirmButton]}
                     onPress={() => onConfirm()}
+                    disabled={isSubmitting}
                 >
-                    <Text style={styles.confirmButtonText}>Confirm Booking</Text>
+                    {isSubmitting ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <Text style={styles.confirmButtonText}>Confirm Booking</Text>
+                    )}
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.button, styles.editButton]}
                     onPress={() => onBack()}
+                    disabled={isSubmitting}
                 >
                     <Text style={styles.editButtonText}>Edit Booking</Text>
                 </TouchableOpacity>

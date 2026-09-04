@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Print from 'expo-print';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+    ActivityIndicator,
     Alert,
     Image,
     Linking,
@@ -17,9 +18,15 @@ import {
     TouchableWithoutFeedback,
     View,
 } from 'react-native';
-import { BookingsListProfessional } from '../../../data/servicesList';
+import * as ImagePicker from 'expo-image-picker';
+import { acceptBooking, completeBooking, listOpenBookings } from '../../../api/PostApiBookingGardener';
+import { sendOtp } from '../../../api/PostApiOtp';
+import { uploadPublicFile } from '../../../api/uploadToStorage';
 
-const STATUS_OPTIONS = ['New', 'OnGoing', 'Completed', 'Cancelled', 'Dispute'];
+// Only one real transition exists post-accept — marking the job done, which
+// requires the customer's completion OTP (see complete-booking). HomeSewa's
+// own version doesn't have an arbitrary status editor either, just this.
+const STATUS_OPTIONS = ['Completed'];
 
 const maskPhoneNumber = (phone) => {
     if (!phone) return '+977 98XXX28XX47';
@@ -60,23 +67,64 @@ const IndividualBooking = () => {
         updatedEndDate
     } = params;
 
-    const foundBooking = BookingsListProfessional.find((item) => item.id.toString() === id?.toString());
+    const [loading, setLoading] = useState(true);
+    const [booking, setBooking] = useState({
+        id: id || '',
+        fullName: fullName || '',
+        phone: '',
+        service: '',
+        location: '',
+        budget: '',
+        booking_date: '',
+        startDate: '',
+        endDate: '',
+        approxDays: 1,
+        specialRequest: '',
+        workStatus: 'New',
+        photos: [],
+        unlocked: false,
+        dealAmount: null,
+        dealNote: null,
+    });
 
-    const booking = {
-        id: id || 'B34',
-        fullName: fullName || foundBooking?.fullName || 'Rohan Adhikari',
-        phone: foundBooking?.phone || '9823028547',
-        service: foundBooking?.service || 'Water Tank Cleaning',
-        location: foundBooking?.location || 'Sanepa, Lalitpur',
-        budget: foundBooking?.budget || 'NPR 5,000 - 10,000',
-        booking_date: foundBooking?.booking_date || '2026/07/28',
-        startDate: foundBooking?.startDate || '2026/07/29',
-        endDate: foundBooking?.endDate || '2026/07/29',
-        approxDays: foundBooking?.approxDays || 1,
-        specialRequest: foundBooking?.specialRequest || 'Test.',
-        workStatus: foundBooking?.workStatus || 'New',
-        photos: foundBooking?.photos || [],
-    };
+    const loadBooking = useCallback(async () => {
+        try {
+            const result = await listOpenBookings();
+            if (!result.success) {
+                Alert.alert('Error', result.message || 'Could not load booking');
+                return;
+            }
+            const found = (result.bookings || []).find((b) => b.bookingId?.toString() === id?.toString());
+            if (!found) return;
+            setBooking({
+                id: found.bookingId,
+                fullName: found.fullName,
+                phone: found.phone,
+                service: found.service,
+                location: [found.area, found.city].filter(Boolean).join(', '),
+                budget: found.budget,
+                booking_date: found.startingDate,
+                startDate: found.startingDate,
+                endDate: found.completionDate,
+                approxDays: 1,
+                specialRequest: found.workDescription,
+                workStatus: found.status === 'New / Open' ? 'New' : found.status === 'Pending' ? 'OnGoing' : found.status,
+                photos: found.photos || [],
+                unlocked: found.unlocked,
+                dealAmount: found.dealAmount,
+                dealNote: found.dealNote,
+            });
+        } catch (error) {
+            Alert.alert('Error', error.message || 'Could not load booking');
+        }
+    }, [id]);
+
+    useFocusEffect(
+        useCallback(() => {
+            setLoading(true);
+            loadBooking().finally(() => setLoading(false));
+        }, [loadBooking])
+    );
 
     const [currentBudget, setCurrentBudget] = useState(booking.budget);
     const [currentStartDate, setCurrentStartDate] = useState(booking.startDate);
@@ -92,13 +140,31 @@ const IndividualBooking = () => {
     const [selectedPhoto, setSelectedPhoto] = useState(null);
 
     const [isOtpModalVisible, setIsOtpModalVisible] = useState(false);
-    const [generatedOtp, setGeneratedOtp] = useState('');
     const [otp, setOtp] = useState(['', '', '', '']);
     const [timer, setTimer] = useState(60);
     const [canResend, setCanResend] = useState(false);
     const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
 
-    const isPhoneMasked = currentStatus === 'New' || currentStatus === 'Cancelled';
+    const [dealModalVisible, setDealModalVisible] = useState(false);
+    const [dealAmountInput, setDealAmountInput] = useState('');
+    const [dealNoteInput, setDealNoteInput] = useState('');
+    const [accepting, setAccepting] = useState(false);
+
+    const [completionPhotos, setCompletionPhotos] = useState([]);
+    const [sendingOtp, setSendingOtp] = useState(false);
+    const [completing, setCompleting] = useState(false);
+
+    // Synced from the fetched booking, since currentStatus/currentBudget/etc
+    // started life as static useState initial values before the real fetch resolved.
+    useEffect(() => {
+        setCurrentBudget(booking.budget);
+        setCurrentStartDate(booking.startDate);
+        setCurrentEndDate(booking.endDate);
+        setCurrentStatus(booking.workStatus);
+        setSelectedStatus(booking.workStatus);
+    }, [booking]);
+
+    const isPhoneMasked = !booking.unlocked;
     const formattedApproxDays = `${booking.approxDays} ${Number(booking.approxDays) === 1 ? 'Day' : 'Days'}`;
 
     useEffect(() => {
@@ -140,16 +206,47 @@ const IndividualBooking = () => {
         return () => clearInterval(interval);
     }, [isOtpModalVisible, timer]);
 
-    const sendOtpCode = () => {
-        const otpCode = __DEV__ ? '1234' : Math.floor(1000 + Math.random() * 9000).toString();
-        setGeneratedOtp(otpCode);
-        setOtp(['', '', '', '']);
-        setTimer(60);
-        setCanResend(false);
+    const handlePickCompletionPhotos = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsMultipleSelection: true,
+            selectionLimit: 5,
+            quality: 0.8,
+        });
+        if (!result.canceled) {
+            setCompletionPhotos((prev) => [...prev, ...result.assets].slice(0, 5));
+        }
+    };
+
+    // Sends a real OTP to the customer (see 'work-completion' in send-otp) —
+    // the gardener reads it back from the customer to prove the job is
+    // actually finished, mirroring HomeSewa's WorkCompletionOTP.tsx.
+    const sendCompletionOtp = async () => {
+        setSendingOtp(true);
+        try {
+            const result = await sendOtp(booking.phone, 'work-completion', booking.fullName);
+            if (!result.success) {
+                Alert.alert('Could Not Send Code', result.message || 'Please try again.');
+                return false;
+            }
+            setOtp(['', '', '', '']);
+            setTimer(60);
+            setCanResend(false);
+            return true;
+        } catch (error) {
+            Alert.alert('Could Not Send Code', error.message || 'Something went wrong.');
+            return false;
+        } finally {
+            setSendingOtp(false);
+        }
     };
 
     const handleSubmitStatus = () => {
         if (selectedStatus === currentStatus) return;
+        if (completionPhotos.length === 0) {
+            Alert.alert('Photos Required', 'Please add at least one photo of the finished job.');
+            return;
+        }
 
         setStatusHistory({
             from: currentStatus,
@@ -158,15 +255,15 @@ const IndividualBooking = () => {
         setIsModalVisible(true);
     };
 
-    const handleInitiateStatusChange = () => {
+    const handleInitiateStatusChange = async () => {
         setIsModalVisible(false);
-        sendOtpCode();
-        setIsOtpModalVisible(true);
+        const sent = await sendCompletionOtp();
+        if (sent) setIsOtpModalVisible(true);
     };
 
     const handleResendOtp = () => {
-        if (canResend) {
-            sendOtpCode();
+        if (canResend && !sendingOtp) {
+            sendCompletionOtp();
         }
     };
 
@@ -187,28 +284,33 @@ const IndividualBooking = () => {
         }
     };
 
-    const handleVerifyOtpAndConfirm = () => {
+    const handleVerifyOtpAndConfirm = async () => {
         const userEnteredOtp = otp.join('');
-        if (userEnteredOtp === generatedOtp) {
-            setCurrentStatus(selectedStatus);
-            setIsOtpModalVisible(false);
+        if (userEnteredOtp.length < 4) return;
+        if (completing) return;
+        setCompleting(true);
+        try {
+            // Upload photos before verifying the OTP — the code is consumed the
+            // instant it checks out, so if a slow upload failed afterward the
+            // gardener would be locked out and need a brand-new code from the
+            // customer. Uploading first leaves only a single fast write after.
+            const photoUrls = await Promise.all(
+                completionPhotos.map((img) => uploadPublicFile(img.uri, img.fileName))
+            );
 
-            if (selectedStatus === 'OnGoing') {
-                router.push({
-                    pathname: '/booking/editSchedule',
-                    params: {
-                        bookingId: booking.id,
-                        fullName: booking.fullName,
-                        budget: currentBudget,
-                        startDate: currentStartDate,
-                        endDate: currentEndDate,
-                    },
-                });
-            } else {
-                Alert.alert('Success', `Status successfully updated to ${selectedStatus}`);
+            const result = await completeBooking(booking.id, userEnteredOtp, photoUrls);
+            if (!result.success) {
+                Alert.alert('Invalid OTP', result.message || 'The code entered does not match. Please try again.');
+                return;
             }
-        } else {
-            Alert.alert('Invalid OTP', 'The code entered does not match. Please try again.');
+
+            setCurrentStatus('Completed');
+            setIsOtpModalVisible(false);
+            Alert.alert('Job Completed', `Booking for ${booking.fullName} has been marked as completed.`);
+        } catch (error) {
+            Alert.alert('Error', error.message || 'Could not complete this job. Please try again.');
+        } finally {
+            setCompleting(false);
         }
     };
 
@@ -237,26 +339,51 @@ const IndividualBooking = () => {
     };
 
     const handleAcceptOffer = () => {
-        router.push({
-            pathname: '/booking/pay',
-            params: {
-                bookingId: booking.id,
-                fullName: booking.fullName,
-            },
-        });
+        if (!booking.unlocked) {
+            router.push({
+                pathname: '/booking/pay',
+                params: {
+                    bookingId: booking.id,
+                    fullName: booking.fullName,
+                },
+            });
+            return;
+        }
+        setDealAmountInput('');
+        setDealNoteInput('');
+        setDealModalVisible(true);
     };
 
+    const handleConfirmDeal = async () => {
+        const amount = Number(dealAmountInput);
+        if (!dealAmountInput.trim() || !Number.isFinite(amount) || amount <= 0) {
+            Alert.alert('Enter Deal Amount', 'Please enter the agreed price as a valid positive number.');
+            return;
+        }
+        setAccepting(true);
+        try {
+            const result = await acceptBooking(booking.id, amount, dealNoteInput.trim() || null);
+            if (!result.success) {
+                Alert.alert('Could Not Accept', result.message || 'Please try again.');
+                return;
+            }
+            setDealModalVisible(false);
+            await loadBooking();
+            Alert.alert('Job Accepted', 'This job is now yours — the customer has been notified.');
+        } catch (error) {
+            Alert.alert('Could Not Accept', error.message || 'Something went wrong. Please try again.');
+        } finally {
+            setAccepting(false);
+        }
+    };
+
+    // No reject-tracking table exists yet (see Phase 2 backend notes) — passing
+    // on a job just leaves this screen without recording anything server-side,
+    // rather than faking a status change that wouldn't reflect reality.
     const handleRejectOffer = () => {
-        Alert.alert('Reject Booking', 'Are you sure you want to reject this offer?', [
-            { text: 'No', style: 'cancel' },
-            {
-                text: 'Yes',
-                style: 'destructive',
-                onPress: () => {
-                    setCurrentStatus('Cancelled');
-                    setSelectedStatus('Cancelled');
-                },
-            },
+        Alert.alert('Pass on this job?', 'It will stay open for other gardeners to accept.', [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Yes, Pass', style: 'destructive', onPress: () => router.back() },
         ]);
     };
 
@@ -330,6 +457,14 @@ const IndividualBooking = () => {
 
     const fullOtpEntered = otp.join('').length === 4;
 
+    if (loading) {
+        return (
+            <View style={[styles.safeArea, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color="#245d5a" />
+            </View>
+        );
+    }
+
     return (
         <View style={styles.safeArea}>
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -397,16 +532,22 @@ const IndividualBooking = () => {
                                         activeOpacity={0.8}
                                         onPress={() => setSelectedPhoto(photoSrc)}
                                     >
-                                        <Image source={photoSrc} style={styles.photoItem} resizeMode="cover" />
+                                        <Image
+                                            source={typeof photoSrc === 'string' ? { uri: photoSrc } : photoSrc}
+                                            style={styles.photoItem}
+                                            resizeMode="cover"
+                                        />
                                     </TouchableOpacity>
                                 ))}
                             </View>
                         </View>
                     )}
-                    {currentStatus === 'New' || currentStatus === 'Cancelled' ? (
+                    {currentStatus === 'New' ? (
                         <View style={styles.actionButtonsContainer}>
                             <TouchableOpacity style={styles.acceptBtn} activeOpacity={0.85} onPress={handleAcceptOffer}>
-                                <Text style={styles.acceptBtnText}>Accept Offer</Text>
+                                <Text style={styles.acceptBtnText}>
+                                    {booking.unlocked ? 'Accept Offer' : 'Pay to View & Accept'}
+                                </Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.rejectBtn} activeOpacity={0.85} onPress={handleRejectOffer}>
                                 <Text style={styles.rejectBtnText}>Reject</Text>
@@ -435,28 +576,55 @@ const IndividualBooking = () => {
                             )}
 
                             <View style={styles.divider} />
-                            <Text style={styles.sectionHeading}>Work Status</Text>
 
-                            <TouchableOpacity
-                                style={styles.dropdownTrigger}
-                                activeOpacity={0.8}
-                                onPress={() => setIsDropdownOpen(true)}
-                            >
-                                <Text style={styles.dropdownTriggerText}>{selectedStatus}</Text>
-                                <Ionicons name="chevron-down" size={20} color="#245d5a" />
-                            </TouchableOpacity>
+                            {currentStatus === 'Completed' ? (
+                                <View style={styles.completedBanner}>
+                                    <Ionicons name="checkmark-circle" size={20} color="#15803D" />
+                                    <Text style={styles.completedBannerText}>This job has been marked completed.</Text>
+                                </View>
+                            ) : (
+                                <>
+                                    <Text style={styles.sectionHeading}>Mark Job as Completed</Text>
+                                    <Text style={styles.completionHint}>
+                                        Add at least one photo of the finished job, then confirm with the customer&apos;s OTP.
+                                    </Text>
 
-                            <TouchableOpacity
-                                style={[
-                                    styles.submitButton,
-                                    selectedStatus === currentStatus && styles.submitButtonDisabled,
-                                ]}
-                                activeOpacity={0.85}
-                                onPress={handleSubmitStatus}
-                                disabled={selectedStatus === currentStatus}
-                            >
-                                <Text style={styles.submitButtonText}>Submit</Text>
-                            </TouchableOpacity>
+                                    <TouchableOpacity style={styles.photoPickerBtn} onPress={handlePickCompletionPhotos}>
+                                        <Ionicons name="camera-outline" size={18} color="#245d5a" />
+                                        <Text style={styles.photoPickerBtnText}>
+                                            {completionPhotos.length > 0 ? `${completionPhotos.length} photo(s) selected` : 'Add Completion Photos'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                    {completionPhotos.length > 0 && (
+                                        <View style={styles.photosGrid}>
+                                            {completionPhotos.map((img, index) => (
+                                                <Image key={index} source={{ uri: img.uri }} style={styles.photoItem} resizeMode="cover" />
+                                            ))}
+                                        </View>
+                                    )}
+
+                                    <TouchableOpacity
+                                        style={styles.dropdownTrigger}
+                                        activeOpacity={0.8}
+                                        onPress={() => setIsDropdownOpen(true)}
+                                    >
+                                        <Text style={styles.dropdownTriggerText}>{selectedStatus}</Text>
+                                        <Ionicons name="chevron-down" size={20} color="#245d5a" />
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.submitButton,
+                                            selectedStatus === currentStatus && styles.submitButtonDisabled,
+                                        ]}
+                                        activeOpacity={0.85}
+                                        onPress={handleSubmitStatus}
+                                        disabled={selectedStatus === currentStatus || sendingOtp}
+                                    >
+                                        {sendingOtp ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitButtonText}>Submit</Text>}
+                                    </TouchableOpacity>
+                                </>
+                            )}
                         </>
                     )}
                 </View>
@@ -478,7 +646,11 @@ const IndividualBooking = () => {
                     </TouchableOpacity>
 
                     {selectedPhoto && (
-                        <Image source={selectedPhoto} style={styles.fullScreenImage} resizeMode="contain" />
+                        <Image
+                            source={typeof selectedPhoto === 'string' ? { uri: selectedPhoto } : selectedPhoto}
+                            style={styles.fullScreenImage}
+                            resizeMode="contain"
+                        />
                     )}
                 </View>
             </Modal>
@@ -628,12 +800,72 @@ const IndividualBooking = () => {
                             <TouchableOpacity
                                 style={[
                                     styles.confirmBtn,
-                                    !fullOtpEntered && styles.submitButtonDisabled,
+                                    (!fullOtpEntered || completing) && styles.submitButtonDisabled,
                                 ]}
-                                disabled={!fullOtpEntered}
+                                disabled={!fullOtpEntered || completing}
                                 onPress={handleVerifyOtpAndConfirm}
                             >
-                                <Text style={styles.confirmBtnText}>Verify</Text>
+                                {completing ? (
+                                    <ActivityIndicator color="#fff" size="small" />
+                                ) : (
+                                    <Text style={styles.confirmBtnText}>Verify</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal
+                visible={dealModalVisible}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => !accepting && setDealModalVisible(false)}
+            >
+                <View style={styles.modalOverlayCenter}>
+                    <View style={styles.confirmationCard}>
+                        <View style={styles.confirmIconBadge}>
+                            <Ionicons name="checkmark-done-outline" size={32} color="#245d5a" />
+                        </View>
+                        <Text style={styles.confirmTitle}>Confirm Deal Terms</Text>
+                        <Text style={styles.confirmSubtext}>
+                            Enter the price you and the customer agreed on for this job.
+                        </Text>
+
+                        <TextInput
+                            style={styles.dealInput}
+                            placeholder="Deal Amount (NPR)"
+                            keyboardType="numeric"
+                            value={dealAmountInput}
+                            onChangeText={(t) => setDealAmountInput(t.replace(/[^0-9]/g, ''))}
+                            autoFocus
+                        />
+                        <TextInput
+                            style={[styles.dealInput, styles.dealNoteInput]}
+                            placeholder="Note (optional)"
+                            multiline
+                            value={dealNoteInput}
+                            onChangeText={setDealNoteInput}
+                        />
+
+                        <View style={styles.modalActionButtons}>
+                            <TouchableOpacity
+                                style={styles.cancelBtn}
+                                onPress={() => setDealModalVisible(false)}
+                                disabled={accepting}
+                            >
+                                <Text style={styles.cancelBtnText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.confirmBtn, accepting && styles.submitButtonDisabled]}
+                                onPress={handleConfirmDeal}
+                                disabled={accepting}
+                            >
+                                {accepting ? (
+                                    <ActivityIndicator color="#fff" size="small" />
+                                ) : (
+                                    <Text style={styles.confirmBtnText}>Accept Job</Text>
+                                )}
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -676,6 +908,11 @@ const styles = StyleSheet.create({
     sectionHeading: { fontSize: 15, fontWeight: '700', color: '#0F172A', marginBottom: 10 },
     dropdownTrigger: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: '#245d5a', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 12, marginBottom: 16 },
     dropdownTriggerText: { fontSize: 14, fontWeight: '600', color: '#1E293B' },
+    completedBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#F0FDF4', borderRadius: 8, padding: 12 },
+    completedBannerText: { color: '#15803D', fontWeight: '600', fontSize: 13 },
+    completionHint: { fontSize: 12, color: '#64748B', marginBottom: 12 },
+    photoPickerBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#245d5a', borderRadius: 8, paddingVertical: 12, marginBottom: 8 },
+    photoPickerBtnText: { color: '#245d5a', fontWeight: '600', fontSize: 13 },
     submitButton: { backgroundColor: '#245d5a', borderRadius: 8, paddingVertical: 14, alignItems: 'center', width: '60%', alignSelf: 'center' },
     submitButtonDisabled: { backgroundColor: '#94A3B8' },
     submitButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
@@ -706,6 +943,8 @@ const styles = StyleSheet.create({
     cancelBtnText: { color: '#64748B', fontWeight: '700', fontSize: 14 },
     confirmBtn: { flex: 1, backgroundColor: '#245d5a', paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
     confirmBtnText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
+    dealInput: { width: '100%', borderWidth: 1, borderColor: '#E2E8F0', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, marginBottom: 12 },
+    dealNoteInput: { minHeight: 60, textAlignVertical: 'top' },
 });
 
 export default IndividualBooking;

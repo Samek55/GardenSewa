@@ -21,6 +21,9 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { boolean, object, string } from 'yup';
 
 import BookingSummaryCard from '../../components/BookingSummaryCard';
+import { createBooking } from '../../api/PostApiBooking';
+import { sendOtp } from '../../api/PostApiOtp';
+import { uploadPublicFile } from '../../api/uploadToStorage';
 import { areasByCity } from '../../data/Data';
 import { budgetData, categories, cityData, priorityData, shiftsData } from '../../data/servicesList';
 
@@ -113,6 +116,7 @@ export default function Book() {
     const [selectedImages, setSelectedImages] = useState([]);
     const [showSummary, setShowSummary] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const toggleDropdown = (name) => {
         setActiveDropdown((prev) => (prev === name ? null : name));
@@ -524,17 +528,54 @@ export default function Book() {
                     budget={formik.values.budget}
                     message={formik.values.message}
                     onBack={() => setShowSummary(false)}
-                    onConfirm={() => {
-                        const phoneNumber = formik.values.phone;
-                        formik.resetForm();
-                        setSelectedImages([]);
-                        setShowSummary(false);
-                        Alert.alert("Success", "Your booking has been confirmed!");
-                        router.push({
-                            pathname: '/phoneVerification',
-                            params: { phone: phoneNumber, requestType: 'Booking' },
+                    isSubmitting={isSubmitting}
+                    onConfirm={async () => {
+                        if (isSubmitting) return;
+                        setIsSubmitting(true);
+                        try {
+                            const photos = await Promise.all(
+                                selectedImages.map((img) => uploadPublicFile(img.uri, img.fileName))
+                            );
 
-                        });
+                            await createBooking({
+                                full_name: formik.values.name,
+                                phone: formik.values.phone,
+                                service: formik.values.service,
+                                city: formik.values.city,
+                                area: formik.values.area,
+                                priority: formik.values.priority || null,
+                                budget: formik.values.budget,
+                                select_shift: formik.values.preferredTime,
+                                starting_date: formik.values.startDate,
+                                service_completion_date: formik.values.endDate || null,
+                                work_description: formik.values.message || null,
+                                photos,
+                            });
+
+                            const phoneNumber = formik.values.phone;
+                            const fullName = formik.values.name;
+
+                            // The booking is already saved at this point — a failed OTP send
+                            // shouldn't block the customer from proceeding, just prevent them
+                            // from completing verification until they hit Resend.
+                            try {
+                                await sendOtp(phoneNumber, 'booking', fullName);
+                            } catch (otpError) {
+                                console.error('send-otp error:', otpError);
+                            }
+
+                            formik.resetForm();
+                            setSelectedImages([]);
+                            setShowSummary(false);
+                            router.push({
+                                pathname: '/phoneVerification',
+                                params: { phone: phoneNumber, requestType: 'Booking', otpPurpose: 'booking' },
+                            });
+                        } catch (error) {
+                            Alert.alert('Submission Failed', error.message || 'Something went wrong. Please try again.');
+                        } finally {
+                            setIsSubmitting(false);
+                        }
                     }}
                 />
             )}

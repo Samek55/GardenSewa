@@ -18,6 +18,10 @@ const MESSAGES: Record<string, (code: string, name: string) => string> = {
     `Dear ${name}, your Garden Sewa Gardener application OTP code is ${code}.\n\nThank you for using Garden Sewa\n( www.gardensewa.com )`,
   'customer-login': (code) =>
     `Your Garden Sewa login OTP code is ${code}.\n\nThank you for using Garden Sewa\n( www.gardensewa.com )`,
+  booking: (code, name) =>
+    `Dear ${name}, Your Service Booking OTP code is ${code}.\n\nThank you for using Garden Sewa\n( www.gardensewa.com )`,
+  'work-completion': (code, name) =>
+    `Dear ${name}, your Garden Sewa service is being marked as completed.\n\nYour completion OTP is: ${code}\n\nShare this code with the gardener to confirm.\n\nGarden Sewa ( www.gardensewa.com )`,
 };
 
 Deno.serve(async (req) => {

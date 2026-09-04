@@ -1,7 +1,9 @@
 import { Feather, FontAwesome, Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   FlatList,
   Modal,
   StyleSheet,
@@ -12,9 +14,16 @@ import {
   View,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
-import { BookingsListProfessional } from '../../../data/servicesList';
+import { listOpenBookings } from '../../../api/PostApiBookingGardener';
 
-const STATUS_OPTIONS = ['New', 'Cancelled', 'OnGoing', 'Dispute', 'Completed', 'All'];
+const STATUS_OPTIONS = ['New / Open', 'Pending', 'Completed', 'Cancelled', 'All'];
+const STATUS_LABELS = {
+  'New / Open': 'New',
+  Pending: 'Accepted',
+  Completed: 'Completed',
+  Cancelled: 'Cancelled',
+  All: 'All',
+};
 
 const formatToISODate = (dateString) => {
   if (!dateString) return null;
@@ -64,7 +73,10 @@ const getFormattedDateParts = (dateString) => {
 };
 
 const BookingSummaryPage = () => {
-  const [selectedStatus, setSelectedStatus] = useState('New');
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [selectedStatus, setSelectedStatus] = useState('New / Open');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,17 +84,44 @@ const BookingSummaryPage = () => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [selectedDateStr, setSelectedDateStr] = useState('');
 
+  const loadBookings = useCallback(async () => {
+    try {
+      const result = await listOpenBookings();
+      if (!result.success) {
+        Alert.alert('Error', result.message || 'Could not load bookings');
+        return;
+      }
+      setBookings((result.bookings || []).map((b) => ({
+        id: b.bookingId,
+        fullName: b.fullName,
+        phone: b.phone,
+        service: b.service,
+        location: [b.area, b.city].filter(Boolean).join(', '),
+        budget: b.budget,
+        bookingDate: b.startingDate,
+        status: b.status,
+        unlocked: b.unlocked,
+      })));
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Could not load bookings');
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      loadBookings().finally(() => setLoading(false));
+    }, [loadBookings])
+  );
+
   const handleDateSelect = (dateString) => {
     setSelectedDateStr(dateString);
     setSelectedStatus('All');
     setIsCalendarOpen(false);
   };
 
-  const filteredBookings = BookingsListProfessional.filter((item) => {
-    const matchesStatus =
-      selectedStatus === 'All'
-        ? true
-        : item.workStatus?.toLowerCase() === selectedStatus.toLowerCase();
+  const filteredBookings = bookings.filter((item) => {
+    const matchesStatus = selectedStatus === 'All' ? true : item.status === selectedStatus;
 
     const query = searchQuery.toLowerCase().trim();
     const matchesSearch =
@@ -109,7 +148,7 @@ const BookingSummaryPage = () => {
   const getMarkedDates = () => {
     const marked = {};
 
-    BookingsListProfessional.forEach((item) => {
+    bookings.forEach((item) => {
       const rawBookingDate = item.bookingDate || item.booking_date;
       const singleISO = formatToISODate(rawBookingDate);
 
@@ -132,22 +171,20 @@ const BookingSummaryPage = () => {
   };
 
   const getStatusBadgeStyle = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'ongoing':
+    switch (status) {
+      case 'Pending':
         return { bg: '#EBF8FF', text: '#2B6CB0', border: '#3182CE' };
-      case 'completed':
+      case 'Completed':
         return { bg: '#F0FDF4', text: '#15803D', border: '#22C55E' };
-      case 'cancelled':
+      case 'Cancelled':
         return { bg: '#FEF2F2', text: '#B91C1C', border: '#EF4444' };
-      case 'dispute':
-        return { bg: '#FFFBEB', text: '#B45309', border: '#F59E0B' };
-      default: // 'new'
+      default: // 'New / Open'
         return { bg: '#E8F4F3', text: '#245d5a', border: '#245d5a' };
     }
   };
 
   const renderBookingItem = ({ item }) => {
-    const statusTheme = getStatusBadgeStyle(item.workStatus);
+    const statusTheme = getStatusBadgeStyle(item.status);
     const rawDate = item.bookingDate || item.booking_date;
     const { day, suffix, month, year } = getFormattedDateParts(rawDate);
 
@@ -159,9 +196,12 @@ const BookingSummaryPage = () => {
       >
         <View style={styles.cardHeader}>
           <View style={styles.clientMeta}>
-            <Text style={styles.clientName} numberOfLines={1}>
-              {item.fullName || 'Client Request'}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              {!item.unlocked && <Ionicons name="lock-closed" size={13} color="#94A3B8" />}
+              <Text style={styles.clientName} numberOfLines={1}>
+                {item.fullName || 'Client Request'}
+              </Text>
+            </View>
             <Text
               style={styles.bookingDate}
               numberOfLines={1}
@@ -173,7 +213,7 @@ const BookingSummaryPage = () => {
 
           <View style={[styles.statusBadge, { backgroundColor: statusTheme.bg }]}>
             <Text style={[styles.statusBadgeText, { color: statusTheme.text }]}>
-              {item.workStatus || 'New'}
+              {STATUS_LABELS[item.status] || item.status}
             </Text>
           </View>
         </View>
@@ -267,7 +307,7 @@ const BookingSummaryPage = () => {
           activeOpacity={0.8}
           onPress={() => setIsDropdownOpen(!isDropdownOpen)}
         >
-          <Text style={styles.dropdownTriggerText}>{selectedStatus}</Text>
+          <Text style={styles.dropdownTriggerText}>{STATUS_LABELS[selectedStatus] || selectedStatus}</Text>
           <Feather
             name={isDropdownOpen ? 'chevron-up' : 'chevron-down'}
             size={18}
@@ -301,7 +341,7 @@ const BookingSummaryPage = () => {
                       selectedStatus === status && styles.selectedOptionText,
                     ]}
                   >
-                    {status}
+                    {STATUS_LABELS[status] || status}
                   </Text>
                   {selectedStatus === status && (
                     <Ionicons name="checkmark" size={16} color="#245d5a" />
@@ -416,19 +456,25 @@ const BookingSummaryPage = () => {
       </Modal>
 
       {/* 6. List of Matching Requests */}
-      <FlatList
-        data={filteredBookings}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderBookingItem}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons name="document-text-outline" size={40} color="#94A3B8" />
-            <Text style={styles.emptyText}>No requests found for this filter.</Text>
-          </View>
-        }
-      />
+      {loading ? (
+        <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#245d5a" />
+      ) : (
+        <FlatList
+          data={filteredBookings}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderBookingItem}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          onRefresh={loadBookings}
+          refreshing={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Ionicons name="document-text-outline" size={40} color="#94A3B8" />
+              <Text style={styles.emptyText}>No requests found for this filter.</Text>
+            </View>
+          }
+        />
+      )}
     </View>
   );
 };
