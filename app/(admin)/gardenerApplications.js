@@ -217,6 +217,11 @@ export default function GardenerApplications() {
                     <Text style={styles.headerSubtitle}>{adminDisplayName} · {roleLabel(adminRole)}</Text>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                    {(adminRole === 'bdm' || adminRole === 'call_center') && (
+                        <TouchableOpacity onPress={() => router.push('/(admin)/submitBookingForCustomer')}>
+                            <Ionicons name="call-outline" size={24} color="#fff" />
+                        </TouchableOpacity>
+                    )}
                     {canReview && (
                         <TouchableOpacity onPress={() => router.push('/(admin)/leadUnlockRequests')}>
                             <Ionicons name="cash-outline" size={24} color="#fff" />

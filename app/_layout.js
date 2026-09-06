@@ -8,7 +8,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import { memo, useContext, useEffect, useState } from "react";
 import { Alert, Image, Linking, Platform, Pressable, StyleSheet, Text, View } from "react-native";
-import { OneSignal } from 'react-native-onesignal';
+import { OneSignal } from '@/lib/oneSignal';
 
 SplashScreen.preventAutoHideAsync().catch(() => { });
 

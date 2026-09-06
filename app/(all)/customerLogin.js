@@ -13,6 +13,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { OneSignal } from "../../lib/oneSignal";
 
 import { invokeEdgeFunction } from "../../api/functionsClient";
 import { sendOtp } from "../../api/PostApiOtp";
@@ -119,6 +120,10 @@ const CustomerLogin = () => {
                 setOtp(["", "", "", ""]);
                 inputRefs[0].current?.focus();
                 return;
+            }
+            if (Platform.OS !== "web") {
+                OneSignal.login(result.customer.phone);
+                OneSignal.User.addTag("role", "customer");
             }
             await login({ phone: result.customer.phone, name: result.customer.fullName });
             router.replace("/(tabs)");

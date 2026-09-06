@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
-import { OneSignal } from 'react-native-onesignal';
+import { OneSignal } from '../lib/oneSignal';
 
 export const AdminAuthContext = createContext();
 

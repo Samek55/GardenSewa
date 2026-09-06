@@ -13,6 +13,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { OneSignal } from "../../lib/oneSignal";
 import SuccessAfterVerification from "../../components/SuccessModal";
 import { sendOtp, verifyOtp } from "../../api/PostApiOtp";
 
@@ -93,6 +94,15 @@ const PhoneVerification = () => {
     try {
       const result = await verifyOtp(phone, otpPurpose, fullOtp);
       if (result.verified) {
+        // Booking is submitted with no login at all — this is the one point
+        // a customer's phone is confirmed real, so it's also the right point
+        // to register the device for push (booking-accepted, job-completed),
+        // matching HomeSewa's own BookingOtp.tsx registering here rather than
+        // requiring a separate login. Native-only, same guard as app/_layout.js.
+        if (Platform.OS !== "web" && otpPurpose === "booking") {
+          OneSignal.login(phone);
+          OneSignal.User.addTag("role", "customer");
+        }
         setIsOpenModal(true);
       } else {
         Alert.alert("Verification Failed", result.message || "Incorrect OTP");

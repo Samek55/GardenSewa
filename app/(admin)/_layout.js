@@ -6,6 +6,7 @@ export default function AdminLayout() {
             <Stack.Screen name="gardenerApplications" />
             <Stack.Screen name="manageStaff" />
             <Stack.Screen name="leadUnlockRequests" />
+            <Stack.Screen name="submitBookingForCustomer" />
         </Stack>
     );
 }

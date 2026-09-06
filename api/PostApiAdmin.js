@@ -48,3 +48,6 @@ export const approveLeadUnlock = (id) =>
 
 export const rejectLeadUnlock = (id) =>
     invokeEdgeFunction('reject-lead-unlock', { id }, 'Could not reject this request', { requireSession: true });
+
+export const submitBookingForCustomer = (fields) =>
+    invokeEdgeFunction('submit-booking-for-customer', fields, 'Could not submit booking', { requireSession: true });

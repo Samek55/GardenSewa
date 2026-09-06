@@ -20,6 +20,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { acceptBooking, completeBooking, listOpenBookings } from '../../../api/PostApiBookingGardener';
+import { notifyBookingAccepted, notifyJobCompleted } from '../../../api/PostApiNotification';
 import { sendOtp } from '../../../api/PostApiOtp';
 import { uploadPublicFile } from '../../../api/uploadToStorage';
 
@@ -306,6 +307,7 @@ const IndividualBooking = () => {
 
             setCurrentStatus('Completed');
             setIsOtpModalVisible(false);
+            notifyJobCompleted(booking.id).catch((e) => console.error('notify completion failed:', e));
             Alert.alert('Job Completed', `Booking for ${booking.fullName} has been marked as completed.`);
         } catch (error) {
             Alert.alert('Error', error.message || 'Could not complete this job. Please try again.');
@@ -368,6 +370,7 @@ const IndividualBooking = () => {
                 return;
             }
             setDealModalVisible(false);
+            notifyBookingAccepted(booking.id).catch((e) => console.error('notify accept failed:', e));
             await loadBooking();
             Alert.alert('Job Accepted', 'This job is now yours — the customer has been notified.');
         } catch (error) {

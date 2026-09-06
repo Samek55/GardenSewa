@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 
 import { approveLeadUnlock, listLeadUnlockRequests, rejectLeadUnlock } from '../../api/PostApiAdmin';
+import { notifyLeadUnlockApproved, notifyLeadUnlockRejected } from '../../api/PostApiNotification';
 import { AdminAuthContext } from '../../context/AdminAuthContext';
 
 const STATUS_TABS = ['Pending', 'Approved', 'Rejected'];
@@ -65,6 +66,7 @@ export default function LeadUnlockRequests() {
                 Alert.alert('Error', result.message || 'Could not approve this request');
                 return;
             }
+            notifyLeadUnlockApproved(id).catch((e) => console.error('notify approve failed:', e));
             await loadRequests(activeTab);
         } catch (error) {
             Alert.alert('Error', error.message || 'Could not approve this request');
@@ -81,6 +83,7 @@ export default function LeadUnlockRequests() {
                 Alert.alert('Error', result.message || 'Could not reject this request');
                 return;
             }
+            notifyLeadUnlockRejected(id).catch((e) => console.error('notify reject failed:', e));
             await loadRequests(activeTab);
         } catch (error) {
             Alert.alert('Error', error.message || 'Could not reject this request');
