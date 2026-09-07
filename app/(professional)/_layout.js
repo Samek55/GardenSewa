@@ -37,13 +37,6 @@ export default function ProfessionalLayout() {
                     title: 'Favorite Services'
                 }}
             /> */}
-            <Stack.Screen
-                name="updateProfile"
-                options={{
-                    title: 'Update Profile'
-                }}
-            />
-
         </Stack>
     );
 }

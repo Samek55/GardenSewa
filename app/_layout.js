@@ -7,14 +7,15 @@ import { Asset } from 'expo-asset';
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import { memo, useContext, useEffect, useState } from "react";
-import { Alert, Image, Linking, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Image, Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { OneSignal } from '@/lib/oneSignal';
 
 SplashScreen.preventAutoHideAsync().catch(() => { });
 
-// Native-only — react-native-onesignal has no web implementation, and this
-// app's `web` output target would otherwise crash on load.
-if (Platform.OS !== 'web' && process.env.EXPO_PUBLIC_ONESIGNAL_APP_ID) {
+// OneSignal is null in any environment lacking its native module (Expo Go,
+// web) — see lib/oneSignal.js. Checking Platform.OS alone isn't enough,
+// since Expo Go on Android/iOS also lacks it despite being "native."
+if (OneSignal && process.env.EXPO_PUBLIC_ONESIGNAL_APP_ID) {
   OneSignal.initialize(process.env.EXPO_PUBLIC_ONESIGNAL_APP_ID);
   OneSignal.Notifications.requestPermission(true);
 }

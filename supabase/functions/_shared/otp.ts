@@ -29,6 +29,12 @@ export const OTP_MESSAGES: Record<string, (code: string, name: string) => string
     `Dear ${name}, your Garden Sewa service is being marked as completed.\n\nYour completion OTP is: ${code}\n\nShare this code with the gardener to confirm.\n\nGarden Sewa ( www.gardensewa.com )`,
   'bdm-booking-confirm': (code, name) =>
     `Dear ${name}, your Garden Sewa booking submission OTP code is ${code}.\n\nThank you for using Garden Sewa\n( www.gardensewa.com )`,
+  'become-partner': (code, name) =>
+    `Dear ${name}, your Garden Sewa Partnership application OTP code is ${code}.\n\nThank you for using Garden Sewa\n( www.gardensewa.com )`,
+  helpbox: (code) =>
+    `Your Garden Sewa help request OTP code is ${code}.\n\nOur team will call you back shortly.\n\nThank you for using Garden Sewa\n( www.gardensewa.com )`,
+  'pin-reset': (code) =>
+    `Your Garden Sewa PIN reset OTP code is ${code}.\n\nIf you did not request this, please ignore this message.\n\nThank you for using Garden Sewa\n( www.gardensewa.com )`,
 };
 
 export interface OtpIssueResult {

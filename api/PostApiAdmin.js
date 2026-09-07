@@ -51,3 +51,21 @@ export const rejectLeadUnlock = (id) =>
 
 export const submitBookingForCustomer = (fields) =>
     invokeEdgeFunction('submit-booking-for-customer', fields, 'Could not submit booking', { requireSession: true });
+
+export const listHelpboxRequests = () =>
+    invokeEdgeFunction('list-helpbox-requests', {}, 'Could not load help requests', { requireSession: true });
+
+export const updateHelpboxRequest = (id, status, issue, reply) =>
+    invokeEdgeFunction('update-helpbox-request', { id, status, issue, reply }, 'Could not save', { requireSession: true });
+
+export const getMyProfile = () =>
+    invokeEdgeFunction('get-my-profile', {}, 'Could not load profile', { requireSession: true });
+
+export const updateMyProfile = (fields) =>
+    invokeEdgeFunction('update-my-profile', fields, 'Could not save profile', { requireSession: true });
+
+export const listPartnershipApplications = () =>
+    invokeEdgeFunction('list-partnership-applications', {}, 'Could not load partnership applications', { requireSession: true });
+
+export const updatePartnershipStatus = (id, status) =>
+    invokeEdgeFunction('update-partnership-status', { id, status }, 'Could not save', { requireSession: true });

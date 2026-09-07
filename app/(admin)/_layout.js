@@ -7,6 +7,8 @@ export default function AdminLayout() {
             <Stack.Screen name="manageStaff" />
             <Stack.Screen name="leadUnlockRequests" />
             <Stack.Screen name="submitBookingForCustomer" />
+            <Stack.Screen name="helpboxRequests" />
+            <Stack.Screen name="partnershipApplications" />
         </Stack>
     );
 }

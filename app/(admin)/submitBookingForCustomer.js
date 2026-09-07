@@ -69,7 +69,7 @@ const emptyForm = {
 };
 
 export default function SubmitBookingForCustomer() {
-    const { adminRole } = useContext(AdminAuthContext);
+    const { adminRole, isAdminAuthLoading } = useContext(AdminAuthContext);
     const [form, setForm] = useState(emptyForm);
     const [calendarField, setCalendarField] = useState(null); // 'startingDate' | 'serviceCompletionDate' | null
     const [submitting, setSubmitting] = useState(false);
@@ -78,6 +78,25 @@ export default function SubmitBookingForCustomer() {
     const [bdmPhone, setBdmPhone] = useState('');
     const [otp, setOtp] = useState(['', '', '', '']);
     const [verifying, setVerifying] = useState(false);
+
+    // Same reasoning as manageStaff.js's fix — adminRole is null until
+    // AdminAuthContext finishes reading AsyncStorage, so checking it before
+    // isAdminAuthLoading resolves would flash "Not Available" at a legitimate
+    // BDM/Call Center user on every fresh mount (a hard reload, a deep link).
+    if (isAdminAuthLoading) {
+        return (
+            <View style={styles.container}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()}>
+                        <Ionicons name="arrow-back" size={24} color="#fff" />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Submit Booking for Customer</Text>
+                    <View style={{ width: 24 }} />
+                </View>
+                <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#245d5a" />
+            </View>
+        );
+    }
 
     if (adminRole !== 'bdm' && adminRole !== 'call_center') {
         return (

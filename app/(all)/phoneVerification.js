@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { OneSignal } from "../../lib/oneSignal";
 import SuccessAfterVerification from "../../components/SuccessModal";
+import { submitHelpbox } from "../../api/PostApiHelpbox";
 import { sendOtp, verifyOtp } from "../../api/PostApiOtp";
 
 const PhoneVerification = () => {
@@ -92,14 +93,22 @@ const PhoneVerification = () => {
     if (isVerifying) return;
     setIsVerifying(true);
     try {
-      const result = await verifyOtp(phone, otpPurpose, fullOtp);
+      // helpbox has no row to create ahead of time (unlike booking/join-gardener,
+      // which insert first and treat OTP as a soft confirmation after) — the
+      // request only gets created once the code actually checks out, so it
+      // goes through its own combined verify-and-insert call instead of the
+      // generic verifyOtp.
+      const result = otpPurpose === "helpbox"
+        ? await submitHelpbox(phone, fullOtp)
+        : await verifyOtp(phone, otpPurpose, fullOtp);
       if (result.verified) {
         // Booking is submitted with no login at all — this is the one point
         // a customer's phone is confirmed real, so it's also the right point
         // to register the device for push (booking-accepted, job-completed),
         // matching HomeSewa's own BookingOtp.tsx registering here rather than
-        // requiring a separate login. Native-only, same guard as app/_layout.js.
-        if (Platform.OS !== "web" && otpPurpose === "booking") {
+        // requiring a separate login. OneSignal is null in any environment
+        // lacking its native module (Expo Go, web) — see lib/oneSignal.js.
+        if (OneSignal && otpPurpose === "booking") {
           OneSignal.login(phone);
           OneSignal.User.addTag("role", "customer");
         }
@@ -213,6 +222,12 @@ const PhoneVerification = () => {
           visible={isOpenModal}
           onClose={() => setIsOpenModal(false)}
           onClear={handleClearForm}
+          title={otpPurpose === "helpbox" ? "Request Received!" : undefined}
+          subtitle={
+            otpPurpose === "helpbox"
+              ? "Thank you! Our team will call you back shortly."
+              : undefined
+          }
         />
       </KeyboardAvoidingView>
     </View>

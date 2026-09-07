@@ -122,11 +122,6 @@ export default function GardenerApplications() {
         }
     };
 
-    const handleLogout = async () => {
-        await adminLogoutLocal();
-        router.replace('/adminLogin');
-    };
-
     const renderItem = ({ item }) => (
         <View style={styles.card}>
             <View style={styles.cardHeader}>
@@ -215,26 +210,6 @@ export default function GardenerApplications() {
                 <View>
                     <Text style={styles.headerTitle}>Gardener Applications</Text>
                     <Text style={styles.headerSubtitle}>{adminDisplayName} · {roleLabel(adminRole)}</Text>
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-                    {(adminRole === 'bdm' || adminRole === 'call_center') && (
-                        <TouchableOpacity onPress={() => router.push('/(admin)/submitBookingForCustomer')}>
-                            <Ionicons name="call-outline" size={24} color="#fff" />
-                        </TouchableOpacity>
-                    )}
-                    {canReview && (
-                        <TouchableOpacity onPress={() => router.push('/(admin)/leadUnlockRequests')}>
-                            <Ionicons name="cash-outline" size={24} color="#fff" />
-                        </TouchableOpacity>
-                    )}
-                    {adminRole === 'super_admin' && (
-                        <TouchableOpacity onPress={() => router.push('/(admin)/manageStaff')}>
-                            <Ionicons name="people-outline" size={24} color="#fff" />
-                        </TouchableOpacity>
-                    )}
-                    <TouchableOpacity onPress={handleLogout}>
-                        <Ionicons name="log-out-outline" size={26} color="#fff" />
-                    </TouchableOpacity>
                 </View>
             </View>
 

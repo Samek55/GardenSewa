@@ -1,19 +1,42 @@
+import { AdminAuthContext } from '@/context/AdminAuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { usePathname, useRouter } from 'expo-router';
-import React from 'react';
+import React, { useContext } from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
 const SIDEBAR_WIDTH = Math.min(width * 0.75, 300);
 
+const ROLE_LABELS = {
+    super_admin: 'Super Admin',
+    admin: 'Admin',
+    bdm: 'Business Development Manager',
+    call_center: 'Call Center',
+    gardener: 'Gardener',
+};
+
+// Mirrors each screen's own server-side role gate (see their Edge Functions'
+// CAN_VIEW/CAN_REVIEW/ALLOWED_ROLES sets) so the drawer only ever offers a
+// link a role can actually use.
+const BACK_OFFICE_ROLES = new Set(['super_admin', 'admin', 'bdm', 'call_center']);
+const LEAD_REVIEW_ROLES = new Set(['super_admin', 'admin', 'bdm']);
+const BOOKING_SUBMIT_ROLES = new Set(['bdm', 'call_center']);
+
 const SideBarModal = ({ onClose }) => {
     const router = useRouter();
     const pathname = usePathname();
+    const { isAdminLoggedIn, adminRole, adminDisplayName, adminLogoutLocal } = useContext(AdminAuthContext);
 
     const handleNavigation = (path) => {
         onClose();
         router.push(path);
+    };
+
+    const handleAdminLogout = async () => {
+        onClose();
+        await adminLogoutLocal();
+        router.replace('/(tabs)');
     };
 
     const isActive = (targetPath) => {
@@ -81,34 +104,94 @@ const SideBarModal = ({ onClose }) => {
             </View>
 
             <View style={styles.adminButtonWrapper}>
-                <TouchableOpacity
-                    style={[
-                        styles.customerLoginButton,
-                        isActive('/customerLogin') && styles.adminActiveButton
-                    ]}
-                    activeOpacity={0.8}
-                    onPress={() => handleNavigation('/customerLogin')}
-                >
-                    <Ionicons name="person-circle-outline" size={18} color="#FFFFFF" />
-                    <Text style={styles.adminButtonText}>Login / Sign Up</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[
-                        styles.adminLoginButton,
-                        isActive('/adminLogin') && styles.adminActiveButton
-                    ]}
-                    activeOpacity={0.8}
-                    onPress={() => handleNavigation('/adminLogin')}
-                >
-                    <Ionicons name="lock-closed-outline" size={18} color="#FFFFFF" />
-                    <Text style={styles.adminButtonText}>Admin Login</Text>
-                </TouchableOpacity>
+                {isAdminLoggedIn ? (
+                    <>
+                        <View style={styles.loggedInAsRow}>
+                            <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+                            <Text style={styles.loggedInAsText} numberOfLines={1}>
+                                {adminDisplayName ? `${adminDisplayName} · ` : ''}{ROLE_LABELS[adminRole] || adminRole}
+                            </Text>
+                        </View>
+                        <TouchableOpacity
+                            style={[
+                                styles.customerLoginButton,
+                                isActive('/updateProfile') && styles.adminActiveButton
+                            ]}
+                            activeOpacity={0.8}
+                            onPress={() => handleNavigation('/updateProfile')}
+                        >
+                            <Ionicons name="person-outline" size={18} color="#FFFFFF" />
+                            <Text style={styles.adminButtonText}>Update Profile</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.adminLogoutButton}
+                            activeOpacity={0.8}
+                            onPress={handleAdminLogout}
+                        >
+                            <Ionicons name="log-out-outline" size={18} color="#FFFFFF" />
+                            <Text style={styles.adminButtonText}>Logout</Text>
+                        </TouchableOpacity>
+                    </>
+                ) : (
+                    <>
+                        <TouchableOpacity
+                            style={[
+                                styles.customerLoginButton,
+                                isActive('/customerLogin') && styles.adminActiveButton
+                            ]}
+                            activeOpacity={0.8}
+                            onPress={() => handleNavigation('/customerLogin')}
+                        >
+                            <Ionicons name="person-circle-outline" size={18} color="#FFFFFF" />
+                            <Text style={styles.adminButtonText}>Login / Sign Up</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                styles.adminLoginButton,
+                                isActive('/adminLogin') && styles.adminActiveButton
+                            ]}
+                            activeOpacity={0.8}
+                            onPress={() => handleNavigation('/adminLogin')}
+                        >
+                            <Ionicons name="lock-closed-outline" size={18} color="#FFFFFF" />
+                            <Text style={styles.adminButtonText}>Admin Login</Text>
+                        </TouchableOpacity>
+                    </>
+                )}
             </View>
 
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
+                {isAdminLoggedIn && (
+                    <View style={styles.primaryLinks}>
+                        <Text style={styles.sectionTitle}>Staff Menu</Text>
+
+                        {adminRole === 'gardener' && (
+                            renderMenuItem('/booking', 'leaf-outline', 'My Leads & Bookings')
+                        )}
+                        {BACK_OFFICE_ROLES.has(adminRole) && (
+                            renderMenuItem('/gardenerApplications', 'checkmark-done-outline', 'Gardener Applications')
+                        )}
+                        {LEAD_REVIEW_ROLES.has(adminRole) && (
+                            renderMenuItem('/leadUnlockRequests', 'cash-outline', 'Lead Unlock Requests')
+                        )}
+                        {BOOKING_SUBMIT_ROLES.has(adminRole) && (
+                            renderMenuItem('/submitBookingForCustomer', 'call-outline', 'Submit Booking for Customer')
+                        )}
+                        {BACK_OFFICE_ROLES.has(adminRole) && (
+                            renderMenuItem('/helpboxRequests', 'help-buoy-outline', 'Help Box Requests')
+                        )}
+                        {BACK_OFFICE_ROLES.has(adminRole) && (
+                            renderMenuItem('/partnershipApplications', 'briefcase-outline', 'Partnership Applications')
+                        )}
+                        {adminRole === 'super_admin' && (
+                            renderMenuItem('/manageStaff', 'people-outline', 'Manage Staff')
+                        )}
+                    </View>
+                )}
+
                 <View style={styles.primaryLinks}>
                     {/* <Text style={styles.sectionTitle}>Menu</Text> */}
 
@@ -269,6 +352,28 @@ const styles = StyleSheet.create({
     adminActiveButton: {
         borderWidth: 2,
         borderColor: '#10B981',
+    },
+    loggedInAsRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        paddingHorizontal: 4,
+    },
+    loggedInAsText: {
+        flex: 1,
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#374151',
+    },
+    adminLogoutButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        backgroundColor: '#B91C1C',
+        paddingVertical: 12,
+        borderRadius: 14,
+        width: '100%',
     },
     adminButtonText: {
         color: '#FFFFFF',

@@ -121,7 +121,9 @@ const CustomerLogin = () => {
                 inputRefs[0].current?.focus();
                 return;
             }
-            if (Platform.OS !== "web") {
+            // OneSignal is null in any environment lacking its native module
+            // (Expo Go, web) — see lib/oneSignal.js.
+            if (OneSignal) {
                 OneSignal.login(result.customer.phone);
                 OneSignal.User.addTag("role", "customer");
             }

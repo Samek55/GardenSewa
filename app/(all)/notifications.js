@@ -1,70 +1,105 @@
-import { Ionicons } from '@expo/vector-icons'; // Ensure @expo/vector-icons or react-native-vector-icons is installed
-import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { notificationsData } from '../../data/servicesList';
+import { listMyNotificationsAsCustomer, listMyNotificationsAsStaff } from '@/api/PostApiNotification';
+import { AdminAuthContext } from '@/context/AdminAuthContext';
+import { AuthContext } from '@/context/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useContext, useState } from 'react';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const FAQ = () => {
-    const [isMuted, setIsMuted] = useState(false)
-    const [hasUnread, setHasUnread] = useState(true)
+const formatDateTime = (iso) => {
+    const d = new Date(iso);
+    const date = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+    const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return { date, time };
+};
 
-    const toggleMute = () => {
-        setIsMuted(prev => !prev)
-    }
+const NotificationsInbox = () => {
+    const { isAdminLoggedIn, isAdminAuthLoading } = useContext(AdminAuthContext);
+    const { user, isLoading: isCustomerAuthLoading } = useContext(AuthContext);
 
-    const handleBellPress = () => {
-        setHasUnread(false)
-        toggleMute()
-    }
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const load = useCallback(async () => {
+        try {
+            const result = isAdminLoggedIn
+                ? await listMyNotificationsAsStaff()
+                : await listMyNotificationsAsCustomer(user?.phone);
+            if (result.success) setNotifications(result.notifications || []);
+        } catch (error) {
+            console.error('Could not load notifications:', error);
+        }
+    }, [isAdminLoggedIn, user?.phone]);
+
+    useFocusEffect(
+        useCallback(() => {
+            if (isAdminAuthLoading || isCustomerAuthLoading) return;
+            setLoading(true);
+            load().finally(() => setLoading(false));
+        }, [isAdminAuthLoading, isCustomerAuthLoading, load])
+    );
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        await load();
+        setRefreshing(false);
+    };
+
+    const handlePress = (item) => {
+        if (item.screen) router.push(item.screen);
+    };
 
     return (
-        <ScrollView style={styles.scrollview} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <ScrollView
+            style={styles.scrollview}
+            contentContainerStyle={styles.container}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+        >
             <View style={styles.fullContainer}>
-                {/* Header Row */}
                 <View style={styles.headerRow}>
                     <Text style={styles.pageHeader}>Notifications</Text>
-                    
-                    <TouchableOpacity 
-                        style={styles.bellButton} 
-                        onPress={handleBellPress}
-                        activeOpacity={0.7}
-                    >
-                        <Ionicons 
-                            name={isMuted ? 'notifications-off-outline' : 'notifications-outline'} 
-                            size={28} 
-                            color="#1a1a1a" 
-                        />
-                        {hasUnread && <View style={styles.unreadBadge} />}
-                    </TouchableOpacity>
+                    <Ionicons name="notifications-outline" size={28} color="#1a1a1a" />
                 </View>
 
                 <Text style={styles.subHeaderText}>Garden Sewa Notifications</Text>
 
-                {
-                    notificationsData?.map((notification, key) => {
+                {loading || isAdminAuthLoading || isCustomerAuthLoading ? (
+                    <ActivityIndicator style={{ marginTop: 30 }} size="large" color="#245d5a" />
+                ) : notifications.length === 0 ? (
+                    <View style={styles.emptyContainer}>
+                        <Ionicons name="notifications-off-outline" size={36} color="#94A3B8" />
+                        <Text style={styles.emptyText}>No notifications yet.</Text>
+                    </View>
+                ) : (
+                    notifications.map((notification) => {
+                        const { date, time } = formatDateTime(notification.created_at);
                         return (
                             <TouchableOpacity
-                                key={notification.id || key}
+                                key={notification.id}
                                 style={styles.notificationCard}
-                                activeOpacity={0.7}
+                                activeOpacity={notification.screen ? 0.7 : 1}
+                                onPress={() => handlePress(notification)}
                             >
                                 <View style={styles.cardContent}>
-                                    <Text style={styles.notificationText}>
-                                        {notification.message}
-                                    </Text>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={styles.notificationTitle}>{notification.title}</Text>
+                                        <Text style={styles.notificationText}>{notification.body}</Text>
+                                    </View>
 
                                     <View style={styles.dateTimeContainer}>
-                                        <Text style={styles.dateTimeText}>{notification.date}</Text>
-                                        <Text style={styles.dateTimeText}>{notification.time}</Text>
+                                        <Text style={styles.dateTimeText}>{date}</Text>
+                                        <Text style={styles.dateTimeText}>{time}</Text>
                                     </View>
                                 </View>
                             </TouchableOpacity>
-                        )
+                        );
                     })
-                }
+                )}
             </View>
         </ScrollView>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     scrollview: {
@@ -86,21 +121,6 @@ const styles = StyleSheet.create({
         color: '#1a1a1a',
         fontWeight: '700',
     },
-    bellButton: {
-        position: 'relative',
-        padding: 4,
-    },
-    unreadBadge: {
-        position: 'absolute',
-        top: 4,
-        right: 4,
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: '#ff4d4f',
-        borderWidth: 1.5,
-        borderColor: '#ffffff',
-    },
     subHeaderText: {
         fontSize: 14,
         color: '#58677b',
@@ -112,6 +132,16 @@ const styles = StyleSheet.create({
         gap: 12,
         paddingHorizontal: 8,
         borderRadius: 16,
+    },
+    emptyContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 40,
+        gap: 10,
+    },
+    emptyText: {
+        color: '#58677b',
+        fontSize: 14,
     },
     notificationCard: {
         backgroundColor: '#f0f7f6',
@@ -134,12 +164,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 16,
     },
-    notificationText: {
-        flex: 1,
+    notificationTitle: {
         color: '#1b4744',
         fontSize: 15,
+        fontWeight: '700',
+        marginBottom: 2,
+    },
+    notificationText: {
+        color: '#1b4744',
+        fontSize: 13,
         fontWeight: '500',
-        lineHeight: 20
+        lineHeight: 18,
     },
     dateTimeContainer: {
         alignItems: 'flex-end',
@@ -151,6 +186,6 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         lineHeight: 16,
     }
-})
+});
 
-export default FAQ
+export default NotificationsInbox;

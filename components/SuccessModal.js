@@ -1,7 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
-const SuccessAfterVerification = ({ visible, onClose, onClear }) => {
+const SuccessAfterVerification = ({
+  visible,
+  onClose,
+  onClear,
+  title = "Submitted!",
+  subtitle = "Your Application has been received successfully!",
+}) => {
 
 
   return (
@@ -17,9 +23,9 @@ const SuccessAfterVerification = ({ visible, onClose, onClear }) => {
             <Ionicons name="checkmark-done" size={48} color="#2C5E5A" />
           </View>
 
-          <Text style={styles.title}>Submitted!</Text>
+          <Text style={styles.title}>{title}</Text>
           <Text style={styles.subtitle}>
-            Your Application has been received successfully!
+            {subtitle}
           </Text>
           {/* <Text style={styles.questionText}>Would you like to clear the form?</Text> */}
 

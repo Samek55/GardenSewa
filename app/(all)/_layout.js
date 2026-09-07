@@ -86,6 +86,27 @@ export default function AllLayout() {
                     href: null
                 }}
             />
+            <Stack.Screen
+                name="updateProfile"
+                options={{
+                    title: "Update Profile",
+                    href: null
+                }}
+            />
+            <Stack.Screen
+                name="myBookings"
+                options={{
+                    title: "My Bookings",
+                    href: null
+                }}
+            />
+            <Stack.Screen
+                name="myBookingDetail"
+                options={{
+                    title: "Booking Details",
+                    href: null
+                }}
+            />
         </Stack>
     );
 }

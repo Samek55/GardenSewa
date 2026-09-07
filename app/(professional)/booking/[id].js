@@ -29,11 +29,6 @@ import { uploadPublicFile } from '../../../api/uploadToStorage';
 // own version doesn't have an arbitrary status editor either, just this.
 const STATUS_OPTIONS = ['Completed'];
 
-const maskPhoneNumber = (phone) => {
-    if (!phone) return '+977 98XXX28XX47';
-    return phone.replace(/(\d{2})\d{4}(\d{2})\d(\d{1})$/, '$1XXX$2XX$3');
-};
-
 const getOrdinalSuffix = (day) => {
     if (day > 3 && day < 21) return 'th';
     switch (day % 10) {
@@ -392,7 +387,7 @@ const IndividualBooking = () => {
 
     const handleSharePDF = async () => {
         try {
-            const displayPhone = isPhoneMasked ? maskPhoneNumber(booking.phone) : booking.phone;
+            const displayPhone = isPhoneMasked ? 'Locked — pay to unlock' : booking.phone;
             const htmlContent = `
                 <!DOCTYPE html>
                 <html>
@@ -490,9 +485,13 @@ const IndividualBooking = () => {
                         onPress={handleCallPhone}
                         activeOpacity={isPhoneMasked ? 1 : 0.7}
                     >
-                        <Ionicons name="call-outline" size={16} color="#245d5a" />
+                        <Ionicons name={isPhoneMasked ? 'lock-closed-outline' : 'call-outline'} size={16} color="#245d5a" />
                         <Text style={styles.phoneText}>
-                            {isPhoneMasked ? maskPhoneNumber(booking.phone) : booking.phone}
+                            {/* The server never sends a real phone at all until unlocked
+                                (see list-open-bookings' masking) — there is nothing to
+                                partially obscure, so this says so plainly instead of
+                                showing a fake-looking placeholder number. */}
+                            {isPhoneMasked ? 'Contact locked — pay to view' : booking.phone}
                         </Text>
                     </TouchableOpacity>
 

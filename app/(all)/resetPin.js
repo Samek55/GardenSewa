@@ -3,6 +3,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+    ActivityIndicator,
     Alert,
     KeyboardAvoidingView,
     Platform,
@@ -14,6 +15,7 @@ import {
     useWindowDimensions,
     View,
 } from "react-native";
+import { resetPin as resetPinRequest, sendOtp } from "../../api/PostApiOtp";
 
 const ResetPin = () => {
     const router = useRouter();
@@ -35,6 +37,9 @@ const ResetPin = () => {
     const [focusedNewPinIndex, setFocusedNewPinIndex] = useState(null);
     const [focusedConfirmPinIndex, setFocusedConfirmPinIndex] = useState(null);
 
+    const [isSending, setIsSending] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+
     const { width: screenWidth } = useWindowDimensions();
 
     const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
@@ -52,11 +57,29 @@ const ResetPin = () => {
         }, [])
     );
 
+    // Fires the real OTP the moment the phone number is known — resetPin.js was
+    // previously entirely disconnected from any backend: this screen never sent
+    // a code, never verified one, and "Save" just showed a fake success alert
+    // with nothing written to the database.
     useEffect(() => {
-        if (phoneParam) {
-            const rawDigits = String(phoneParam).replace(/[^0-9]/g, "").slice(0, 10);
-            setPhoneNumber(rawDigits);
-        }
+        if (!phoneParam) return;
+        const rawDigits = String(phoneParam).replace(/[^0-9]/g, "").slice(0, 10);
+        setPhoneNumber(rawDigits);
+        if (rawDigits.length !== 10) return;
+
+        (async () => {
+            setIsSending(true);
+            try {
+                const result = await sendOtp(rawDigits, "pin-reset");
+                if (!result.success) {
+                    Alert.alert("Could Not Send Code", result.message || "Please try again.");
+                }
+            } catch (error) {
+                Alert.alert("Could Not Send Code", error.message || "Something went wrong.");
+            } finally {
+                setIsSending(false);
+            }
+        })();
     }, [phoneParam]);
 
     useEffect(() => {
@@ -113,13 +136,25 @@ const ResetPin = () => {
         }
     };
 
-    const handleResend = () => {
-        if (!canResend) return;
-        setSeconds(60);
-        setCanResend(false);
-        setOtp(["", "", "", ""]);
-        otpRefs[0].current?.focus();
-        Alert.alert("Code Sent", `A new OTP code has been sent to ${phoneNumber || "your phone number"}.`);
+    const handleResend = async () => {
+        if (!canResend || isSending || !phoneNumber) return;
+        setIsSending(true);
+        try {
+            const result = await sendOtp(phoneNumber, "pin-reset");
+            if (!result.success) {
+                Alert.alert("Could Not Resend", result.message || "Please try again.");
+                return;
+            }
+            setSeconds(60);
+            setCanResend(false);
+            setOtp(["", "", "", ""]);
+            otpRefs[0].current?.focus();
+            Alert.alert("Code Sent", `A new OTP code has been sent to ${phoneNumber}.`);
+        } catch (error) {
+            Alert.alert("Could Not Resend", error.message || "Something went wrong.");
+        } finally {
+            setIsSending(false);
+        }
     };
 
     // Step 2 -> Step 3
@@ -132,10 +167,13 @@ const ResetPin = () => {
         setStep(3);
     };
 
-    // Step 3 submission
-    const handleSave = () => {
+    // Step 3 submission — verification and the actual write both happen here,
+    // in one call to reset-pin, the same way HomeSewa's set-pin checks the OTP
+    // and writes the new PIN together rather than as two separate steps.
+    const handleSave = async () => {
         const fullNewPin = newPin.join("");
         const fullConfirmPin = confirmPin.join("");
+        const fullOtp = otp.join("");
 
         if (fullNewPin.length < 4) {
             Alert.alert("Incomplete PIN", "Please enter a 4-digit new PIN.");
@@ -152,15 +190,34 @@ const ResetPin = () => {
             return;
         }
 
-        Alert.alert("Success", "Your PIN has been successfully reset!", [
-            {
-                text: "OK",
-                onPress: () => {
-                    resetForm();
-                    router.back();
+        if (isSaving) return;
+        setIsSaving(true);
+        try {
+            const result = await resetPinRequest(phoneNumber, fullOtp, fullNewPin);
+            if (!result.success) {
+                Alert.alert("Could Not Reset PIN", result.message || "Please try again.");
+                // A wrong/expired code means step 3's OTP is stale — send them
+                // back to re-enter it rather than letting them keep retrying
+                // step 3 with a code that will never succeed.
+                setStep(2);
+                setOtp(["", "", "", ""]);
+                return;
+            }
+
+            Alert.alert("Success", "Your PIN has been successfully reset! Please log in with your new PIN.", [
+                {
+                    text: "OK",
+                    onPress: () => {
+                        resetForm();
+                        router.replace("/adminLogin");
+                    },
                 },
-            },
-        ]);
+            ]);
+        } catch (error) {
+            Alert.alert("Could Not Reset PIN", error.message || "Something went wrong. Please try again.");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleBackOrCancel = () => {
@@ -247,10 +304,14 @@ const ResetPin = () => {
 
                                     <View style={styles.resendContainer}>
                                         {canResend ? (
-                                            <TouchableOpacity onPress={handleResend} activeOpacity={0.7}>
+                                            <TouchableOpacity onPress={handleResend} activeOpacity={0.7} disabled={isSending}>
                                                 <Text style={styles.resendBtnText}>
-                                                    Didn't get code?{" "}
-                                                    <Text style={styles.resendBtnBold}>Resend Code</Text>
+                                                    {isSending ? "Sending..." : (
+                                                        <>
+                                                            Didn't get code?{" "}
+                                                            <Text style={styles.resendBtnBold}>Resend Code</Text>
+                                                        </>
+                                                    )}
                                                 </Text>
                                             </TouchableOpacity>
                                         ) : (
@@ -378,8 +439,13 @@ const ResetPin = () => {
                                             activeOpacity={0.85}
                                             style={styles.brandButton}
                                             onPress={handleSave}
+                                            disabled={isSaving}
                                         >
-                                            <Text style={styles.brandButtonText}>Save</Text>
+                                            {isSaving ? (
+                                                <ActivityIndicator color="#fff" />
+                                            ) : (
+                                                <Text style={styles.brandButtonText}>Save</Text>
+                                            )}
                                         </TouchableOpacity>
                                     </View>
                                 </View>

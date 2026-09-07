@@ -35,8 +35,8 @@ const SideBarModalLoggedIn = ({ onClose }) => {
             return pathname.startsWith('/services') || pathname.startsWith('/(tabs)/services');
         }
 
-        if (targetPath === '/booking') {
-            return pathname.startsWith('/booking');
+        if (targetPath === '/myBookings') {
+            return pathname.startsWith('/myBookings') || pathname.startsWith('/myBookingDetail');
         }
 
         return pathname === targetPath || pathname === `/(tabs)${targetPath}`;
@@ -99,25 +99,16 @@ const SideBarModalLoggedIn = ({ onClose }) => {
                 <View style={styles.primaryLinks}>
                     {renderMenuItem('/(tabs)', <SimpleLineIcons name="home" />, 'Home')}
                     {renderMenuItem('/(tabs)/services', <Feather name="tool" />, 'Services')}
-                    {renderMenuItem('/booking', <Ionicons name="time-outline" />, 'Booking History')}
+                    {renderMenuItem('/myBookings', <Ionicons name="time-outline" />, 'My Bookings')}
                     {renderMenuItem('/notifications', <Ionicons name="notifications-outline" />, 'Notifications')}
                     {renderMenuItem('/faq', <Ionicons name="help-circle-outline" />, 'FAQs')}
                     {renderMenuItem('/glossary', <Ionicons name="book-outline" />, 'Glossary')}
                     {renderMenuItem('/favorites', <Ionicons name="heart-outline" />, 'Favorites')}
-                    {renderMenuItem('/resetPin', <Ionicons name="key-outline" />, 'Change PIN')}
                 </View>
             </ScrollView>
 
-            {/* Bottom Update Profile / Logout Buttons */}
+            {/* Bottom Logout Button */}
             <View style={styles.bottomButtonWrapper}>
-                <TouchableOpacity
-                    style={styles.updateProfileButton}
-                    activeOpacity={0.8}
-                    onPress={() => handleNavigation('/updateProfile')}
-                >
-                    <Ionicons name="person-outline" size={18} color="#FFFFFF" />
-                    <Text style={styles.updateProfileButtonText}>Update Profile</Text>
-                </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.logoutButton}
                     activeOpacity={0.8}
@@ -234,21 +225,6 @@ const styles = StyleSheet.create({
         paddingTop: 8,
         backgroundColor: '#ffffff',
     },
-    updateProfileButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        backgroundColor: '#245d5a',
-        paddingVertical: 12,
-        borderRadius: 25,
-        width: '100%',
-    },
-    updateProfileButtonText: {
-        color: '#FFFFFF',
-        fontWeight: '700',
-        fontSize: 15,
-    },
     logoutButton: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -258,7 +234,6 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         borderRadius: 25,
         width: '100%',
-        marginTop: 10,
     },
     logoutButtonText: {
         color: '#245d5a',

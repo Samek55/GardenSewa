@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useEffect, useState } from 'react';
-import { Platform } from 'react-native';
 import { OneSignal } from '../lib/oneSignal';
 
 export const AdminAuthContext = createContext();
@@ -46,10 +45,18 @@ export const AdminAuthProvider = ({ children }) => {
         // send-notification can target them directly — see its 'gardener-application-
         // received' purpose, which looks up admin phones by role and pushes via
         // include_aliases rather than a broad tag filter.
-        if (Platform.OS !== 'web' && phone) {
+        if (OneSignal && phone) {
             OneSignal.login(phone);
             OneSignal.User.addTag('role', role);
         }
+    };
+
+    // Called after Update Profile saves a new name, so the drawer's "logged in
+    // as" line and anywhere else reading adminDisplayName reflect it without
+    // requiring a re-login.
+    const updateAdminDisplayName = async (displayName) => {
+        setAdminDisplayName(displayName);
+        await AsyncStorage.setItem('adminDisplayName', displayName || '');
     };
 
     const adminLogoutLocal = async () => {
@@ -59,7 +66,7 @@ export const AdminAuthProvider = ({ children }) => {
 
         await AsyncStorage.multiRemove(['adminSessionToken', 'adminRole', 'adminDisplayName']);
 
-        if (Platform.OS !== 'web') {
+        if (OneSignal) {
             OneSignal.logout();
         }
     };
@@ -73,6 +80,7 @@ export const AdminAuthProvider = ({ children }) => {
                 isAdminAuthLoading,
                 adminLoginSuccess,
                 adminLogoutLocal,
+                updateAdminDisplayName,
             }}
         >
             {children}

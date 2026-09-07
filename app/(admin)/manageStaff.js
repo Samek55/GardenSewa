@@ -33,7 +33,7 @@ const CITY_NAMES = cityData.map((c) => c.name);
 const emptyForm = { phone: '', fullName: '', pin: '', role: 'admin', allowedCities: [] };
 
 export default function ManageStaff() {
-    const { adminRole } = useContext(AdminAuthContext);
+    const { adminRole, isAdminAuthLoading } = useContext(AdminAuthContext);
 
     const [admins, setAdmins] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -61,15 +61,23 @@ export default function ManageStaff() {
     }, []);
 
     useEffect(() => {
+        // Wait for AdminAuthContext to actually finish reading AsyncStorage first —
+        // adminRole starts out null on every fresh mount (e.g. a hard page reload,
+        // or a deep link straight to this route) until that read resolves, so
+        // redirecting on `adminRole !== 'super_admin'` without this guard fires a
+        // false-positive redirect before the real role is even known, and on web
+        // that redirect can fire before the root Stack has mounted at all,
+        // crashing with "navigate before mounting the Root Layout component."
+        if (isAdminAuthLoading) return;
         if (adminRole !== 'super_admin') {
             router.replace('/(admin)/gardenerApplications');
             return;
         }
         setLoading(true);
         load().finally(() => setLoading(false));
-    }, [adminRole, load]);
+    }, [isAdminAuthLoading, adminRole, load]);
 
-    if (adminRole !== 'super_admin') return null;
+    if (isAdminAuthLoading || adminRole !== 'super_admin') return null;
 
     const handleRefresh = async () => {
         setRefreshing(true);

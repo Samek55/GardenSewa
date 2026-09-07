@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { useFormik } from 'formik';
 import { useState } from 'react';
 import {
+    ActivityIndicator,
     Alert,
     Image,
     Pressable,
@@ -18,6 +19,10 @@ import { NP } from 'react-native-country-flag-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { array, boolean, object, string } from 'yup';
 
+import { notifyPartnershipApplicationReceived } from '../../api/PostApiNotification';
+import { sendOtp } from '../../api/PostApiOtp';
+import { createPartnershipApplication } from '../../api/PostApiPartnership';
+import { uploadPublicFile } from '../../api/uploadToStorage';
 import {
     businessType,
     cityData,
@@ -25,6 +30,8 @@ import {
     serviceOfferedData,
     sourceData,
 } from '../../data/servicesList';
+
+const nullIfEmpty = (v) => (typeof v === 'string' && v.trim() === '' ? null : v);
 
 const MAX_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
@@ -217,6 +224,7 @@ export default function PartnerBook() {
     const [selectedCompanyImages, setSelectedCompanyImages] = useState([]);
     const [selectedCertificates, setSelectedCertificates] = useState([]);
     const [activeDropdown, setActiveDropdown] = useState(null);
+    const [submitting, setSubmitting] = useState(false);
 
     const toggleDropdown = (name) => {
         setActiveDropdown((prev) => (prev === name ? null : name));
@@ -238,19 +246,7 @@ export default function PartnerBook() {
             terms: false,
         },
         validationSchema,
-        onSubmit: (values) => {
-            if (selectedCompanyImages.length === 0) {
-                Alert.alert('Validation Error', 'Please upload at least one Company Photo');
-                return;
-            }
-            if (selectedCertificates.length === 0) {
-                Alert.alert('Validation Error', 'Please upload Registration Documents');
-                return;
-            }
-
-            Alert.alert("Success", "Your partner application has been submitted!");
-            handleClearForm();
-        },
+        onSubmit: () => { },
     });
 
     const formatPhone = (text) => {
@@ -354,12 +350,59 @@ export default function PartnerBook() {
 
         }
         else {
-            formik.handleSubmit();
-            router.push({
-                pathname: '/phoneVerification',
-                params: { phone: formik.values.phone, requestType: 'Become a Partner' },
+            setSubmitting(true);
+            try {
+                const companyPhotos = await Promise.all(
+                    selectedCompanyImages.map((img) => uploadPublicFile(img.uri, img.fileName))
+                );
+                const registrationDocuments = await Promise.all(
+                    selectedCertificates.map((img) => uploadPublicFile(img.uri, img.fileName))
+                );
 
-            });
+                const v = formik.values;
+                await createPartnershipApplication({
+                    full_name: v.name,
+                    organization: v.organization,
+                    phone: v.phone,
+                    email: nullIfEmpty(v.email),
+                    area: v.area,
+                    no_of_employees: v.noOfEmployees,
+                    business_type: v.businessType,
+                    services_offered: v.servicesOffered,
+                    partnership_interest: v.partnershipInterest,
+                    hear_about_us: v.hearAboutUs,
+                    message: nullIfEmpty(v.message),
+                    company_photos: companyPhotos,
+                    registration_documents: registrationDocuments,
+                });
+
+                const phone = v.phone;
+
+                // The application is already saved at this point — a failed OTP
+                // send shouldn't block the user from proceeding, just prevent
+                // them from completing verification until they hit Resend.
+                try {
+                    await sendOtp(phone, 'become-partner', v.name);
+                } catch (otpError) {
+                    console.error('send-otp error:', otpError);
+                }
+
+                try {
+                    await notifyPartnershipApplicationReceived(v.organization);
+                } catch (notifyError) {
+                    console.error('send-notification error:', notifyError);
+                }
+
+                handleClearForm();
+                router.push({
+                    pathname: '/phoneVerification',
+                    params: { phone, requestType: 'Become a Partner', otpPurpose: 'become-partner' },
+                });
+            } catch (error) {
+                Alert.alert('Submission Failed', error.message || 'Something went wrong. Please try again.');
+            } finally {
+                setSubmitting(false);
+            }
         }
     };
 
@@ -637,8 +680,8 @@ export default function PartnerBook() {
                         <Text style={styles.label}>Clear Form</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.submitButton} onPress={handleSubmitWithValidation}>
-                        <Text style={styles.submitButtonText}>Submit</Text>
+                    <TouchableOpacity style={styles.submitButton} onPress={handleSubmitWithValidation} disabled={submitting}>
+                        {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitButtonText}>Submit</Text>}
                     </TouchableOpacity>
                 </View>
             </View>

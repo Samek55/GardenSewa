@@ -5,3 +5,6 @@ export const sendOtp = (phone, purpose, name) =>
 
 export const verifyOtp = (phone, purpose, code) =>
     invokeEdgeFunction('verify-otp', { phone, purpose, code }, 'Verification failed');
+
+export const resetPin = (phone, otpCode, newPin) =>
+    invokeEdgeFunction('reset-pin', { phone, otpCode, newPin }, 'Could not reset PIN');

@@ -1,4 +1,5 @@
 import PopUpAd from '@/components/PopUpAd';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Link, router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -7,7 +8,6 @@ import {
     FlatList,
     Image,
     InteractionManager,
-    Linking,
     Modal,
     Pressable,
     StyleSheet,
@@ -17,8 +17,15 @@ import {
 } from "react-native";
 import { NP } from 'react-native-country-flag-icons';
 
+import { sendOtp } from '../../api/PostApiOtp';
 import ServiceCard from "../../components/ServiceCard";
 import { services } from "../../data/servicesList";
+
+// Client-side spam guard only, matching HomeSewa's NumberBar.tsx — the real
+// abuse protection is send-otp's own per-phone daily cap/cooldown server-side;
+// this just avoids bothering the same device repeatedly.
+const LAST_HELP_REQUEST_KEY = 'lastHelpRequestAt';
+const HELP_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
 const { width } = Dimensions.get('window');
 const TOP_CARD_WIDTH = (width - 36 - 2 - 24 - 10) / 2.6;
@@ -68,25 +75,57 @@ export default function Index() {
         };
     }, [filteredServicesTop.length]);
 
-    const onWhatsappOpen = async () => {
-        const phoneNumber = "+ 977 9852024365";
-        const message = "Hello! I am looking for a gardening service";
-        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-        try {
-            const supported = await Linking.canOpenURL(url);
-            if (supported) {
-                await Linking.openURL(url);
-            } else {
-                Alert.alert("Error", "WhatsApp is not installed on this device");
-            }
-        } catch (error) {
-            console.error("An error occurred", error);
-        }
-    };
-
     const formattedPhoneValue = phone.length === 10
         ? `${phone.slice(0, 5)} ${phone.slice(5, 7)} ${phone.slice(7, 10)}`
         : phone;
+
+    // Was previously wired to onWhatsappOpen() — tapping Confirm just opened
+    // WhatsApp instead of actually submitting anything, so no help request
+    // this widget ever "sent" was real. Now it actually sends an OTP and
+    // routes to phoneVerification, which submits the request once the code
+    // checks out (see submit-helpbox).
+    const handleHelpRequest = async () => {
+        if (phone.length !== 10) {
+            Alert.alert('Invalid Number', 'Please enter a valid 10-digit phone number.');
+            return;
+        }
+
+        const lastRequestRaw = await AsyncStorage.getItem(LAST_HELP_REQUEST_KEY);
+        const lastRequestAt = lastRequestRaw ? Number(lastRequestRaw) : 0;
+        const elapsed = Date.now() - lastRequestAt;
+        if (elapsed < HELP_COOLDOWN_MS) {
+            const hoursLeft = Math.ceil((HELP_COOLDOWN_MS - elapsed) / (60 * 60 * 1000));
+            Alert.alert('Please Wait', `You've already sent a help request. Please try again in ${hoursLeft} hour${hoursLeft === 1 ? '' : 's'}.`);
+            return;
+        }
+
+        Alert.alert(
+            'Confirm Help Request',
+            `Send a help request from +977 ${phone}? \nOur team will contact you shortly`,
+            [
+                { text: 'CANCEL', style: 'cancel' },
+                {
+                    text: 'CONFIRM',
+                    onPress: async () => {
+                        try {
+                            const result = await sendOtp(phone, 'helpbox');
+                            if (!result.success) {
+                                Alert.alert('Could Not Send Code', result.message || 'Please try again.');
+                                return;
+                            }
+                            await AsyncStorage.setItem(LAST_HELP_REQUEST_KEY, String(Date.now()));
+                            router.push({
+                                pathname: '/phoneVerification',
+                                params: { phone, requestType: 'Help Request', otpPurpose: 'helpbox' },
+                            });
+                        } catch (error) {
+                            Alert.alert('Could Not Send Code', error.message || 'Something went wrong. Please try again.');
+                        }
+                    },
+                },
+            ]
+        );
+    };
 
     return (
         <View style={styles.screenContainer}>
@@ -118,16 +157,7 @@ export default function Index() {
                         />
                         <Pressable
                             style={styles.helpButton}
-                            onPress={() => {
-                                Alert.alert('Confirm Help Request', `Send a help request from +977 ${phone}? \nOur team will contact you shortly`, [
-                                    {
-                                        text: 'CANCEL',
-                                        onPress: () => console.log('Cancel Pressed'),
-                                        style: 'cancel',
-                                    },
-                                    { text: 'CONFIRM', onPress: () => { onWhatsappOpen() } },
-                                ])
-                            }}
+                            onPress={handleHelpRequest}
                         >
                             <Text style={styles.helpButtonText}>Help</Text>
                         </Pressable>

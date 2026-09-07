@@ -10,7 +10,20 @@ import { supabaseAdmin } from '../_shared/supabaseAdmin.ts';
 // looked up by an id the client supplies — the client never gets to name a phone
 // number directly, only point at a request/booking id it should already know
 // (its own submission's id, or one visible in an admin-only list).
-interface Resolved { phones: string[]; title: string; body: string; screen?: string }
+// `audience` here is what actually gets persisted to the notifications log
+// (see 0007/0015's audience CHECK) and is what list-my-notifications later
+// filters by — 'admin_reviewers'/'gardener_specific'/'customer_specific'
+// broadcast-vs-single-recipient distinctions, matching HomeSewa/RocketSingh's
+// own real in-app notification inboxes rather than fire-and-forget push only.
+// `linkId` is the row id a tap should deep-link to (paired with `screen`).
+interface Resolved {
+  phones: string[];
+  title: string;
+  body: string;
+  screen?: string;
+  audience: 'admin_reviewers' | 'gardener_specific' | 'customer_specific';
+  linkId?: string;
+}
 
 const PURPOSE_HANDLERS: Record<string, (ctx: Record<string, any>) => Promise<Resolved | null>> = {
   // Admin/BDM/Super Admin can act on a new gardener application (see
@@ -28,6 +41,24 @@ const PURPOSE_HANDLERS: Record<string, (ctx: Record<string, any>) => Promise<Res
       title: 'New Gardener Application',
       body: `${ctx.applicantName || 'An applicant'} has submitted a Gardener application. Review it in Gardener Applications.`,
       screen: '/gardenerApplications',
+      audience: 'admin_reviewers',
+    };
+  },
+
+  // Business-development-adjacent, same reviewer set as gardener applications.
+  'partnership-application-received': async (ctx) => {
+    const { data } = await supabaseAdmin
+      .from('admin')
+      .select('phone')
+      .in('role', ['super_admin', 'admin', 'bdm'])
+      .eq('status', 'Active');
+    const phones = (data || []).map((a) => a.phone).filter(Boolean);
+    return {
+      phones,
+      title: 'New Partnership Application',
+      body: `${ctx.organization || 'A business'} has applied to become a partner.`,
+      screen: '/partnershipApplications',
+      audience: 'admin_reviewers',
     };
   },
 
@@ -43,6 +74,8 @@ const PURPOSE_HANDLERS: Record<string, (ctx: Record<string, any>) => Promise<Res
       title: 'Payment Approved',
       body: `Your payment for Booking #${reqRow.booking_id} has been approved — you can now view the customer's contact details.`,
       screen: `/booking/${reqRow.booking_id}`,
+      audience: 'gardener_specific',
+      linkId: String(reqRow.booking_id),
     };
   },
 
@@ -58,6 +91,8 @@ const PURPOSE_HANDLERS: Record<string, (ctx: Record<string, any>) => Promise<Res
       title: 'Payment Not Approved',
       body: `Your payment proof for Booking #${reqRow.booking_id} could not be verified. Please try again or contact support.`,
       screen: `/booking/${reqRow.booking_id}`,
+      audience: 'gardener_specific',
+      linkId: String(reqRow.booking_id),
     };
   },
 
@@ -72,6 +107,8 @@ const PURPOSE_HANDLERS: Record<string, (ctx: Record<string, any>) => Promise<Res
       phones: [booking.phone],
       title: 'Gardener Assigned',
       body: `A gardener has accepted your ${booking.service} request and will be in touch soon.`,
+      audience: 'customer_specific',
+      linkId: String(ctx.bookingId),
     };
   },
 
@@ -86,6 +123,8 @@ const PURPOSE_HANDLERS: Record<string, (ctx: Record<string, any>) => Promise<Res
       phones: [booking.phone],
       title: 'Job Completed',
       body: `Your ${booking.service} service has been marked as completed. Thank you for using Garden Sewa!`,
+      audience: 'customer_specific',
+      linkId: String(ctx.bookingId),
     };
   },
 };
@@ -110,7 +149,7 @@ Deno.serve(async (req) => {
       // match a row — but nothing to push.
       return json({ success: true, sent: false });
     }
-    const { phones, title, body, screen } = resolved;
+    const { phones, title, body, screen, audience, linkId } = resolved;
 
     const response = await fetch('https://api.onesignal.com/notifications', {
       method: 'POST',
@@ -134,12 +173,19 @@ Deno.serve(async (req) => {
     }
 
     // Awaited deliberately — an un-awaited insert risks the edge runtime tearing
-    // down before it completes, silently dropping the audit-log row.
+    // down before it completes, silently dropping the audit-log row. Only
+    // 'gardener_specific'/'customer_specific' carry a single audience_phone —
+    // 'admin_reviewers' can resolve to several admin phones at once, and any
+    // matching admin viewer should see it, not just whichever phone happens
+    // to be first in the array.
+    const audiencePhone = audience === 'admin_reviewers' ? null : phones[0];
     const { error } = await supabaseAdmin.from('notifications').insert([{
       title,
       body,
       screen: screen || null,
-      audience: purpose,
+      link_id: linkId || null,
+      audience,
+      audience_phone: audiencePhone,
     }]);
     if (error) console.error('notifications log insert failed:', error);
 
