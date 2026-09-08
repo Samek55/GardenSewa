@@ -2,7 +2,7 @@
   "expo": {
     "name": "GardenSewa",
     "slug": "gardensewa",
-    "owner": "pratigyaluitel",
+    "owner": "sriyog",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -91,7 +91,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "1968f487-c034-420a-8219-ebe8f5a1c759"
+        "projectId": "3297caa6-a640-45d4-b008-b360bd2dc9fb"
       }
     }
   }
