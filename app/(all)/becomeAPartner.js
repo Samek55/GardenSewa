@@ -263,10 +263,8 @@ export default function PartnerBook() {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ['images'],
-                allowsEditing: true,
                 quality: 1,
                 selectionLimit: 5,
-                aspect: [1, 1]
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {

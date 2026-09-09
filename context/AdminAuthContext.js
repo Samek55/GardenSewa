@@ -8,6 +8,7 @@ export const AdminAuthProvider = ({ children }) => {
     const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
     const [adminRole, setAdminRole] = useState(null);
     const [adminDisplayName, setAdminDisplayName] = useState(null);
+    const [adminPhone, setAdminPhone] = useState(null);
     const [isAdminAuthLoading, setIsAdminAuthLoading] = useState(true);
 
     useEffect(() => {
@@ -16,11 +17,13 @@ export const AdminAuthProvider = ({ children }) => {
                 const token = await AsyncStorage.getItem('adminSessionToken');
                 const role = await AsyncStorage.getItem('adminRole');
                 const displayName = await AsyncStorage.getItem('adminDisplayName');
+                const phone = await AsyncStorage.getItem('adminPhone');
 
                 if (token && role) {
                     setIsAdminLoggedIn(true);
                     setAdminRole(role);
                     setAdminDisplayName(displayName);
+                    setAdminPhone(phone);
                 }
             } catch (error) {
                 console.error('Failed to load admin auth state:', error);
@@ -36,10 +39,12 @@ export const AdminAuthProvider = ({ children }) => {
         setIsAdminLoggedIn(true);
         setAdminRole(role);
         setAdminDisplayName(displayName);
+        setAdminPhone(phone || null);
 
         await AsyncStorage.setItem('adminSessionToken', sessionToken);
         await AsyncStorage.setItem('adminRole', role);
         await AsyncStorage.setItem('adminDisplayName', displayName || '');
+        await AsyncStorage.setItem('adminPhone', phone || '');
 
         // Associates this device with the admin's phone (OneSignal external_id) so
         // send-notification can target them directly — see its 'gardener-application-
@@ -63,8 +68,9 @@ export const AdminAuthProvider = ({ children }) => {
         setIsAdminLoggedIn(false);
         setAdminRole(null);
         setAdminDisplayName(null);
+        setAdminPhone(null);
 
-        await AsyncStorage.multiRemove(['adminSessionToken', 'adminRole', 'adminDisplayName']);
+        await AsyncStorage.multiRemove(['adminSessionToken', 'adminRole', 'adminDisplayName', 'adminPhone']);
 
         if (OneSignal) {
             OneSignal.logout();
@@ -77,6 +83,7 @@ export const AdminAuthProvider = ({ children }) => {
                 isAdminLoggedIn,
                 adminRole,
                 adminDisplayName,
+                adminPhone,
                 isAdminAuthLoading,
                 adminLoginSuccess,
                 adminLogoutLocal,

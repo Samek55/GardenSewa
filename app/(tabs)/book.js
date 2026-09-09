@@ -153,10 +153,8 @@ export default function Book() {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ['images'],
-                allowsEditing: true,
                 quality: 1,
                 selectionLimit: 5,
-                aspect: [1, 1]
             });
 
             if (!result.canceled) {
@@ -190,8 +188,6 @@ export default function Book() {
         if (firstError) {
             formik.setTouched({ [firstError]: true });
             Alert.alert('Validation Error', errors[firstError]);
-        } else if (selectedImages.length == 0) {
-            Alert.alert('Validation Error', "Select at least one image")
         } else {
             formik.handleSubmit();
         }
@@ -279,7 +275,7 @@ export default function Book() {
                     {/* Start Date */}
                     <View style={styles.individualContainer}>
                         <Text style={styles.label}>
-                            Choose Date <Text style={styles.asterisk}>*</Text>
+                            Choose Starting Date <Text style={styles.asterisk}>*</Text>
                         </Text>
                         <TouchableOpacity
                             style={styles.dropdownTrigger}
@@ -323,7 +319,7 @@ export default function Book() {
                     {/* End Date */}
                     <View style={styles.individualContainer}>
                         <Text style={styles.label}>
-                            Service Ending Date
+                            Choose Ending Date
                         </Text>
                         <TouchableOpacity
                             style={styles.dropdownTrigger}
@@ -343,11 +339,13 @@ export default function Book() {
                                     setActiveDropdown(null);
                                 }}
                                 markedDates={{
-                                    [today]: {
-                                        selected: true,
-                                        selectedColor: '#629f9c',
-                                        selectedTextColor: '#ffffff',
-                                    },
+                                    ...(formik.values.startDate && {
+                                        [formik.values.startDate]: {
+                                            selected: true,
+                                            selectedColor: '#629f9c',
+                                            selectedTextColor: '#ffffff',
+                                        },
+                                    }),
                                     ...(formik.values.endDate && {
                                         [formik.values.endDate]: {
                                             selected: true,

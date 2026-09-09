@@ -337,11 +337,11 @@ export default function JoinProfessional() {
 
     const handleImagePick = async (type) => {
         try {
+            const isProfilePicture = type === 'profile';
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ['images'],
-                allowsEditing: true,
                 quality: 1,
-                aspect: [1, 1],
+                ...(isProfilePicture ? { allowsEditing: true, aspect: [1, 1] } : {}),
             });
 
             if (!result.canceled) {

@@ -11,3 +11,11 @@ export const acceptBooking = (bookingId, dealAmount, dealNote) =>
 
 export const completeBooking = (bookingId, code, completionPhotos) =>
     invokeEdgeFunction('complete-booking', { bookingId, code, completionPhotos }, 'Could not mark this job as completed', { requireSession: true });
+
+export const updateBookingSchedule = (bookingId, code, { budget, startDate, endDate, workDescription }) =>
+    invokeEdgeFunction(
+        'update-booking-schedule',
+        { bookingId, code, budget, startDate, endDate, workDescription },
+        'Could not update this booking',
+        { requireSession: true }
+    );

@@ -327,7 +327,7 @@ export default function SubmitBookingForCustomer() {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F5F7F7' },
     header: {
-        backgroundColor: '#245d5a', paddingTop: 50, paddingBottom: 16, paddingHorizontal: 16,
+        backgroundColor: '#245d5a', paddingTop: 14, paddingBottom: 12, paddingHorizontal: 16,
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     },
     headerTitle: { color: '#fff', fontSize: 16, fontWeight: '700', flex: 1, textAlign: 'center' },

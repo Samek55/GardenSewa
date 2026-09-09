@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
       query = supabaseAdmin
         .from('notifications')
         .select(SELECT_COLUMNS)
-        .or(`and(audience.eq.gardener_specific,audience_phone.eq.${account.phone}),audience.eq.all`);
+        .or(`and(audience.eq.gardener_specific,audience_phone.eq.${account.phone}),audience.eq.gardener_all,audience.eq.all`);
     } else if (session && BACK_OFFICE_ROLES.has(session.role)) {
       query = supabaseAdmin
         .from('notifications')
@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
         query = supabaseAdmin
           .from('notifications')
           .select(SELECT_COLUMNS)
-          .or(`and(audience.eq.customer_specific,audience_phone.eq.${cleaned}),audience.eq.all`);
+          .or(`and(audience.eq.customer_specific,audience_phone.eq.${cleaned}),audience.eq.customer_all,audience.eq.all`);
       } else {
         // No session and no phone — an anonymous visitor. Not an error, just
         // nothing personal to show; company-wide broadcasts only.

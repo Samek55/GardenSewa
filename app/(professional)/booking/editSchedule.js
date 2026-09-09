@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
+    ActivityIndicator,
     Alert,
     Modal,
     StyleSheet,
@@ -13,6 +14,9 @@ import {
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+
+import { updateBookingSchedule } from '../../../api/PostApiBookingGardener';
+import { sendOtp } from '../../../api/PostApiOtp';
 
 const today = new Date().toISOString().split('T')[0];
 
@@ -36,7 +40,6 @@ const EditSchedule = () => {
 
     // OTP Modal States
     const [isOtpModalVisible, setIsOtpModalVisible] = useState(false);
-    const [generatedOtp, setGeneratedOtp] = useState('');
     const [otp, setOtp] = useState(['', '', '', '']);
     const [timer, setTimer] = useState(60);
     const [canResend, setCanResend] = useState(false);
@@ -55,15 +58,30 @@ const EditSchedule = () => {
         return () => clearInterval(interval);
     }, [isOtpModalVisible, timer]);
 
-    const sendOtpCode = () => {
-        const otpCode = __DEV__ ? '1234' : Math.floor(1000 + Math.random() * 9000).toString();
-        setGeneratedOtp(otpCode);
-        setOtp(['', '', '', '']);
-        setTimer(60);
-        setCanResend(false);
+    const [sendingOtp, setSendingOtp] = useState(false);
+    const [updating, setUpdating] = useState(false);
+
+    const sendOtpCode = async () => {
+        setSendingOtp(true);
+        try {
+            const result = await sendOtp(phone, 'schedule-update', fullName);
+            if (!result.success) {
+                Alert.alert('Could Not Send Code', result.message || 'Please try again.');
+                return false;
+            }
+            setOtp(['', '', '', '']);
+            setTimer(60);
+            setCanResend(false);
+            return true;
+        } catch (error) {
+            Alert.alert('Could Not Send Code', error.message || 'Something went wrong. Please try again.');
+            return false;
+        } finally {
+            setSendingOtp(false);
+        }
     };
 
-    const handleUpdate = () => {
+    const handleUpdate = async () => {
         if (!startDate) {
             Alert.alert('Validation Error', 'Start date is required');
             return;
@@ -72,9 +90,13 @@ const EditSchedule = () => {
             Alert.alert('Validation Error', 'Budget is required');
             return;
         }
+        if (!phone) {
+            Alert.alert('Error', 'Customer phone number is missing — please go back and try again.');
+            return;
+        }
 
-        sendOtpCode();
-        setIsOtpModalVisible(true);
+        const sent = await sendOtpCode();
+        if (sent) setIsOtpModalVisible(true);
     };
 
     const handleOtpChange = (text, index) => {
@@ -95,16 +117,34 @@ const EditSchedule = () => {
     };
 
     const handleResendOtp = () => {
-        if (canResend) {
+        if (canResend && !sendingOtp) {
             sendOtpCode();
         }
     };
 
-    const handleVerifyOtpAndConfirm = () => {
+    const handleVerifyOtpAndConfirm = async () => {
         const userEnteredOtp = otp.join('');
-        if (userEnteredOtp === generatedOtp) {
-            setIsOtpModalVisible(false);
+        if (userEnteredOtp.length < 4) {
+            Alert.alert('Incomplete Code', 'Please enter the complete 4-digit code.');
+            return;
+        }
 
+        setUpdating(true);
+        try {
+            const result = await updateBookingSchedule(bookingId, userEnteredOtp, {
+                budget,
+                startDate,
+                endDate,
+                workDescription: scopeOfWork,
+            });
+            if (!result.success) {
+                Alert.alert('Update Failed', result.message || 'Incorrect OTP');
+                setOtp(['', '', '', '']);
+                inputRefs[0].current?.focus();
+                return;
+            }
+
+            setIsOtpModalVisible(false);
             router.dismissTo({
                 pathname: `/booking/${bookingId}`,
                 params: {
@@ -116,8 +156,10 @@ const EditSchedule = () => {
                     shouldEditSchedule: 'false',
                 },
             });
-        } else {
-            Alert.alert('Invalid OTP', 'The code entered does not match. Please try again.');
+        } catch (error) {
+            Alert.alert('Update Failed', error.message || 'Something went wrong. Please try again.');
+        } finally {
+            setUpdating(false);
         }
     };
 
@@ -125,9 +167,9 @@ const EditSchedule = () => {
 
     // Custom render component to differentiate previous vs next month extra days
     const renderCustomDay = ({ date, state, marking, onDayPress, minDate }) => {
-        const isSelected = marking?.selected;
-        const isToday = date.dateString === today;
         const isDisabledByMinDate = minDate && date.dateString < minDate;
+        const isSelected = marking?.selected && !isDisabledByMinDate;
+        const isToday = date.dateString === today;
 
         if (state === 'disabled') {
             const dayNum = date.day;
@@ -284,8 +326,16 @@ const EditSchedule = () => {
                         <Text style={styles.cancelButtonText}>Cancel</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.submitButton} onPress={handleUpdate}>
-                        <Text style={styles.submitButtonText}>Update</Text>
+                    <TouchableOpacity
+                        style={[styles.submitButton, sendingOtp && styles.submitButtonDisabled]}
+                        onPress={handleUpdate}
+                        disabled={sendingOtp}
+                    >
+                        {sendingOtp ? (
+                            <ActivityIndicator color="#fff" size="small" />
+                        ) : (
+                            <Text style={styles.submitButtonText}>Update</Text>
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>
@@ -365,11 +415,13 @@ const EditSchedule = () => {
                                             setActiveCalendarModal(null);
                                         }}
                                         markedDates={{
-                                            [today]: {
-                                                selected: true,
-                                                selectedColor: '#629f9c',
-                                                selectedTextColor: '#ffffff',
-                                            },
+                                            ...(startDate && {
+                                                [startDate]: {
+                                                    selected: true,
+                                                    selectedColor: '#629f9c',
+                                                    selectedTextColor: '#ffffff',
+                                                },
+                                            }),
                                             ...(endDate && {
                                                 [endDate]: {
                                                     selected: true,
@@ -436,8 +488,10 @@ const EditSchedule = () => {
 
                         <View style={styles.resendContainer}>
                             {canResend ? (
-                                <TouchableOpacity onPress={handleResendOtp}>
-                                    <Text style={styles.resendActiveText}>Resend Code</Text>
+                                <TouchableOpacity onPress={handleResendOtp} disabled={sendingOtp}>
+                                    <Text style={styles.resendActiveText}>
+                                        {sendingOtp ? 'Sending...' : 'Resend Code'}
+                                    </Text>
                                 </TouchableOpacity>
                             ) : (
                                 <Text style={styles.resendTimerText}>
@@ -450,6 +504,7 @@ const EditSchedule = () => {
                             <TouchableOpacity
                                 style={styles.cancelBtn}
                                 onPress={() => setIsOtpModalVisible(false)}
+                                disabled={updating}
                             >
                                 <Text style={styles.cancelBtnText}>Cancel</Text>
                             </TouchableOpacity>
@@ -457,12 +512,16 @@ const EditSchedule = () => {
                             <TouchableOpacity
                                 style={[
                                     styles.confirmBtn,
-                                    !fullOtpEntered && styles.submitButtonDisabled,
+                                    (!fullOtpEntered || updating) && styles.submitButtonDisabled,
                                 ]}
-                                disabled={!fullOtpEntered}
+                                disabled={!fullOtpEntered || updating}
                                 onPress={handleVerifyOtpAndConfirm}
                             >
-                                <Text style={styles.confirmBtnText}>Verify</Text>
+                                {updating ? (
+                                    <ActivityIndicator color="#fff" size="small" />
+                                ) : (
+                                    <Text style={styles.confirmBtnText}>Verify</Text>
+                                )}
                             </TouchableOpacity>
                         </View>
                     </View>

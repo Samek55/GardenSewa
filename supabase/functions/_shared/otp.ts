@@ -35,6 +35,8 @@ export const OTP_MESSAGES: Record<string, (code: string, name: string) => string
     `Your Garden Sewa help request OTP code is ${code}.\n\nOur team will call you back shortly.\n\nThank you for using Garden Sewa\n( www.gardensewa.com )`,
   'pin-reset': (code) =>
     `Your Garden Sewa PIN reset OTP code is ${code}.\n\nIf you did not request this, please ignore this message.\n\nThank you for using Garden Sewa\n( www.gardensewa.com )`,
+  'schedule-update': (code, name) =>
+    `Dear ${name}, your gardener wants to update this booking's schedule/budget.\n\nYour confirmation OTP is: ${code}\n\nShare this code with the gardener to confirm.\n\nGarden Sewa ( www.gardensewa.com )`,
 };
 
 export interface OtpIssueResult {

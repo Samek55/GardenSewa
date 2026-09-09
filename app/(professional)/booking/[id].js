@@ -60,7 +60,8 @@ const IndividualBooking = () => {
         shouldEditSchedule,
         updatedBudget,
         updatedStartDate,
-        updatedEndDate
+        updatedEndDate,
+        updatedScopeOfWork
     } = params;
 
     const [loading, setLoading] = useState(true);
@@ -125,6 +126,7 @@ const IndividualBooking = () => {
     const [currentBudget, setCurrentBudget] = useState(booking.budget);
     const [currentStartDate, setCurrentStartDate] = useState(booking.startDate);
     const [currentEndDate, setCurrentEndDate] = useState(booking.endDate);
+    const [currentScopeOfWork, setCurrentScopeOfWork] = useState(booking.specialRequest);
 
     const [currentStatus, setCurrentStatus] = useState(booking.workStatus);
     const [selectedStatus, setSelectedStatus] = useState(booking.workStatus);
@@ -156,6 +158,7 @@ const IndividualBooking = () => {
         setCurrentBudget(booking.budget);
         setCurrentStartDate(booking.startDate);
         setCurrentEndDate(booking.endDate);
+        setCurrentScopeOfWork(booking.specialRequest);
         setCurrentStatus(booking.workStatus);
         setSelectedStatus(booking.workStatus);
     }, [booking]);
@@ -172,6 +175,7 @@ const IndividualBooking = () => {
         if (updatedBudget) setCurrentBudget(updatedBudget);
         if (updatedStartDate) setCurrentStartDate(updatedStartDate);
         if (updatedEndDate) setCurrentEndDate(updatedEndDate);
+        if (updatedScopeOfWork) setCurrentScopeOfWork(updatedScopeOfWork);
 
         if (shouldEditSchedule === 'true') {
             router.setParams({ shouldEditSchedule: 'false' });
@@ -181,13 +185,15 @@ const IndividualBooking = () => {
                 params: {
                     bookingId: booking.id,
                     fullName: booking.fullName,
+                    phone: booking.phone,
                     budget: updatedBudget || currentBudget,
                     startDate: updatedStartDate || currentStartDate,
                     endDate: updatedEndDate || currentEndDate,
+                    scopeOfWork: updatedScopeOfWork || currentScopeOfWork,
                 },
             });
         }
-    }, [updatedStatus, shouldEditSchedule, updatedBudget, updatedStartDate, updatedEndDate]);
+    }, [updatedStatus, shouldEditSchedule, updatedBudget, updatedStartDate, updatedEndDate, updatedScopeOfWork]);
 
     useEffect(() => {
         let interval = null;
@@ -424,7 +430,7 @@ const IndividualBooking = () => {
                         <div class="row"><div class="label">Starting Date</div><div class="value">${formatDateFormatted(currentStartDate)}</div></div>
                         <div class="row"><div class="label">Ending Date</div><div class="value">${formatDateFormatted(currentEndDate)}</div></div>
                         <div class="row"><div class="label">Approx Days to Complete</div><div class="value">${formattedApproxDays}</div></div>
-                        <div class="row"><div class="label">Special Request</div><div class="value">${booking.specialRequest || 'None'}</div></div>
+                        <div class="row"><div class="label">Special Request</div><div class="value">${currentScopeOfWork || 'None'}</div></div>
                         <div class="row"><div class="label">Work Status</div><div class="value">${currentStatus}</div></div>
                     </div>
 
@@ -521,7 +527,7 @@ const IndividualBooking = () => {
                         <Text style={styles.fieldValue}>{formattedApproxDays}</Text>
 
                         <Text style={styles.fieldLabel}>Special Request</Text>
-                        <Text style={styles.fieldValue}>{booking.specialRequest || 'None'}</Text>
+                        <Text style={styles.fieldValue}>{currentScopeOfWork || 'None'}</Text>
                     </View>
 
                     {booking.photos && booking.photos.length > 0 && (
@@ -566,9 +572,11 @@ const IndividualBooking = () => {
                                         params: {
                                             bookingId: booking.id,
                                             fullName: booking.fullName,
+                                            phone: booking.phone,
                                             budget: currentBudget,
                                             startDate: currentStartDate,
                                             endDate: currentEndDate,
+                                            scopeOfWork: currentScopeOfWork,
                                         },
                                     })}
                                 >

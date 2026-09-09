@@ -1,9 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const PopUpAd = ({ onClose }) => {
+const PopUpAd = ({ onClose, banner }) => {
     const [countdown, setCountdown] = useState(10);
     const [autoCloseSeconds, setAutoCloseSeconds] = useState(5);
     const isClosing = useRef(false);
@@ -57,7 +57,7 @@ const PopUpAd = ({ onClose }) => {
         <View style={styles.container}>
             <View style={styles.imageWrapper}>
                 <Image
-                    source={require('../assets/images/services/15.jpg')}
+                    source={{ uri: banner.image_url }}
                     style={styles.adImage}
                     resizeMode="cover"
                 />
@@ -81,10 +81,8 @@ const PopUpAd = ({ onClose }) => {
                 )}
             </View>
 
-            <Text style={styles.title}>Flat 20% discount off Landscape Lighting</Text>
-            <Text style={styles.description}>
-                Book a service for landscape lighting before the flash price disappears, same-day slots across Kathmandu, Lalitpur & Bhaktapur.
-            </Text>
+            <Text style={styles.title}>{banner.title}</Text>
+            <Text style={styles.description}>{banner.message}</Text>
 
             <TouchableOpacity
                 style={styles.button}
@@ -92,10 +90,14 @@ const PopUpAd = ({ onClose }) => {
                     if (isClosing.current) return;
                     isClosing.current = true;
                     onClose?.();
-                    router.push(`/services/${19}`);
+                    if (banner.button_link?.startsWith('/')) {
+                        router.push(banner.button_link);
+                    } else if (banner.button_link) {
+                        Linking.openURL(banner.button_link).catch(() => {});
+                    }
                 }}
             >
-                <Text style={styles.buttonText}>View More</Text>
+                <Text style={styles.buttonText}>{banner.button_text || 'View More'}</Text>
             </TouchableOpacity>
         </View>
     );

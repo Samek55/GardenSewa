@@ -9,6 +9,8 @@ export default function AdminLayout() {
             <Stack.Screen name="submitBookingForCustomer" />
             <Stack.Screen name="helpboxRequests" />
             <Stack.Screen name="partnershipApplications" />
+            <Stack.Screen name="sendNotification" />
+            <Stack.Screen name="popupBanner" />
         </Stack>
     );
 }

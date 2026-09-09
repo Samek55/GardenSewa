@@ -17,6 +17,7 @@ import {
 } from "react-native";
 import { NP } from 'react-native-country-flag-icons';
 
+import { fetchActivePopupBanner } from '../../api/PostApiBanner';
 import { sendOtp } from '../../api/PostApiOtp';
 import ServiceCard from "../../components/ServiceCard";
 import { services } from "../../data/servicesList";
@@ -27,11 +28,15 @@ import { services } from "../../data/servicesList";
 const LAST_HELP_REQUEST_KEY = 'lastHelpRequestAt';
 const HELP_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
+const LAST_PROMO_AD_SHOWN_KEY = 'lastPromoAdShownAt';
+const PROMO_AD_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
 const { width } = Dimensions.get('window');
 const TOP_CARD_WIDTH = (width - 36 - 2 - 24 - 10) / 2.6;
 
 export default function Index() {
     const [isAdVisible, setIsAdVisible] = useState(false);
+    const [activeBanner, setActiveBanner] = useState(null);
     const [phone, setPhone] = useState('');
     const [activeTopIndex, setActiveTopIndex] = useState(0);
 
@@ -41,9 +46,21 @@ export default function Index() {
     const filteredServicesTop = services.filter(service => service.label === 'Top');
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsAdVisible(true);
-        }, 500);
+        let timer;
+        (async () => {
+            const lastShownRaw = await AsyncStorage.getItem(LAST_PROMO_AD_SHOWN_KEY);
+            const lastShown = lastShownRaw ? Number(lastShownRaw) : 0;
+            if (Date.now() - lastShown < PROMO_AD_COOLDOWN_MS) return;
+
+            const result = await fetchActivePopupBanner().catch(() => null);
+            if (!result?.success || !result.banner) return;
+
+            timer = setTimeout(async () => {
+                setActiveBanner(result.banner);
+                setIsAdVisible(true);
+                await AsyncStorage.setItem(LAST_PROMO_AD_SHOWN_KEY, String(Date.now()));
+            }, 500);
+        })();
         return () => clearTimeout(timer);
     }, []);
 
@@ -227,7 +244,9 @@ export default function Index() {
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.adContainer}>
-                        <PopUpAd onClose={() => setIsAdVisible(false)} />
+                        {activeBanner && (
+                            <PopUpAd banner={activeBanner} onClose={() => setIsAdVisible(false)} />
+                        )}
                     </View>
                 </View>
             </Modal>
