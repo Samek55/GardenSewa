@@ -70,6 +70,11 @@ export default function LeadUnlockRequests() {
             const result = await approveLeadUnlock(id);
             if (!result.success) {
                 Alert.alert('Error', result.message || 'Could not approve this request');
+                // Reached whenever another admin already reviewed this request
+                // (the server's compare-and-swap rejects a stale second action) —
+                // refetch so the now-outdated row with live buttons doesn't just
+                // sit there inviting the same failed tap again.
+                await loadRequests(activeTab);
                 return;
             }
             notifyLeadUnlockApproved(id).catch((e) => console.error('notify approve failed:', e));
@@ -87,6 +92,9 @@ export default function LeadUnlockRequests() {
             const result = await rejectLeadUnlock(id);
             if (!result.success) {
                 Alert.alert('Error', result.message || 'Could not reject this request');
+                // Same reasoning as handleApprove — a failed CAS means the row
+                // is stale, so refetch instead of leaving dead buttons up.
+                await loadRequests(activeTab);
                 return;
             }
             notifyLeadUnlockRejected(id).catch((e) => console.error('notify reject failed:', e));
