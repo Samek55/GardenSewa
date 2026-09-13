@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
       return json({ success: false, message: 'Only an ongoing job\'s schedule can be edited.' }, 409);
     }
 
-    const otpResult = await checkOtp(bookingRow.phone, 'schedule-update', code);
+    const otpResult = await checkOtp(bookingRow.phone, 'schedule-update', code, String(bookingId));
     if (!otpResult.verified) {
       return json({ success: false, message: otpResult.message || 'Incorrect OTP' }, otpResult.status);
     }

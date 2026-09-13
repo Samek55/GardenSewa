@@ -1,7 +1,9 @@
 import PopUpAd from '@/components/PopUpAd';
+import { AdminAuthContext } from '@/context/AdminAuthContext';
+import { AuthContext } from '@/context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Link, router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import {
     Alert,
     Dimensions,
@@ -43,16 +45,34 @@ export default function Index() {
     const flatListRef = useRef(null);
     const intervalRef = useRef(null);
 
+    const { isLoggedIn, isLoading: isCustomerAuthLoading } = useContext(AuthContext);
+    const { isAdminLoggedIn, adminRole, adminPhone, isAdminAuthLoading } = useContext(AdminAuthContext);
+    // Matches the exact audience options the admin's Popup Banner composer
+    // offers (see popupBanner.js's Audience Targeting section) — there's no
+    // session for get-active-popup-banner to derive this from server-side,
+    // so the caller passes what it already knows about itself locally.
+    const userType = isAdminLoggedIn
+        ? (adminRole === 'gardener' ? 'Workforce' : 'Admin')
+        : (isLoggedIn ? 'Customer' : 'Public');
+
     const filteredServicesTop = services.filter(service => service.label === 'Top');
 
     useEffect(() => {
+        // Both auth contexts start out logged-out/false and only resolve their
+        // real value after an async AsyncStorage read — without this guard,
+        // this effect would fire on mount with userType forced to 'Public'
+        // (and never re-fire once the real role loads, since a banner already
+        // fetched isn't refetched), so every logged-in audience silently only
+        // ever saw the Public-targeted banner.
+        if (isCustomerAuthLoading || isAdminAuthLoading) return;
+
         let timer;
         (async () => {
             const lastShownRaw = await AsyncStorage.getItem(LAST_PROMO_AD_SHOWN_KEY);
             const lastShown = lastShownRaw ? Number(lastShownRaw) : 0;
             if (Date.now() - lastShown < PROMO_AD_COOLDOWN_MS) return;
 
-            const result = await fetchActivePopupBanner().catch(() => null);
+            const result = await fetchActivePopupBanner(userType, adminPhone).catch(() => null);
             if (!result?.success || !result.banner) return;
 
             timer = setTimeout(async () => {
@@ -62,7 +82,7 @@ export default function Index() {
             }, 500);
         })();
         return () => clearTimeout(timer);
-    }, []);
+    }, [isCustomerAuthLoading, isAdminAuthLoading, userType, adminPhone]);
 
     useEffect(() => {
         if (filteredServicesTop.length === 0) return;

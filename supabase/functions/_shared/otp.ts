@@ -48,8 +48,13 @@ export interface OtpIssueResult {
 
 // Generates, stores, and SMS's a code for one purpose — the daily cap and
 // resend cooldown live here so every caller gets them for free, not just
-// send-otp's own HTTP handler.
-export async function issueOtp(phone: string, purpose: string, name?: string): Promise<OtpIssueResult> {
+// send-otp's own HTTP handler. scopeKey narrows the code to one specific
+// thing (e.g. a booking id) for purposes where the same phone can have more
+// than one of that purpose in flight at once ('work-completion' and
+// 'schedule-update', both scoped to a bookingId by their callers) — every
+// other purpose leaves it as '' since phone+purpose alone is already unique
+// for them (a phone only ever has one login/PIN-reset/application in flight).
+export async function issueOtp(phone: string, purpose: string, name?: string, scopeKey = ''): Promise<OtpIssueResult> {
   if (!OTP_MESSAGES[purpose]) return { success: false, message: 'Invalid purpose', status: 400 };
 
   const { count: sentToday } = await supabaseAdmin
@@ -67,6 +72,7 @@ export async function issueOtp(phone: string, purpose: string, name?: string): P
     .select('id, created_at')
     .eq('phone', phone)
     .eq('purpose', purpose)
+    .eq('scope_key', scopeKey)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -83,8 +89,8 @@ export async function issueOtp(phone: string, purpose: string, name?: string): P
   const codeHash = await sha256(code);
   const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60_000).toISOString();
 
-  await supabaseAdmin.from('otp_codes').delete().eq('phone', phone).eq('purpose', purpose);
-  const { error } = await supabaseAdmin.from('otp_codes').insert([{ phone, purpose, code_hash: codeHash, expires_at: expiresAt }]);
+  await supabaseAdmin.from('otp_codes').delete().eq('phone', phone).eq('purpose', purpose).eq('scope_key', scopeKey);
+  const { error } = await supabaseAdmin.from('otp_codes').insert([{ phone, purpose, scope_key: scopeKey, code_hash: codeHash, expires_at: expiresAt }]);
   if (error) throw new Error(error.message);
 
   await supabaseAdmin.from('otp_send_log').insert([{ phone, purpose }]);
@@ -105,12 +111,13 @@ export interface OtpCheckResult {
 // in one call) so the hashing/expiry/attempt-lockout logic only lives in one
 // place. Consumes the code on success, same as before — a verified code can
 // never be replayed.
-export async function checkOtp(phone: string, purpose: string, code: string): Promise<OtpCheckResult> {
+export async function checkOtp(phone: string, purpose: string, code: string, scopeKey = ''): Promise<OtpCheckResult> {
   const { data: row } = await supabaseAdmin
     .from('otp_codes')
     .select('id, code_hash, attempts, expires_at')
     .eq('phone', phone)
     .eq('purpose', purpose)
+    .eq('scope_key', scopeKey)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();

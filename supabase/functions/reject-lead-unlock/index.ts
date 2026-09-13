@@ -16,11 +16,19 @@ Deno.serve(async (req) => {
     const { id } = await req.json();
     if (!id) return json({ success: false, message: 'id is required' }, 400);
 
-    const { error } = await supabaseAdmin
+    // Atomic CAS on status, same guard as approve-lead-unlock — without the
+    // `.eq('status', 'Pending')`, two admins acting on the same request
+    // near-simultaneously (or a double-tap) could both succeed, flipping it
+    // back and forth and firing duplicate/contradictory push notifications.
+    const { data: claimed, error } = await supabaseAdmin
       .from('lead_unlock_requests')
       .update({ status: 'Rejected', reviewed_by: session.adminId, reviewed_at: new Date().toISOString() })
-      .eq('id', id);
+      .eq('id', id)
+      .eq('status', 'Pending')
+      .select('id')
+      .maybeSingle();
     if (error) throw new Error(error.message);
+    if (!claimed) return json({ success: false, message: 'This request was already reviewed.' }, 409);
 
     return json({ success: true });
   } catch (e) {

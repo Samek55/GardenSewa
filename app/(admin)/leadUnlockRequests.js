@@ -1,6 +1,10 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import AdminButton from '@/components/admin/AdminButton';
+import AdminCard from '@/components/admin/AdminCard';
+import Header4Admin from '@/components/admin/Header4Admin';
+import StatusBadge from '@/components/admin/StatusBadge';
+import { useTheme } from '@/context/ThemeContext';
 import { router } from 'expo-router';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -21,7 +25,9 @@ import { AdminAuthContext } from '../../context/AdminAuthContext';
 const STATUS_TABS = ['Pending', 'Approved', 'Rejected'];
 
 export default function LeadUnlockRequests() {
-    const { adminRole, adminLogoutLocal } = useContext(AdminAuthContext);
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+    const { adminLogoutLocal } = useContext(AdminAuthContext);
 
     const [activeTab, setActiveTab] = useState(STATUS_TABS[0]);
     const [requests, setRequests] = useState([]);
@@ -93,15 +99,13 @@ export default function LeadUnlockRequests() {
     };
 
     const renderItem = ({ item }) => (
-        <View style={styles.card}>
+        <AdminCard style={styles.card}>
             <View style={styles.cardHeader}>
                 <View style={{ flex: 1 }}>
                     <Text style={styles.title}>Booking #{item.booking_id}</Text>
                     <Text style={styles.phone}>{item.gardener_phone}</Text>
                 </View>
-                <View style={[styles.statusBadge, statusBadgeStyle(item.status)]}>
-                    <Text style={styles.statusBadgeText}>{item.status}</Text>
-                </View>
+                <StatusBadge label={item.status} variant={statusVariant(item.status)} />
             </View>
 
             <TouchableOpacity onPress={() => Linking.openURL(item.proof_url)}>
@@ -114,37 +118,29 @@ export default function LeadUnlockRequests() {
 
             {item.status === 'Pending' && (
                 <View style={styles.actionsRow}>
-                    <TouchableOpacity
-                        style={styles.rejectButton}
+                    <AdminButton
+                        variant="dangerOutline"
+                        label="Reject"
                         onPress={() => handleReject(item.id)}
                         disabled={actioningId === item.id}
-                    >
-                        <Text style={styles.rejectButtonText}>Reject</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.approveButton}
+                    />
+                    <AdminButton
+                        variant="brand"
+                        label="Approve"
                         onPress={() => handleApprove(item.id)}
-                        disabled={actioningId === item.id}
-                    >
-                        {actioningId === item.id ? (
-                            <ActivityIndicator color="#fff" size="small" />
-                        ) : (
-                            <Text style={styles.approveButtonText}>Approve</Text>
-                        )}
-                    </TouchableOpacity>
+                        loading={actioningId === item.id}
+                    />
                 </View>
             )}
-        </View>
+        </AdminCard>
     );
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()}>
-                    <Ionicons name="arrow-back" size={24} color="#fff" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Lead Payment Requests</Text>
-                <View style={{ width: 24 }} />
+            <Header4Admin />
+
+            <View style={styles.subHeader}>
+                <Text style={styles.headerTitle}>Lead Unlock Requests</Text>
             </View>
 
             <View style={styles.tabsRow}>
@@ -160,14 +156,14 @@ export default function LeadUnlockRequests() {
             </View>
 
             {loading ? (
-                <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#245d5a" />
+                <ActivityIndicator style={{ marginTop: 40 }} size="large" color={colors.brand} />
             ) : (
                 <FlatList
                     data={requests}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={renderItem}
                     contentContainerStyle={styles.listContent}
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.brand]} tintColor={colors.brand} />}
                     ListEmptyComponent={
                         <Text style={styles.emptyText}>No requests in &quot;{activeTab}&quot;.</Text>
                     }
@@ -177,42 +173,28 @@ export default function LeadUnlockRequests() {
     );
 }
 
-const statusBadgeStyle = (status) => {
-    if (status === 'Approved') return { backgroundColor: '#DFF5E1' };
-    if (status === 'Rejected') return { backgroundColor: '#FCE1E1' };
-    return { backgroundColor: '#FFF3D6' };
+const statusVariant = (status) => {
+    if (status === 'Approved') return 'success';
+    if (status === 'Rejected') return 'danger';
+    return 'warning';
 };
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7F7' },
-    header: {
-        backgroundColor: '#245d5a',
-        paddingTop: 14,
-        paddingBottom: 12,
-        paddingHorizontal: 16,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    headerTitle: { color: '#fff', fontSize: 18, fontWeight: '700' },
-    tabsRow: { flexDirection: 'row', padding: 10, gap: 8, backgroundColor: '#fff' },
-    tab: { flex: 1, paddingVertical: 8, borderRadius: 8, alignItems: 'center', backgroundColor: '#F0F0F0' },
-    tabActive: { backgroundColor: '#245d5a' },
-    tabText: { fontSize: 12, fontWeight: '600', color: '#555', textAlign: 'center' },
+const createStyles = (colors) => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    subHeader: { backgroundColor: colors.surface, paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.divider },
+    headerTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '700' },
+    tabsRow: { flexDirection: 'row', padding: 10, gap: 8, backgroundColor: colors.surface },
+    tab: { flex: 1, paddingVertical: 8, borderRadius: 20, alignItems: 'center', backgroundColor: colors.surfaceMuted },
+    tabActive: { backgroundColor: colors.brand },
+    tabText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary, textAlign: 'center' },
     tabTextActive: { color: '#fff' },
     listContent: { padding: 12, gap: 12 },
-    emptyText: { textAlign: 'center', color: '#888', marginTop: 40 },
-    card: { backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 12, gap: 8 },
+    emptyText: { textAlign: 'center', color: colors.textMuted, marginTop: 40 },
+    card: { marginBottom: 12, gap: 8 },
     cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    title: { fontSize: 15, fontWeight: '700', color: '#222' },
-    phone: { fontSize: 13, color: '#666' },
-    statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
-    statusBadgeText: { fontSize: 10, fontWeight: '700', color: '#333' },
-    proofImage: { width: '100%', height: 180, borderRadius: 8, backgroundColor: '#eee' },
-    note: { fontSize: 13, color: '#555' },
+    title: { fontSize: 15, fontWeight: '700', color: colors.textPrimary },
+    phone: { fontSize: 13, color: colors.textSecondary },
+    proofImage: { width: '100%', height: 180, borderRadius: 12, backgroundColor: colors.surfaceMuted },
+    note: { fontSize: 13, color: colors.textSecondary },
     actionsRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 4 },
-    rejectButton: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, borderWidth: 1, borderColor: '#d9534f' },
-    rejectButtonText: { color: '#d9534f', fontWeight: '700', fontSize: 13 },
-    approveButton: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, backgroundColor: '#245d5a', minWidth: 76, alignItems: 'center' },
-    approveButtonText: { color: '#fff', fontWeight: '700', fontSize: 13 },
 });

@@ -69,3 +69,18 @@ export const listPartnershipApplications = () =>
 
 export const updatePartnershipStatus = (id, status) =>
     invokeEdgeFunction('update-partnership-status', { id, status }, 'Could not save', { requireSession: true });
+
+export const listGardeners = () =>
+    invokeEdgeFunction('list-gardeners', {}, 'Could not load gardeners', { requireSession: true });
+
+export const toggleGardenerStatus = (id, status) =>
+    invokeEdgeFunction('toggle-gardener-status', { id, status }, 'Could not update status', { requireSession: true });
+
+export const listCustomers = () =>
+    invokeEdgeFunction('list-customers', {}, 'Could not load customers', { requireSession: true });
+
+export const toggleCustomerStatus = (id, status) =>
+    invokeEdgeFunction('toggle-customer-status', { id, status }, 'Could not update status', { requireSession: true });
+
+export const changePin = (currentPin, newPin) =>
+    invokeEdgeFunction('change-pin', { currentPin, newPin }, 'Could not change PIN', { requireSession: true });

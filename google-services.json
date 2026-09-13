@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:274296041548:android:ff45c975e3b9f766cbc4e9",
+        "android_client_info": {
+          "package_name": "com.gardensewa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANufciWf5PPlHoWWNtPbkgIFJeVJg6DCM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:274296041548:android:03911582ec22b80ecbc4e9",
         "android_client_info": {
           "package_name": "com.pratigyaluitel.gardensewa"

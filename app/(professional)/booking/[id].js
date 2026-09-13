@@ -226,7 +226,7 @@ const IndividualBooking = () => {
     const sendCompletionOtp = async () => {
         setSendingOtp(true);
         try {
-            const result = await sendOtp(booking.phone, 'work-completion', booking.fullName);
+            const result = await sendOtp(booking.phone, 'work-completion', booking.fullName, booking.id);
             if (!result.success) {
                 Alert.alert('Could Not Send Code', result.message || 'Please try again.');
                 return false;

@@ -465,7 +465,6 @@ export default function PartnerBook() {
                                 formik.setFieldValue('phone', rawDigits);
                             }}
                             keyboardType="phone-pad"
-                            maxLength={12}
                         />
                     </View>
                 </View>

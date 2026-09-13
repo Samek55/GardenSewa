@@ -1,6 +1,9 @@
+import AdminButton from '@/components/admin/AdminButton';
+import Header4Admin from '@/components/admin/Header4Admin';
+import { useTheme } from '@/context/ThemeContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { useContext, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -23,45 +26,6 @@ import { budgetData, categories, cityData, priorityData, shiftsData } from '../.
 
 const today = new Date().toISOString().split('T')[0];
 
-// A compact "pick one" field — book.js has its own richer version of this,
-// but it's defined inline there and not exported; this screen's needs
-// (single-select from a short list, no search) are simple enough not to
-// warrant pulling that apart just to share it.
-const SelectField = ({ label, required, value, placeholder, options, onSelect, getLabel = (o) => o }) => {
-    const [open, setOpen] = useState(false);
-    return (
-        <View style={styles.field}>
-            <Text style={styles.label}>{label}{required && <Text style={styles.asterisk}> *</Text>}</Text>
-            <TouchableOpacity style={styles.selectTrigger} onPress={() => setOpen(true)}>
-                <Text style={[styles.selectTriggerText, !value && styles.placeholderText]}>
-                    {value ? getLabel(value) : placeholder}
-                </Text>
-                <Ionicons name="chevron-down" size={18} color="#666" />
-            </TouchableOpacity>
-            <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-                <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setOpen(false)}>
-                    <View style={styles.modalCard}>
-                        <Text style={styles.modalTitle}>{label}</Text>
-                        <FlatList
-                            data={options}
-                            keyExtractor={(item, i) => String(item.id ?? item ?? i)}
-                            style={{ maxHeight: 350 }}
-                            renderItem={({ item }) => (
-                                <TouchableOpacity
-                                    style={styles.optionRow}
-                                    onPress={() => { onSelect(item); setOpen(false); }}
-                                >
-                                    <Text style={styles.optionText}>{getLabel(item)}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                    </View>
-                </TouchableOpacity>
-            </Modal>
-        </View>
-    );
-};
-
 const emptyForm = {
     fullName: '', phone: '', service: '', city: '', area: '',
     priority: '', budget: '', selectShift: '', startingDate: '',
@@ -69,6 +33,8 @@ const emptyForm = {
 };
 
 export default function SubmitBookingForCustomer() {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
     const { adminRole, isAdminAuthLoading } = useContext(AdminAuthContext);
     const [form, setForm] = useState(emptyForm);
     const [calendarField, setCalendarField] = useState(null); // 'startingDate' | 'serviceCompletionDate' | null
@@ -79,6 +45,45 @@ export default function SubmitBookingForCustomer() {
     const [otp, setOtp] = useState(['', '', '', '']);
     const [verifying, setVerifying] = useState(false);
 
+    // A compact "pick one" field — book.js has its own richer version of this,
+    // but it's defined inline there and not exported; this screen's needs
+    // (single-select from a short list, no search) are simple enough not to
+    // warrant pulling that apart just to share it.
+    const SelectField = ({ label, required, value, placeholder, options, onSelect, getLabel = (o) => o }) => {
+        const [open, setOpen] = useState(false);
+        return (
+            <View style={styles.field}>
+                <Text style={styles.label}>{label}{required && <Text style={styles.asterisk}> *</Text>}</Text>
+                <TouchableOpacity style={styles.selectTrigger} onPress={() => setOpen(true)}>
+                    <Text style={[styles.selectTriggerText, !value && styles.placeholderText]}>
+                        {value ? getLabel(value) : placeholder}
+                    </Text>
+                    <Ionicons name="chevron-down" size={18} color={colors.textSecondary} />
+                </TouchableOpacity>
+                <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+                    <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setOpen(false)}>
+                        <View style={styles.modalCard}>
+                            <Text style={styles.modalTitle}>{label}</Text>
+                            <FlatList
+                                data={options}
+                                keyExtractor={(item, i) => String(item.id ?? item ?? i)}
+                                style={{ maxHeight: 350 }}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity
+                                        style={styles.optionRow}
+                                        onPress={() => { onSelect(item); setOpen(false); }}
+                                    >
+                                        <Text style={styles.optionText}>{getLabel(item)}</Text>
+                                    </TouchableOpacity>
+                                )}
+                            />
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
+            </View>
+        );
+    };
+
     // Same reasoning as manageStaff.js's fix — adminRole is null until
     // AdminAuthContext finishes reading AsyncStorage, so checking it before
     // isAdminAuthLoading resolves would flash "Not Available" at a legitimate
@@ -86,14 +91,11 @@ export default function SubmitBookingForCustomer() {
     if (isAdminAuthLoading) {
         return (
             <View style={styles.container}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <Ionicons name="arrow-back" size={24} color="#fff" />
-                    </TouchableOpacity>
+                <Header4Admin />
+                <View style={styles.subHeader}>
                     <Text style={styles.headerTitle}>Submit Booking for Customer</Text>
-                    <View style={{ width: 24 }} />
                 </View>
-                <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#245d5a" />
+                <ActivityIndicator style={{ marginTop: 40 }} size="large" color={colors.brand} />
             </View>
         );
     }
@@ -101,12 +103,9 @@ export default function SubmitBookingForCustomer() {
     if (adminRole !== 'bdm' && adminRole !== 'call_center') {
         return (
             <View style={styles.container}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <Ionicons name="arrow-back" size={24} color="#fff" />
-                    </TouchableOpacity>
+                <Header4Admin />
+                <View style={styles.subHeader}>
                     <Text style={styles.headerTitle}>Not Available</Text>
-                    <View style={{ width: 24 }} />
                 </View>
                 <Text style={styles.notAllowedText}>This form is only available to Business Development Managers and Call Center staff.</Text>
             </View>
@@ -179,12 +178,13 @@ export default function SubmitBookingForCustomer() {
     if (step === 'otp') {
         return (
             <View style={styles.container}>
-                <View style={styles.header}>
+                <Header4Admin />
+                <View style={styles.subHeader}>
                     <TouchableOpacity onPress={() => setStep('form')}>
-                        <Ionicons name="arrow-back" size={24} color="#fff" />
+                        <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>Confirm Submission</Text>
-                    <View style={{ width: 24 }} />
+                    <View style={{ width: 22 }} />
                 </View>
                 <View style={styles.otpCard}>
                     <Text style={styles.otpTitle}>Enter the code sent to your phone</Text>
@@ -204,9 +204,7 @@ export default function SubmitBookingForCustomer() {
                             />
                         ))}
                     </View>
-                    <TouchableOpacity style={styles.submitButton} onPress={handleVerify} disabled={verifying}>
-                        {verifying ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitButtonText}>Confirm</Text>}
-                    </TouchableOpacity>
+                    <AdminButton variant="brand" label="Confirm" onPress={handleVerify} loading={verifying} style={styles.submitButton} />
                 </View>
             </View>
         );
@@ -214,12 +212,9 @@ export default function SubmitBookingForCustomer() {
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()}>
-                    <Ionicons name="arrow-back" size={24} color="#fff" />
-                </TouchableOpacity>
+            <Header4Admin />
+            <View style={styles.subHeader}>
                 <Text style={styles.headerTitle}>Submit Booking for Customer</Text>
-                <View style={{ width: 24 }} />
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -230,7 +225,7 @@ export default function SubmitBookingForCustomer() {
 
                 <View style={styles.field}>
                     <Text style={styles.label}>Customer Full Name<Text style={styles.asterisk}> *</Text></Text>
-                    <TextInput style={styles.input} value={form.fullName} onChangeText={set('fullName')} placeholder="Customer's name" />
+                    <TextInput style={styles.input} value={form.fullName} onChangeText={set('fullName')} placeholder="Customer's name" placeholderTextColor={colors.textMuted} />
                 </View>
 
                 <View style={styles.field}>
@@ -240,6 +235,7 @@ export default function SubmitBookingForCustomer() {
                         value={form.phone}
                         onChangeText={(t) => set('phone')(t.replace(/[^0-9]/g, '').slice(0, 10))}
                         placeholder="10-digit phone number"
+                        placeholderTextColor={colors.textMuted}
                         keyboardType="number-pad"
                         maxLength={10}
                     />
@@ -293,7 +289,7 @@ export default function SubmitBookingForCustomer() {
                         <Text style={[styles.selectTriggerText, !form.startingDate && styles.placeholderText]}>
                             {form.startingDate || 'Select date'}
                         </Text>
-                        <Ionicons name="calendar-outline" size={18} color="#666" />
+                        <Ionicons name="calendar-outline" size={18} color={colors.textSecondary} />
                     </TouchableOpacity>
                 </View>
 
@@ -301,7 +297,7 @@ export default function SubmitBookingForCustomer() {
                     <Calendar
                         minDate={today}
                         onDayPress={(day) => { set(calendarField)(day.dateString); setCalendarField(null); }}
-                        markedDates={form[calendarField] ? { [form[calendarField]]: { selected: true, selectedColor: '#245d5a' } } : {}}
+                        markedDates={form[calendarField] ? { [form[calendarField]]: { selected: true, selectedColor: colors.brand } } : {}}
                     />
                 )}
 
@@ -312,47 +308,46 @@ export default function SubmitBookingForCustomer() {
                         value={form.workDescription}
                         onChangeText={set('workDescription')}
                         placeholder="Any details the customer mentioned (optional)"
+                        placeholderTextColor={colors.textMuted}
                         multiline
                     />
                 </View>
 
-                <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} disabled={submitting}>
-                    {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitButtonText}>Submit Request</Text>}
-                </TouchableOpacity>
+                <AdminButton variant="brand" label="Submit Request" onPress={handleSubmit} loading={submitting} style={styles.submitButton} />
             </ScrollView>
         </View>
     );
 }
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7F7' },
-    header: {
-        backgroundColor: '#245d5a', paddingTop: 14, paddingBottom: 12, paddingHorizontal: 16,
+const createStyles = (colors) => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    subHeader: {
+        backgroundColor: colors.surface, paddingHorizontal: 16, paddingVertical: 14,
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+        borderBottomWidth: 1, borderBottomColor: colors.divider,
     },
-    headerTitle: { color: '#fff', fontSize: 16, fontWeight: '700', flex: 1, textAlign: 'center' },
-    notAllowedText: { textAlign: 'center', color: '#888', marginTop: 40, paddingHorizontal: 24 },
+    headerTitle: { color: colors.textPrimary, fontSize: 16, fontWeight: '700', flex: 1, textAlign: 'center' },
+    notAllowedText: { textAlign: 'center', color: colors.textMuted, marginTop: 40, paddingHorizontal: 24 },
     scrollContent: { padding: 16, gap: 4 },
-    helperText: { fontSize: 12, color: '#666', backgroundColor: '#FFF3D6', padding: 10, borderRadius: 8, marginBottom: 12, lineHeight: 18 },
+    helperText: { fontSize: 12, color: colors.warning, backgroundColor: colors.warningBg, padding: 10, borderRadius: 12, marginBottom: 12, lineHeight: 18 },
     field: { marginBottom: 14 },
-    label: { fontSize: 13, fontWeight: '600', color: '#333', marginBottom: 6 },
-    asterisk: { color: '#d9534f' },
-    input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, fontSize: 14 },
+    label: { fontSize: 13, fontWeight: '600', color: colors.textPrimary, marginBottom: 6 },
+    asterisk: { color: colors.danger },
+    input: { borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 12, fontSize: 14, color: colors.textPrimary },
     textArea: { minHeight: 80, textAlignVertical: 'top' },
-    selectTrigger: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12 },
-    selectTriggerText: { fontSize: 14, color: '#000' },
-    placeholderText: { color: '#999' },
+    selectTrigger: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 12 },
+    selectTriggerText: { fontSize: 14, color: colors.textPrimary },
+    placeholderText: { color: colors.textMuted },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 24 },
-    modalCard: { backgroundColor: '#fff', borderRadius: 14, padding: 16 },
-    modalTitle: { fontSize: 16, fontWeight: '700', marginBottom: 10, color: '#222' },
-    optionRow: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
-    optionText: { fontSize: 14, color: '#333' },
-    submitButton: { backgroundColor: '#245d5a', borderRadius: 26, height: 52, alignItems: 'center', justifyContent: 'center', marginTop: 12, marginBottom: 30 },
-    submitButtonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-    otpCard: { backgroundColor: '#fff', margin: 16, borderRadius: 14, padding: 20 },
-    otpTitle: { fontSize: 17, fontWeight: '700', color: '#222', marginBottom: 8 },
-    otpSubtitle: { fontSize: 13, color: '#666', lineHeight: 18, marginBottom: 20 },
-    otpPhone: { fontWeight: '700', color: '#245d5a' },
+    modalCard: { backgroundColor: colors.surface, borderRadius: 18, padding: 16 },
+    modalTitle: { fontSize: 16, fontWeight: '700', marginBottom: 10, color: colors.textPrimary },
+    optionRow: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.divider },
+    optionText: { fontSize: 14, color: colors.textSecondary },
+    submitButton: { marginTop: 12, marginBottom: 30 },
+    otpCard: { backgroundColor: colors.surface, margin: 16, borderRadius: 18, padding: 20 },
+    otpTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary, marginBottom: 8 },
+    otpSubtitle: { fontSize: 13, color: colors.textSecondary, lineHeight: 18, marginBottom: 20 },
+    otpPhone: { fontWeight: '700', color: colors.brand },
     otpRow: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 24 },
-    otpBox: { width: 46, height: 54, borderWidth: 1.5, borderColor: '#C5CEE0', borderRadius: 10, fontSize: 20, fontWeight: '700' },
+    otpBox: { width: 46, height: 54, borderWidth: 1.5, borderColor: colors.border, borderRadius: 10, fontSize: 20, fontWeight: '700', color: colors.textPrimary },
 });

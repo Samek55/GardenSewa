@@ -1,7 +1,10 @@
+import AdminSideBar from '@/components/admin/AdminSideBar';
 import SideBarModalLoggedIn from '@/components/LoggedInSideBar';
+import ProfessionalSideBar from '@/components/ProfessionalSideBar';
 import SideBarModal from '@/components/SideBarModal';
-import { AdminAuthProvider } from '@/context/AdminAuthContext';
+import { AdminAuthContext, AdminAuthProvider } from '@/context/AdminAuthContext';
 import { AuthContext, AuthProvider } from '@/context/AuthContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Asset } from 'expo-asset';
 import { Stack } from "expo-router";
@@ -41,6 +44,7 @@ function MainAppContent() {
   const [countdownDigits, setCountdownDigits] = useState("3000");
 
   const { isLoggedIn } = useContext(AuthContext);
+  const { isAdminLoggedIn, adminRole } = useContext(AdminAuthContext);
 
   useEffect(() => {
     let animFrameId;
@@ -162,21 +166,42 @@ function MainAppContent() {
         <Stack.Screen name="onBoarding" options={{ headerShown: false, animation: 'fade' }} />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(professional)" />
-        <Stack.Screen name="(admin)" />
-        <Stack.Screen name="(all)" />
+        {/* (admin) and (all) already disable their own inner Stack's header
+            (each screen builds its own, e.g. Header4Admin) — without this,
+            the root header renders a second "GardenSewa" bar on top of it. */}
+        <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+        <Stack.Screen name="(all)" options={{ headerShown: false }} />
       </Stack>
 
       {isModalOpen && (
-        <View style={[StyleSheet.absoluteFillObject, { zIndex: 9999 }]}>
-          <Pressable style={StyleSheet.absoluteFillObject} onPress={onClose}>
-            <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }} />
-          </Pressable>
-          {isLoggedIn ? (
-            <SideBarModalLoggedIn onClose={onClose} />
+        isAdminLoggedIn ? (
+          // A gardener is a field professional, not an office admin — they
+          // get HomeSewa-style drawer (Services/FAQs/Glossary/Favorites/
+          // Change PIN) instead of AdminSideBar's Popup Banner/Help Box/Lead
+          // Unlock Requests, none of which apply to them. Every other admin
+          // role (super_admin/admin/bdm/call_center) still gets the one real
+          // admin drawer regardless of which screen's hamburger opened it —
+          // SideBarModal used to carry its own separate, hand-rolled copy of
+          // this menu for exactly this case (reachable from the main
+          // customer-facing header), which silently drifted out of sync with
+          // AdminSideBar's real content. Single source of truth now.
+          adminRole === 'gardener' ? (
+            <ProfessionalSideBar visible={isModalOpen} onClose={onClose} />
           ) : (
-            <SideBarModal onClose={onClose} />
-          )}
-        </View>
+            <AdminSideBar visible={isModalOpen} onClose={onClose} />
+          )
+        ) : (
+          <View style={[StyleSheet.absoluteFillObject, { zIndex: 9999 }]}>
+            <Pressable style={StyleSheet.absoluteFillObject} onPress={onClose}>
+              <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }} />
+            </Pressable>
+            {isLoggedIn ? (
+              <SideBarModalLoggedIn onClose={onClose} />
+            ) : (
+              <SideBarModal onClose={onClose} />
+            )}
+          </View>
+        )
       )}
 
       {!isAppReady && <SplashOverlay countdownDigits={countdownDigits} />}
@@ -188,7 +213,9 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <AdminAuthProvider>
-        <MainAppContent />
+        <ThemeProvider>
+          <MainAppContent />
+        </ThemeProvider>
       </AdminAuthProvider>
     </AuthProvider>
   );

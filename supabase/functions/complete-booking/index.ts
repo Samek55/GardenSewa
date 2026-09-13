@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
       return json({ success: false, message: 'This job was not accepted by you.' }, 403);
     }
 
-    const otpResult = await checkOtp(bookingRow.phone, 'work-completion', code);
+    const otpResult = await checkOtp(bookingRow.phone, 'work-completion', code, String(bookingId));
     if (!otpResult.verified) {
       return json({ success: false, message: otpResult.message || 'Incorrect OTP' }, otpResult.status);
     }

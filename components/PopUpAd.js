@@ -4,7 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const PopUpAd = ({ onClose, banner }) => {
-    const [countdown, setCountdown] = useState(10);
+    // Admin-configurable (see popupBanner.js's "Close Button Countdown"
+    // field) — was a hardcoded 10s for every banner before that field
+    // existed.
+    const countdownEnabled = banner.close_countdown_enabled !== false;
+    const initialCountdown = countdownEnabled ? (banner.close_countdown_seconds || 10) : 0;
+    const [countdown, setCountdown] = useState(initialCountdown);
     const [autoCloseSeconds, setAutoCloseSeconds] = useState(5);
     const isClosing = useRef(false);
     const mounted = useRef(true);

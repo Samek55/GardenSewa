@@ -10,7 +10,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pratigyaluitel.gardensewa",
+      "bundleIdentifier": "com.gardensewa",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "LSApplicationQueriesSchemes": [
@@ -27,7 +27,7 @@
         "backgroundColor": "#ffffff"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.pratigyaluitel.gardensewa",
+      "package": "com.gardensewa",
       "googleServicesFile": "./google-services.json"
     },
     "web": {

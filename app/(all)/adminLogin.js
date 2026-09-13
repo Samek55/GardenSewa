@@ -1,6 +1,7 @@
+import { useTheme } from "@/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useContext, useRef, useState } from "react";
+import { useContext, useMemo, useRef, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -15,11 +16,16 @@ import {
     View
 } from "react-native";
 import { NP } from "react-native-country-flag-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { adminLogin as adminLoginRequest } from "../../api/PostApiAdmin";
 import { AdminAuthContext } from "../../context/AdminAuthContext";
 
 const AdminLogin = () => {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+    const insets = useSafeAreaInsets();
+
     const [rawPhone, setRawPhone] = useState("");
     const [pin, setPin] = useState(["", "", "", ""]);
     const [showPin, setShowPin] = useState(false);
@@ -134,7 +140,7 @@ const AdminLogin = () => {
                     keyboardShouldPersistTaps="handled"
                 >
                     <View style={[styles.brandingHeaderContainer, {
-                        paddingTop: screenHeight * 0.04,
+                        paddingTop: insets.top + screenHeight * 0.04,
                         paddingBottom: screenHeight * 0.03
                     }]}>
                         <View style={styles.outerLockCircle}>
@@ -142,7 +148,7 @@ const AdminLogin = () => {
                                 <Ionicons name="lock-closed" size={38} color="#FFD54F" />
                             </View>
                         </View>
-                        <Text style={styles.brandTitleText}>Garden Sewa</Text>
+                        <Text style={styles.brandTitleText}>GardenSewa</Text>
                         <Text style={styles.adminLoginText}>ADMIN LOGIN</Text>
                     </View>
 
@@ -152,8 +158,8 @@ const AdminLogin = () => {
                             maxWidth: cardMaxWidth,
                             paddingHorizontal: dynamicPadding,
                             paddingTop: dynamicPadding,
-                            borderTopLeftRadius: isTablet ? 36 : 36,
-                            borderTopRightRadius: isTablet ? 36 : 36,
+                            borderTopLeftRadius: 36,
+                            borderTopRightRadius: 36,
                             borderBottomLeftRadius: isTablet ? 36 : 0,
                             borderBottomRightRadius: isTablet ? 36 : 0,
                             marginBottom: isTablet ? 40 : 0
@@ -171,7 +177,7 @@ const AdminLogin = () => {
                                 onChangeText={handlePhoneChange}
                                 keyboardType="phone-pad"
                                 placeholder="Enter your phone number"
-                                placeholderTextColor="#999"
+                                placeholderTextColor={colors.textMuted}
                                 maxLength={12}
                             />
                         </View>
@@ -182,7 +188,7 @@ const AdminLogin = () => {
                                 <Ionicons
                                     name={showPin ? "eye-outline" : "eye-off-outline"}
                                     size={20}
-                                    color="#333"
+                                    color={colors.textSecondary}
                                 />
                             </TouchableOpacity>
                         </View>
@@ -243,10 +249,10 @@ const AdminLogin = () => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#235A55",
+        backgroundColor: colors.brand,
     },
     keyboardView: {
         flex: 1,
@@ -282,7 +288,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     adminLoginText: {
-        color: "#BCE5E1",
+        color: "rgba(255,255,255,0.75)",
         fontSize: 12,
         fontWeight: "700",
         letterSpacing: 1.5,
@@ -291,21 +297,21 @@ const styles = StyleSheet.create({
     whitePanelCard: {
         flex: 1,
         width: '100%',
-        backgroundColor: "#F7FAFA",
+        backgroundColor: colors.background,
         paddingBottom: 28,
     },
     signInTitle: {
         fontSize: 22,
         fontWeight: "700",
-        color: "#000",
+        color: colors.textPrimary,
         marginBottom: 16,
     },
     phoneInputRow: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#FFF",
+        backgroundColor: colors.surface,
         borderWidth: 1,
-        borderColor: "#D2E3E1",
+        borderColor: colors.border,
         borderRadius: 14,
         height: 50,
         paddingHorizontal: 16,
@@ -313,18 +319,15 @@ const styles = StyleSheet.create({
     iconWrapper: {
         paddingRight: 8,
         borderRightWidth: 1,
-        borderRightColor: '#E0E0E0',
+        borderRightColor: colors.divider,
         height: '60%',
         justifyContent: 'center',
         marginRight: 10,
     },
-    nepalFlag: {
-        marginRight: 4,
-    },
     phoneTextInput: {
         flex: 1,
         fontSize: 14,
-        color: "#000",
+        color: colors.textPrimary,
         fontWeight: "400",
         paddingVertical: 0,
         height: '80%',
@@ -339,7 +342,7 @@ const styles = StyleSheet.create({
     pinLabel: {
         fontSize: 13,
         fontWeight: "700",
-        color: "#000",
+        color: colors.textPrimary,
     },
     pinInputsGroupRow: {
         flexDirection: "row",
@@ -350,17 +353,17 @@ const styles = StyleSheet.create({
     singlePinBox: {
         width: 46,
         height: 54,
-        backgroundColor: "#FFF",
+        backgroundColor: colors.surface,
         fontSize: 20,
         fontWeight: "700",
-        color: "#000",
+        color: colors.textPrimary,
         borderWidth: 1.5,
-        borderColor: "#C5CEE0",
-        borderRadius: 10,
+        borderColor: colors.border,
+        borderRadius: 12,
         paddingVertical: 0,
     },
     loginSubmitButton: {
-        backgroundColor: "#2C5E5A",
+        backgroundColor: colors.brand,
         height: 50,
         borderRadius: 14,
         justifyContent: "center",
@@ -374,7 +377,7 @@ const styles = StyleSheet.create({
     },
     horizontalDivider: {
         height: 1,
-        backgroundColor: "#E4ECEB",
+        backgroundColor: colors.divider,
     },
     panelFooterActionContainer: {
         alignItems: "center",
@@ -384,12 +387,12 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
     },
     professionalJoinText: {
-        color: "#000",
+        color: colors.textPrimary,
         fontSize: 14,
         fontWeight: "700",
     },
     resetPinText: {
-        color: "#000",
+        color: colors.textPrimary,
         fontSize: 14,
         fontWeight: "700",
     },

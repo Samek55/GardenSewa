@@ -1,33 +1,22 @@
-import { AdminAuthContext } from '@/context/AdminAuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { usePathname, useRouter } from 'expo-router';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
 const SIDEBAR_WIDTH = Math.min(width * 0.75, 300);
 
-const ROLE_LABELS = {
-    super_admin: 'Super Admin',
-    admin: 'Admin',
-    bdm: 'Business Development Manager',
-    call_center: 'Call Center',
-    gardener: 'Gardener',
-};
-
-// Mirrors each screen's own server-side role gate (see their Edge Functions'
-// CAN_VIEW/CAN_REVIEW/ALLOWED_ROLES sets) so the drawer only ever offers a
-// link a role can actually use.
-const BACK_OFFICE_ROLES = new Set(['super_admin', 'admin', 'bdm', 'call_center']);
-const LEAD_REVIEW_ROLES = new Set(['super_admin', 'admin', 'bdm']);
-const BOOKING_SUBMIT_ROLES = new Set(['bdm', 'call_center']);
-const BROADCAST_ROLES = new Set(['super_admin']);
-
+// Guest-only menu — an active admin/gardener session is now handled entirely
+// by AdminSideBar (see app/_layout.js), which takes over this modal slot
+// before this component ever renders for that case. This used to also carry
+// its own separate, hand-rolled copy of the admin menu for when the
+// hamburger was tapped from the main customer-facing header, which silently
+// drifted out of sync with AdminSideBar's real content — removed rather than
+// kept in sync in two places.
 const SideBarModal = ({ onClose }) => {
     const router = useRouter();
     const pathname = usePathname();
-    const { isAdminLoggedIn, adminRole, adminDisplayName, adminPhone } = useContext(AdminAuthContext);
 
     const handleNavigation = (path) => {
         onClose();
@@ -43,10 +32,6 @@ const SideBarModal = ({ onClose }) => {
 
         if (targetPath === '/(tabs)/services') {
             return pathname.startsWith('/services') || pathname.startsWith('/(tabs)/services');
-        }
-
-        if (targetPath === '/notifications') {
-            return pathname.startsWith('/notifications') || pathname.startsWith('/(tabs)/notifications');
         }
 
         return pathname === targetPath || pathname === `/(tabs)${targetPath}`;
@@ -87,87 +72,34 @@ const SideBarModal = ({ onClose }) => {
                         resizeMode="cover"
                     />
                 </View>
-                {isAdminLoggedIn ? (
-                    <>
-                        <Text style={styles.brandName}>{adminDisplayName || ROLE_LABELS[adminRole] || 'Staff'}</Text>
-                        <Text style={styles.brandTagline}>{adminPhone ? `+977 ${adminPhone}` : (ROLE_LABELS[adminRole] || adminRole)}</Text>
-                    </>
-                ) : (
-                    <>
-                        <Text style={styles.brandName}>Garden Sewa</Text>
-                        <Text style={styles.brandTagline}>gardensewa@sriyog.com</Text>
-                    </>
-                )}
+                <Text style={styles.brandName}>Garden Sewa</Text>
+                <Text style={styles.brandTagline}>gardensewa@sriyog.com</Text>
             </View>
 
             <View style={styles.menu}>
-                {isAdminLoggedIn ? (
-                    <>
-                        {renderMenuItem('/(tabs)', 'home-outline', 'Home')}
-                        {adminRole === 'gardener' && (
-                            renderMenuItem('/booking', 'leaf-outline', 'My Leads & Bookings')
-                        )}
-                        {renderMenuItem(
-                            BROADCAST_ROLES.has(adminRole) ? '/sendNotification' : '/notifications',
-                            'notifications-outline',
-                            'Notifications'
-                        )}
-                        {BACK_OFFICE_ROLES.has(adminRole) && (
-                            renderMenuItem('/popupBanner', 'pricetags-outline', 'Popup Banner')
-                        )}
-                        {BACK_OFFICE_ROLES.has(adminRole) && (
-                            renderMenuItem('/gardenerApplications', 'checkmark-done-outline', 'Gardener Applications')
-                        )}
-                        {LEAD_REVIEW_ROLES.has(adminRole) && (
-                            renderMenuItem('/leadUnlockRequests', 'cash-outline', 'Lead Unlock Requests')
-                        )}
-                        {BOOKING_SUBMIT_ROLES.has(adminRole) && (
-                            renderMenuItem('/submitBookingForCustomer', 'call-outline', 'Submit Booking for Customer')
-                        )}
-                        {BACK_OFFICE_ROLES.has(adminRole) && (
-                            renderMenuItem('/helpboxRequests', 'help-buoy-outline', 'Help Box Requests')
-                        )}
-                        {BACK_OFFICE_ROLES.has(adminRole) && (
-                            renderMenuItem('/partnershipApplications', 'briefcase-outline', 'Partnership Applications')
-                        )}
-                        {adminRole === 'super_admin' && (
-                            <>
-                                <Text style={styles.sectionLabel}>Super Admin</Text>
-                                {renderMenuItem('/manageStaff', 'people-outline', 'Manage Staff')}
-                            </>
-                        )}
-                    </>
-                ) : (
-                    <>
-                        {renderMenuItem('/(tabs)', 'home-outline', 'Home')}
-                        {renderMenuItem('/(tabs)/services', 'grid-outline', 'Services')}
-                        {renderMenuItem('/book', 'calendar-outline', 'Book a Service')}
-                        {renderMenuItem('/joinasaprofessional', 'person-add-outline', 'Join as a Professional')}
+                {renderMenuItem('/(tabs)', 'home-outline', 'Home')}
+                {renderMenuItem('/(tabs)/services', 'grid-outline', 'Services')}
+                {renderMenuItem('/book', 'calendar-outline', 'Book a Service')}
+                {renderMenuItem('/joinasaprofessional', 'person-add-outline', 'Join as a Professional')}
 
-                        <View style={styles.divider} />
+                <View style={styles.divider} />
 
-                        {renderMenuItem('/about', 'information-circle-outline', 'About Us')}
-                        {renderMenuItem('/contact', 'mail-outline', 'Contact')}
-                        {renderMenuItem('/faq', 'help-circle-outline', 'FAQs')}
-                        {renderMenuItem('/glossary', 'book-outline', 'Glossary')}
-                        {renderMenuItem('/becomeAPartner', 'shield-checkmark-outline', 'Become a Partner')}
-                        {renderMenuItem('/favorites', 'heart-outline', 'Favorites')}
-                    </>
-                )}
+                {renderMenuItem('/about', 'information-circle-outline', 'About Us')}
+                {renderMenuItem('/contact', 'mail-outline', 'Contact')}
+                {renderMenuItem('/faq', 'help-circle-outline', 'FAQs')}
+                {renderMenuItem('/glossary', 'book-outline', 'Glossary')}
+                {renderMenuItem('/becomeAPartner', 'shield-checkmark-outline', 'Become a Partner')}
+                {renderMenuItem('/favorites', 'heart-outline', 'Favorites')}
             </View>
 
             <View style={styles.adminWrapper}>
                 <TouchableOpacity
                     style={styles.adminBtn}
                     activeOpacity={0.85}
-                    onPress={() => handleNavigation(isAdminLoggedIn ? '/updateProfile' : '/adminLogin')}
+                    onPress={() => handleNavigation('/adminLogin')}
                 >
-                    <Ionicons
-                        name={isAdminLoggedIn ? 'person-outline' : 'shield-checkmark-outline'}
-                        size={16}
-                        color="#fff"
-                    />
-                    <Text style={styles.adminBtnText}>{isAdminLoggedIn ? 'Update Profile' : 'Admin Login'}</Text>
+                    <Ionicons name="shield-checkmark-outline" size={16} color="#fff" />
+                    <Text style={styles.adminBtnText}>Admin Login</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -230,15 +162,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 2,
         justifyContent: 'space-evenly',
-    },
-    sectionLabel: {
-        fontSize: 10,
-        fontWeight: '800',
-        color: '#9CA3AF',
-        textTransform: 'uppercase',
-        letterSpacing: 0.8,
-        paddingHorizontal: 10,
-        paddingVertical: 3,
     },
     divider: {
         borderTopWidth: 1,

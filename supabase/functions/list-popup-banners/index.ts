@@ -18,7 +18,11 @@ Deno.serve(async (req) => {
 
     const { data, error } = await supabaseAdmin
       .from('popup_banners')
-      .select('id, title, message, image_url, button_text, button_link, is_active, created_at')
+      .select(
+        'id, name, title, message, image_url, button_text, button_link, is_active, ' +
+        'close_countdown_enabled, close_countdown_seconds, start_date, end_date, ' +
+        'target_cities, target_user_types, target_professions, created_at'
+      )
       .order('created_at', { ascending: false })
       .limit(100);
     if (error) throw new Error(error.message);

@@ -64,7 +64,7 @@ const EditSchedule = () => {
     const sendOtpCode = async () => {
         setSendingOtp(true);
         try {
-            const result = await sendOtp(phone, 'schedule-update', fullName);
+            const result = await sendOtp(phone, 'schedule-update', fullName, bookingId);
             if (!result.success) {
                 Alert.alert('Could Not Send Code', result.message || 'Please try again.');
                 return false;

@@ -1,6 +1,9 @@
+import AdminButton from '@/components/admin/AdminButton';
+import Header4Admin from '@/components/admin/Header4Admin';
+import { useTheme } from '@/context/ThemeContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -9,7 +12,7 @@ import {
     Linking,
     Modal,
     Pressable,
-    RefreshControl,
+    ScrollView,
     StyleSheet,
     Text,
     TextInput,
@@ -25,25 +28,31 @@ import {
 } from '../../api/PostApiAdmin';
 import { AdminAuthContext } from '../../context/AdminAuthContext';
 
-const STATUS_TABS = ['Waiting for Verification', 'Approved', 'Rejected'];
 const CAN_REVIEW_ROLES = new Set(['super_admin', 'admin', 'bdm']);
 
-export default function GardenerApplications() {
-    const { adminRole, adminDisplayName, adminLogoutLocal } = useContext(AdminAuthContext);
+const formatDate = (iso) => {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return `${d.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}, ${d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+};
 
-    const [activeTab, setActiveTab] = useState(STATUS_TABS[0]);
+export default function GardenerApplications() {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+    const { adminRole, adminLogoutLocal } = useContext(AdminAuthContext);
+
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
-    const [actioningId, setActioningId] = useState(null);
-    const [rejectTarget, setRejectTarget] = useState(null);
+    const [detail, setDetail] = useState(null);
+    const [actioning, setActioning] = useState(false);
+    const [rejectOpen, setRejectOpen] = useState(false);
     const [rejectReason, setRejectReason] = useState('');
 
     const canReview = CAN_REVIEW_ROLES.has(adminRole);
 
-    const loadApplications = useCallback(async (status) => {
+    const load = useCallback(async () => {
         try {
-            const result = await listGardenerApplications(status);
+            const result = await listGardenerApplications('Waiting for Verification');
             if (!result.success) {
                 if (result.message === 'Please log in again.') {
                     await adminLogoutLocal();
@@ -61,204 +70,167 @@ export default function GardenerApplications() {
 
     useEffect(() => {
         setLoading(true);
-        loadApplications(activeTab).finally(() => setLoading(false));
-    }, [activeTab, loadApplications]);
-
-    const handleRefresh = async () => {
-        setRefreshing(true);
-        await loadApplications(activeTab);
-        setRefreshing(false);
-    };
+        load().finally(() => setLoading(false));
+    }, [load]);
 
     const handleViewId = async (id) => {
         try {
             const result = await getGardenerDocumentUrl(id);
-            if (!result.success) {
-                Alert.alert('Error', result.message || 'Could not open document');
-                return;
-            }
+            if (!result.success) { Alert.alert('Error', result.message || 'Could not open document'); return; }
             Linking.openURL(result.url);
         } catch (error) {
             Alert.alert('Error', error.message || 'Could not open document');
         }
     };
 
-    const handleApprove = async (id) => {
-        setActioningId(id);
+    const handleApprove = async () => {
+        setActioning(true);
         try {
-            const result = await approveGardener(id);
-            if (!result.success) {
-                Alert.alert('Error', result.message || 'Could not approve this application');
-                return;
-            }
-            await loadApplications(activeTab);
+            const result = await approveGardener(detail.id);
+            if (!result.success) { Alert.alert('Error', result.message || 'Could not approve this application'); return; }
+            setDetail(null);
+            await load();
         } catch (error) {
             Alert.alert('Error', error.message || 'Could not approve this application');
         } finally {
-            setActioningId(null);
+            setActioning(false);
         }
     };
 
-    const openRejectModal = (id) => {
-        setRejectTarget(id);
-        setRejectReason('');
-    };
-
     const handleConfirmReject = async () => {
-        const id = rejectTarget;
-        setRejectTarget(null);
-        setActioningId(id);
+        setActioning(true);
         try {
-            const result = await rejectGardener(id, rejectReason.trim() || null);
-            if (!result.success) {
-                Alert.alert('Error', result.message || 'Could not reject this application');
-                return;
-            }
-            await loadApplications(activeTab);
+            const result = await rejectGardener(detail.id, rejectReason.trim() || null);
+            if (!result.success) { Alert.alert('Error', result.message || 'Could not reject this application'); return; }
+            setRejectOpen(false);
+            setDetail(null);
+            await load();
         } catch (error) {
             Alert.alert('Error', error.message || 'Could not reject this application');
         } finally {
-            setActioningId(null);
+            setActioning(false);
         }
     };
 
     const renderItem = ({ item }) => (
-        <View style={styles.card}>
-            <View style={styles.cardHeader}>
+        <TouchableOpacity onPress={() => setDetail(item)}>
+            <View style={styles.row}>
                 {item.profile_picture_url ? (
                     <Image source={{ uri: item.profile_picture_url }} style={styles.avatar} />
                 ) : (
                     <View style={[styles.avatar, styles.avatarPlaceholder]}>
-                        <Ionicons name="person" size={24} color="#999" />
+                        <Ionicons name="person" size={20} color={colors.textMuted} />
                     </View>
                 )}
                 <View style={{ flex: 1 }}>
                     <Text style={styles.name}>{item.full_name}</Text>
-                    <Text style={styles.phone}>{item.phone}</Text>
+                    <Text style={styles.applied}>Applied: {formatDate(item.created_at)}</Text>
+                    <Text style={styles.expertise} numberOfLines={1}>{(item.area_of_expertise || []).join(', ') || '—'}</Text>
                 </View>
-                <View style={[styles.statusBadge, statusBadgeStyle(item.status)]}>
-                    <Text style={styles.statusBadgeText}>{item.status}</Text>
-                </View>
+                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </View>
-
-            <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Gender / Blood Group</Text>
-                <Text style={styles.detailValue}>{item.gender} · {item.blood_group}</Text>
-            </View>
-            <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Citizenship No.</Text>
-                <Text style={styles.detailValue}>{item.citizenship_number} ({item.issued_district})</Text>
-            </View>
-            <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Expertise</Text>
-                <Text style={styles.detailValue}>{(item.area_of_expertise || []).join(', ') || '—'}</Text>
-            </View>
-            <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Work Preference</Text>
-                <Text style={styles.detailValue}>{item.work_preference || '—'}</Text>
-            </View>
-            <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Expected City</Text>
-                <Text style={styles.detailValue}>{(item.expected_working_city || []).join(', ') || '—'}</Text>
-            </View>
-            <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Experience</Text>
-                <Text style={styles.detailValue}>{item.years_experience ?? '—'} years</Text>
-            </View>
-            {item.status === 'Rejected' && item.rejection_reason ? (
-                <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Reason</Text>
-                    <Text style={styles.detailValue}>{item.rejection_reason}</Text>
-                </View>
-            ) : null}
-
-            <View style={styles.actionsRow}>
-                <TouchableOpacity style={styles.viewIdButton} onPress={() => handleViewId(item.id)}>
-                    <Ionicons name="document-text-outline" size={16} color="#245d5a" />
-                    <Text style={styles.viewIdButtonText}>View ID</Text>
-                </TouchableOpacity>
-
-                {canReview && item.status === 'Waiting for Verification' && (
-                    <View style={styles.reviewButtons}>
-                        <TouchableOpacity
-                            style={styles.rejectButton}
-                            onPress={() => openRejectModal(item.id)}
-                            disabled={actioningId === item.id}
-                        >
-                            <Text style={styles.rejectButtonText}>Reject</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.approveButton}
-                            onPress={() => handleApprove(item.id)}
-                            disabled={actioningId === item.id}
-                        >
-                            {actioningId === item.id ? (
-                                <ActivityIndicator color="#fff" size="small" />
-                            ) : (
-                                <Text style={styles.approveButtonText}>Approve</Text>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                )}
-            </View>
-        </View>
+        </TouchableOpacity>
     );
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <View>
-                    <Text style={styles.headerTitle}>Gardener Applications</Text>
-                    <Text style={styles.headerSubtitle}>{adminDisplayName} · {roleLabel(adminRole)}</Text>
+            <Header4Admin />
+
+            <View style={styles.subHeader}>
+                <TouchableOpacity onPress={() => router.back()}>
+                    <Ionicons name="arrow-back" size={22} color={colors.brand} />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Professional Verification</Text>
+                <View style={styles.countBadge}>
+                    <Text style={styles.countBadgeText}>{applications.length}</Text>
                 </View>
             </View>
 
-            <View style={styles.tabsRow}>
-                {STATUS_TABS.map((tab) => (
-                    <TouchableOpacity
-                        key={tab}
-                        style={[styles.tab, activeTab === tab && styles.tabActive]}
-                        onPress={() => setActiveTab(tab)}
-                    >
-                        <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>{tab}</Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
-
             {loading ? (
-                <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#245d5a" />
+                <ActivityIndicator style={{ marginTop: 40 }} size="large" color={colors.brand} />
             ) : (
                 <FlatList
                     data={applications}
                     keyExtractor={(item) => item.id}
                     renderItem={renderItem}
                     contentContainerStyle={styles.listContent}
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
-                    ListEmptyComponent={
-                        <Text style={styles.emptyText}>No applications in &quot;{activeTab}&quot;.</Text>
-                    }
+                    ListEmptyComponent={<Text style={styles.emptyText}>No pending applications.</Text>}
                 />
             )}
 
-            <Modal visible={!!rejectTarget} transparent animationType="fade" onRequestClose={() => setRejectTarget(null)}>
+            <Modal visible={!!detail} transparent animationType="slide" onRequestClose={() => setDetail(null)}>
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalCard}>
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            <View style={styles.modalHeaderRow}>
+                                {detail?.profile_picture_url ? (
+                                    <Image source={{ uri: detail.profile_picture_url }} style={styles.modalAvatar} />
+                                ) : (
+                                    <View style={[styles.modalAvatar, styles.avatarPlaceholder]}>
+                                        <Ionicons name="person" size={26} color={colors.textMuted} />
+                                    </View>
+                                )}
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.modalTitle}>{detail?.full_name}</Text>
+                                    <Text style={styles.modalSubtitle}>{detail?.phone}</Text>
+                                </View>
+                            </View>
+
+                            <InfoRow icon="male-female-outline" label="Gender / Blood Group" value={`${detail?.gender || '—'} · ${detail?.blood_group || '—'}`} colors={colors} />
+                            <InfoRow icon="card-outline" label="Citizenship No." value={`${detail?.citizenship_number || '—'} (${detail?.issued_district || '—'})`} colors={colors} />
+                            <InfoRow icon="briefcase-outline" label="Work Preference" value={detail?.work_preference} colors={colors} />
+                            <InfoRow icon="location-outline" label="Expected City" value={(detail?.expected_working_city || []).join(', ')} colors={colors} />
+                            <InfoRow icon="time-outline" label="Experience" value={detail?.years_experience != null ? `${detail.years_experience} years` : null} colors={colors} />
+                            <InfoRow icon="call-outline" label="Emergency Contact" value={`${detail?.emergency_contact_number || '—'} (${detail?.emergency_contact_relation || '—'})`} colors={colors} />
+
+                            {detail?.area_of_expertise?.length > 0 && (
+                                <>
+                                    <Text style={styles.sectionLabel}>Expertise</Text>
+                                    <View style={styles.chipRow}>
+                                        {detail.area_of_expertise.map((e) => (
+                                            <View key={e} style={styles.chip}><Text style={styles.chipText}>{e}</Text></View>
+                                        ))}
+                                    </View>
+                                </>
+                            )}
+
+                            <TouchableOpacity style={styles.viewIdButton} onPress={() => handleViewId(detail.id)}>
+                                <Ionicons name="document-text-outline" size={16} color={colors.brand} />
+                                <Text style={styles.viewIdButtonText}>View ID / Document</Text>
+                            </TouchableOpacity>
+
+                            {canReview && (
+                                <View style={styles.modalButtonsRow}>
+                                    <AdminButton variant="dangerOutline" label="Reject" onPress={() => { setRejectReason(''); setRejectOpen(true); }} disabled={actioning} style={{ flex: 1 }} />
+                                    <AdminButton variant="brand" label="Approve" onPress={handleApprove} loading={actioning} style={{ flex: 1 }} />
+                                </View>
+                            )}
+                            <TouchableOpacity style={styles.closeButton} onPress={() => setDetail(null)}>
+                                <Text style={styles.closeButtonText}>Close</Text>
+                            </TouchableOpacity>
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal visible={rejectOpen} transparent animationType="fade" onRequestClose={() => setRejectOpen(false)}>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.reasonCard}>
                         <Text style={styles.modalTitle}>Reject Application</Text>
                         <Text style={styles.modalSubtitle}>Optionally add a reason (visible to reviewers only).</Text>
                         <TextInput
-                            style={styles.modalInput}
+                            style={styles.reasonInput}
                             placeholder="Reason for rejection"
+                            placeholderTextColor={colors.textMuted}
                             value={rejectReason}
                             onChangeText={setRejectReason}
                             multiline
                         />
                         <View style={styles.modalButtonsRow}>
-                            <Pressable style={styles.modalCancelButton} onPress={() => setRejectTarget(null)}>
+                            <Pressable style={styles.modalCancelButton} onPress={() => setRejectOpen(false)}>
                                 <Text style={styles.modalCancelButtonText}>Cancel</Text>
                             </Pressable>
-                            <Pressable style={styles.modalConfirmButton} onPress={handleConfirmReject}>
-                                <Text style={styles.modalConfirmButtonText}>Reject</Text>
-                            </Pressable>
+                            <AdminButton variant="danger" label="Reject" onPress={handleConfirmReject} loading={actioning} />
                         </View>
                     </View>
                 </View>
@@ -267,66 +239,55 @@ export default function GardenerApplications() {
     );
 }
 
-const roleLabel = (role) => ({
-    super_admin: 'Super Admin',
-    admin: 'Admin',
-    bdm: 'Business Development Manager',
-    call_center: 'Call Center',
-}[role] || role);
+function InfoRow({ icon, label, value, colors }) {
+    return (
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
+            <Ionicons name={icon} size={16} color={colors.textMuted} style={{ marginTop: 2 }} />
+            <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 11, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.4 }}>{label}</Text>
+                <Text style={{ fontSize: 14, color: colors.textPrimary, fontWeight: '600', marginTop: 2 }}>{value || '—'}</Text>
+            </View>
+        </View>
+    );
+}
 
-const statusBadgeStyle = (status) => {
-    if (status === 'Approved') return { backgroundColor: '#DFF5E1' };
-    if (status === 'Rejected') return { backgroundColor: '#FCE1E1' };
-    return { backgroundColor: '#FFF3D6' };
-};
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7F7' },
-    header: {
-        backgroundColor: '#245d5a',
-        paddingTop: 14,
-        paddingBottom: 12,
-        paddingHorizontal: 16,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+const createStyles = (colors) => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    subHeader: {
+        backgroundColor: colors.surface, paddingHorizontal: 16, paddingVertical: 14,
+        flexDirection: 'row', alignItems: 'center', gap: 12,
     },
-    headerTitle: { color: '#fff', fontSize: 20, fontWeight: '700' },
-    headerSubtitle: { color: '#BCE5E1', fontSize: 12, marginTop: 2 },
-    tabsRow: { flexDirection: 'row', padding: 10, gap: 8, backgroundColor: '#fff' },
-    tab: { flex: 1, paddingVertical: 8, borderRadius: 8, alignItems: 'center', backgroundColor: '#F0F0F0' },
-    tabActive: { backgroundColor: '#245d5a' },
-    tabText: { fontSize: 11, fontWeight: '600', color: '#555', textAlign: 'center' },
-    tabTextActive: { color: '#fff' },
-    listContent: { padding: 12, gap: 12 },
-    emptyText: { textAlign: 'center', color: '#888', marginTop: 40 },
-    card: { backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 12, gap: 6 },
-    cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },
+    headerTitle: { color: colors.brand, fontSize: 18, fontWeight: '700', flex: 1 },
+    countBadge: { width: 26, height: 26, borderRadius: 13, backgroundColor: colors.brand, alignItems: 'center', justifyContent: 'center' },
+    countBadgeText: { color: '#fff', fontSize: 12, fontWeight: '800' },
+    listContent: { padding: 16, gap: 10 },
+    emptyText: { textAlign: 'center', color: colors.textMuted, marginTop: 40 },
+    row: {
+        flexDirection: 'row', alignItems: 'center', gap: 12,
+        backgroundColor: colors.surface, borderRadius: 14, padding: 12,
+    },
     avatar: { width: 48, height: 48, borderRadius: 24 },
-    avatarPlaceholder: { backgroundColor: '#eee', alignItems: 'center', justifyContent: 'center' },
-    name: { fontSize: 16, fontWeight: '700', color: '#222' },
-    phone: { fontSize: 13, color: '#666' },
-    statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
-    statusBadgeText: { fontSize: 10, fontWeight: '700', color: '#333' },
-    detailRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
-    detailLabel: { fontSize: 12, color: '#888', flex: 1 },
-    detailValue: { fontSize: 12, color: '#333', flex: 1.5, textAlign: 'right' },
-    actionsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 },
-    viewIdButton: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    viewIdButtonText: { color: '#245d5a', fontWeight: '600', fontSize: 13 },
-    reviewButtons: { flexDirection: 'row', gap: 8 },
-    rejectButton: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, borderWidth: 1, borderColor: '#d9534f' },
-    rejectButtonText: { color: '#d9534f', fontWeight: '700', fontSize: 13 },
-    approveButton: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, backgroundColor: '#245d5a', minWidth: 76, alignItems: 'center' },
-    approveButtonText: { color: '#fff', fontWeight: '700', fontSize: 13 },
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 24 },
-    modalCard: { backgroundColor: '#fff', borderRadius: 14, padding: 20, gap: 10 },
-    modalTitle: { fontSize: 17, fontWeight: '700', color: '#222' },
-    modalSubtitle: { fontSize: 12, color: '#777' },
-    modalInput: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10, minHeight: 70, textAlignVertical: 'top' },
-    modalButtonsRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 8 },
+    avatarPlaceholder: { backgroundColor: colors.surfaceMuted, alignItems: 'center', justifyContent: 'center' },
+    name: { fontSize: 15, fontWeight: '700', color: colors.textPrimary },
+    applied: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+    expertise: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+    modalCard: { backgroundColor: colors.surface, borderTopLeftRadius: 26, borderTopRightRadius: 26, padding: 20, maxHeight: '88%' },
+    modalHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
+    modalAvatar: { width: 56, height: 56, borderRadius: 28 },
+    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalSubtitle: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
+    sectionLabel: { fontSize: 11, fontWeight: '800', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8, marginTop: 4 },
+    chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
+    chip: { backgroundColor: colors.successBg, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
+    chipText: { fontSize: 12, color: colors.success, fontWeight: '600' },
+    viewIdButton: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4, marginBottom: 16 },
+    viewIdButtonText: { color: colors.brand, fontWeight: '600', fontSize: 13 },
+    modalButtonsRow: { flexDirection: 'row', gap: 10, marginTop: 8, alignItems: 'center' },
+    closeButton: { paddingVertical: 12, alignItems: 'center', marginTop: 12, marginBottom: 4 },
+    closeButtonText: { color: colors.textSecondary, fontWeight: '600' },
+    reasonCard: { backgroundColor: colors.surface, borderRadius: 18, padding: 20, gap: 10, margin: 24 },
+    reasonInput: { borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 10, minHeight: 70, textAlignVertical: 'top', color: colors.textPrimary },
     modalCancelButton: { paddingHorizontal: 16, paddingVertical: 10 },
-    modalCancelButtonText: { color: '#555', fontWeight: '600' },
-    modalConfirmButton: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: '#d9534f', borderRadius: 8 },
-    modalConfirmButtonText: { color: '#fff', fontWeight: '700' },
+    modalCancelButtonText: { color: colors.textSecondary, fontWeight: '600' },
 });

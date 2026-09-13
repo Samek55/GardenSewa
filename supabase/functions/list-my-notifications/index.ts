@@ -38,15 +38,21 @@ Deno.serve(async (req) => {
     } else {
       const body = await req.json().catch(() => ({}));
       const cleaned = cleanPhone(body.phone);
+      // 'public_all' belongs in this branch only — send-notification's own
+      // 'public' audience targets devices with no admin/gardener role tag
+      // (see its `relation: 'not_exists'` filter), i.e. exactly customers and
+      // anonymous visitors, never gardener or back-office sessions. Without
+      // this, a "Public" broadcast was logged but no read path ever queried
+      // `public_all`, so it silently never appeared in anyone's in-app inbox.
       if (cleaned) {
         query = supabaseAdmin
           .from('notifications')
           .select(SELECT_COLUMNS)
-          .or(`and(audience.eq.customer_specific,audience_phone.eq.${cleaned}),audience.eq.customer_all,audience.eq.all`);
+          .or(`and(audience.eq.customer_specific,audience_phone.eq.${cleaned}),audience.eq.customer_all,audience.eq.public_all,audience.eq.all`);
       } else {
         // No session and no phone — an anonymous visitor. Not an error, just
-        // nothing personal to show; company-wide broadcasts only.
-        query = supabaseAdmin.from('notifications').select(SELECT_COLUMNS).eq('audience', 'all');
+        // nothing personal to show; company-wide and public broadcasts only.
+        query = supabaseAdmin.from('notifications').select(SELECT_COLUMNS).in('audience', ['all', 'public_all']);
       }
     }
 

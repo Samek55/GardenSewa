@@ -12,6 +12,14 @@ const toContentFields = (input: Record<string, any>) => ({
   image_url: String(input.imageUrl || '').trim(),
   button_text: String(input.buttonText || 'View More').trim(),
   button_link: String(input.buttonLink || '/').trim(),
+  name: input.name ? String(input.name).trim() : null,
+  close_countdown_enabled: input.closeCountdownEnabled !== false,
+  close_countdown_seconds: Number(input.closeCountdownSeconds) > 0 ? Number(input.closeCountdownSeconds) : 10,
+  start_date: input.startDate || null,
+  end_date: input.endDate || null,
+  target_cities: Array.isArray(input.targetCities) ? input.targetCities : [],
+  target_user_types: Array.isArray(input.targetUserTypes) ? input.targetUserTypes : [],
+  target_professions: Array.isArray(input.targetProfessions) ? input.targetProfessions : [],
 });
 
 Deno.serve(async (req) => {

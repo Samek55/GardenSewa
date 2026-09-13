@@ -457,7 +457,7 @@ const UpdateProfile = () => {
                         <TouchableOpacity
                             style={styles.accountCard}
                             activeOpacity={0.7}
-                            onPress={() => router.push({ pathname: '/resetPin', params: { phone } })}
+                            onPress={() => router.push('/changePin')}
                         >
                             <View style={styles.keyIconBadge}>
                                 <Ionicons name="key-outline" size={20} color="#245d5a" />
@@ -798,11 +798,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#FEF2F2',
-        borderWidth: 1,
-        borderColor: '#FCA5A5',
         paddingVertical: 14,
-        borderRadius: 12,
         gap: 8,
     },
     logoutText: {

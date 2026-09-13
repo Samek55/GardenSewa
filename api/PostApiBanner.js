@@ -1,8 +1,14 @@
 import { invokeEdgeFunction } from './functionsClient';
 
-// Public — no session, shown to every visitor on the home screen.
-export const fetchActivePopupBanner = () =>
-    invokeEdgeFunction('get-active-popup-banner', {}, 'Could not load banner');
+// Public — no session, shown to every visitor on the home screen. userType is
+// whatever the caller already knows about itself locally ('Public' |
+// 'Customer' | 'Workforce' | 'Admin') since there's no session for the
+// function to derive it from. phone is only meaningful (and only sent) for a
+// logged-in gardener session — it lets the function look up that gardener's
+// own area_of_expertise to enforce Profession targeting server-side, without
+// the client needing to fetch and thread its own profile through first.
+export const fetchActivePopupBanner = (userType, phone) =>
+    invokeEdgeFunction('get-active-popup-banner', { userType, phone }, 'Could not load banner');
 
 // Back-office only, from here down.
 export const listPopupBanners = () =>

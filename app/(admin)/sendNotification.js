@@ -1,6 +1,9 @@
+import AdminButton from '@/components/admin/AdminButton';
+import Header4Admin from '@/components/admin/Header4Admin';
+import { useTheme } from '@/context/ThemeContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -47,54 +50,13 @@ const formatDate = (iso) => {
     }
 };
 
-function TabDropdown({ value, onChange }) {
-    const [open, setOpen] = useState(false);
-    const active = TAB_CONFIG.find((t) => t.key === value);
-
-    return (
-        <>
-            <TouchableOpacity style={styles.tabDropdownBtn} onPress={() => setOpen(true)} activeOpacity={0.8}>
-                <Ionicons name={active.icon} size={18} color="#245d5a" />
-                <Text style={styles.tabDropdownValue}>{active.label}</Text>
-                <Ionicons name="chevron-down" size={18} color="#9CA3AF" />
-            </TouchableOpacity>
-
-            <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
-                <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setOpen(false)}>
-                    <View style={styles.modalSheet}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Send To</Text>
-                            <TouchableOpacity onPress={() => setOpen(false)}>
-                                <Ionicons name="close" size={22} color="#222" />
-                            </TouchableOpacity>
-                        </View>
-
-                        {TAB_CONFIG.map((t) => {
-                            const selected = t.key === value;
-                            return (
-                                <TouchableOpacity
-                                    key={t.key}
-                                    style={styles.optionRow}
-                                    onPress={() => { onChange(t.key); setOpen(false); }}
-                                    activeOpacity={0.7}
-                                >
-                                    <Ionicons name={t.icon} size={18} color={selected ? '#245d5a' : '#9CA3AF'} />
-                                    <Text style={[styles.optionText, selected && styles.optionTextChecked]}>{t.label}</Text>
-                                    {selected && <Ionicons name="checkmark" size={18} color="#245d5a" />}
-                                </TouchableOpacity>
-                            );
-                        })}
-                    </View>
-                </TouchableOpacity>
-            </Modal>
-        </>
-    );
-}
-
 export default function SendNotification() {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
     const { adminRole, isAdminAuthLoading } = useContext(AdminAuthContext);
 
     const [tab, setTab] = useState('all');
+    const [tabPickerOpen, setTabPickerOpen] = useState(false);
     const [title, setTitle] = useState('');
     const [message, setMessage] = useState('');
     const [selectedServices, setSelectedServices] = useState([]);
@@ -203,26 +165,57 @@ export default function SendNotification() {
 
     return (
         <View style={styles.screen}>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()}>
-                    <Ionicons name="arrow-back" size={22} color="#fff" />
-                </TouchableOpacity>
+            <Header4Admin />
+
+            <View style={styles.subHeader}>
                 <Text style={styles.headerTitle}>Send Notification</Text>
-                <View style={{ width: 22 }} />
             </View>
 
             <View style={styles.tabDropdownWrap}>
-                <TabDropdown value={tab} onChange={(t) => { setTab(t); resetFields(); }} />
+                <TouchableOpacity style={styles.tabDropdownBtn} onPress={() => setTabPickerOpen(true)} activeOpacity={0.8}>
+                    <Ionicons name={activeTab.icon} size={18} color={colors.brand} />
+                    <Text style={styles.tabDropdownValue}>{activeTab.label}</Text>
+                    <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
+                </TouchableOpacity>
+
+                <Modal visible={tabPickerOpen} transparent animationType="slide" onRequestClose={() => setTabPickerOpen(false)}>
+                    <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setTabPickerOpen(false)}>
+                        <View style={styles.modalSheet}>
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>Send To</Text>
+                                <TouchableOpacity onPress={() => setTabPickerOpen(false)}>
+                                    <Ionicons name="close" size={22} color={colors.textPrimary} />
+                                </TouchableOpacity>
+                            </View>
+
+                            {TAB_CONFIG.map((t) => {
+                                const selected = t.key === tab;
+                                return (
+                                    <TouchableOpacity
+                                        key={t.key}
+                                        style={styles.optionRow}
+                                        onPress={() => { setTab(t.key); resetFields(); setTabPickerOpen(false); }}
+                                        activeOpacity={0.7}
+                                    >
+                                        <Ionicons name={t.icon} size={18} color={selected ? colors.brand : colors.textMuted} />
+                                        <Text style={[styles.optionText, selected && styles.optionTextChecked]}>{t.label}</Text>
+                                        {selected && <Ionicons name="checkmark" size={18} color={colors.brand} />}
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
             </View>
 
             {tab === 'history' ? (
                 historyLoading ? (
                     <View style={styles.historyCenter}>
-                        <ActivityIndicator size="large" color="#245d5a" />
+                        <ActivityIndicator size="large" color={colors.brand} />
                     </View>
                 ) : history.length === 0 ? (
                     <View style={styles.historyCenter}>
-                        <Ionicons name="notifications-off-outline" size={40} color="#9CA3AF" />
+                        <Ionicons name="notifications-off-outline" size={40} color={colors.textMuted} />
                         <Text style={styles.emptyText}>No notifications sent yet.</Text>
                     </View>
                 ) : (
@@ -244,7 +237,7 @@ export default function SendNotification() {
                 <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
                     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
                         <View style={styles.infoBanner}>
-                            <Ionicons name={activeTab.icon} size={18} color="#245d5a" />
+                            <Ionicons name={activeTab.icon} size={18} color={colors.brand} />
                             <Text style={styles.infoText}>{activeTab.description}</Text>
                         </View>
 
@@ -268,7 +261,7 @@ export default function SendNotification() {
                                 <TextInput
                                     style={[styles.input, styles.textarea]}
                                     placeholder="Type your message to gardeners..."
-                                    placeholderTextColor="#999"
+                                    placeholderTextColor={colors.textMuted}
                                     value={message}
                                     onChangeText={setMessage}
                                     multiline
@@ -290,7 +283,7 @@ export default function SendNotification() {
                                 <TextInput
                                     style={styles.input}
                                     placeholder="Notification title"
-                                    placeholderTextColor="#999"
+                                    placeholderTextColor={colors.textMuted}
                                     value={title}
                                     onChangeText={setTitle}
                                 />
@@ -306,7 +299,7 @@ export default function SendNotification() {
                                                     ? 'Type your message to public installs...'
                                                     : 'Type your announcement or notice...'
                                     }
-                                    placeholderTextColor="#999"
+                                    placeholderTextColor={colors.textMuted}
                                     value={message}
                                     onChangeText={setMessage}
                                     multiline
@@ -315,16 +308,13 @@ export default function SendNotification() {
                             </>
                         )}
 
-                        <TouchableOpacity style={[styles.sendBtn, sending && { opacity: 0.6 }]} onPress={handleSend} disabled={sending}>
-                            {sending ? (
-                                <ActivityIndicator color="#fff" size="small" />
-                            ) : (
-                                <>
-                                    <Ionicons name="send" size={18} color="#fff" />
-                                    <Text style={styles.sendBtnText}>Send Notification</Text>
-                                </>
-                            )}
-                        </TouchableOpacity>
+                        <AdminButton
+                            variant="brand"
+                            label="Send Notification"
+                            onPress={handleSend}
+                            loading={sending}
+                            style={{ marginTop: 24 }}
+                        />
                     </ScrollView>
                 </KeyboardAvoidingView>
             )}
@@ -332,74 +322,64 @@ export default function SendNotification() {
     );
 }
 
-const styles = StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#F5F7F7' },
-    header: {
-        flexDirection: 'row', alignItems: 'center',
-        backgroundColor: '#245d5a',
-        paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12, gap: 12,
-    },
-    headerTitle: { fontSize: 18, fontWeight: '800', color: '#fff', flex: 1 },
+const createStyles = (colors) => StyleSheet.create({
+    screen: { flex: 1, backgroundColor: colors.background },
+    subHeader: { backgroundColor: colors.surface, paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.divider },
+    headerTitle: { fontSize: 18, fontWeight: '800', color: colors.textPrimary },
     tabDropdownWrap: {
-        backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 12,
-        borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
+        backgroundColor: colors.surface, paddingHorizontal: 16, paddingVertical: 12,
+        borderBottomWidth: 1, borderBottomColor: colors.divider,
     },
     tabDropdownBtn: {
         flexDirection: 'row', alignItems: 'center', gap: 10,
-        backgroundColor: '#fff', borderRadius: 14,
-        borderWidth: 1.5, borderColor: '#E0E0E0',
+        backgroundColor: colors.surface, borderRadius: 14,
+        borderWidth: 1.5, borderColor: colors.border,
         paddingHorizontal: 16, paddingVertical: 13,
     },
-    tabDropdownValue: { fontSize: 14, color: '#222', fontWeight: '700', flex: 1 },
+    tabDropdownValue: { fontSize: 14, color: colors.textPrimary, fontWeight: '700', flex: 1 },
     content: { padding: 16, paddingBottom: 40 },
     infoBanner: {
         flexDirection: 'row', alignItems: 'flex-start', gap: 10,
-        backgroundColor: '#EAF6F4', borderRadius: 14,
+        backgroundColor: colors.surfaceMuted, borderRadius: 14,
         padding: 16, marginBottom: 20,
     },
-    infoText: { flex: 1, fontSize: 13, color: '#245d5a', fontWeight: '500', lineHeight: 20 },
+    infoText: { flex: 1, fontSize: 13, color: colors.brand, fontWeight: '500', lineHeight: 20 },
     label: {
-        fontSize: 11, fontWeight: '800', color: '#245d5a',
+        fontSize: 11, fontWeight: '800', color: colors.brand,
         textTransform: 'uppercase', letterSpacing: 0.6,
         marginBottom: 8, marginTop: 16,
     },
     input: {
-        backgroundColor: '#fff', borderRadius: 14,
-        borderWidth: 1.5, borderColor: '#E0E0E0',
+        backgroundColor: colors.surface, borderRadius: 14,
+        borderWidth: 1.5, borderColor: colors.border,
         paddingHorizontal: 16, paddingVertical: 12,
-        fontSize: 14, color: '#000',
+        fontSize: 14, color: colors.textPrimary,
     },
     textarea: { minHeight: 130, paddingTop: 12 },
     historyCenter: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10 },
-    emptyText: { fontSize: 14, color: '#9CA3AF', fontWeight: '500' },
+    emptyText: { fontSize: 14, color: colors.textMuted, fontWeight: '500' },
     historyList: { padding: 16, paddingBottom: 40 },
     historyCard: {
-        backgroundColor: '#fff', borderRadius: 14,
-        borderWidth: 1, borderColor: '#E0E0E0',
+        backgroundColor: colors.surface, borderRadius: 14,
+        borderWidth: 1, borderColor: colors.border,
         padding: 16, marginBottom: 12,
     },
-    historyCardTitle: { fontSize: 15, fontWeight: '700', color: '#222', marginBottom: 4 },
-    historyCardBody: { fontSize: 13.5, fontWeight: '500', color: '#555', lineHeight: 19, marginBottom: 6 },
-    historyCardDate: { fontSize: 11, fontWeight: '600', color: '#9CA3AF' },
+    historyCardTitle: { fontSize: 15, fontWeight: '700', color: colors.textPrimary, marginBottom: 4 },
+    historyCardBody: { fontSize: 13.5, fontWeight: '500', color: colors.textSecondary, lineHeight: 19, marginBottom: 6 },
+    historyCardDate: { fontSize: 11, fontWeight: '600', color: colors.textMuted },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-    modalSheet: { backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingTop: 8, maxHeight: '75%' },
+    modalSheet: { backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingTop: 8, maxHeight: '75%' },
     modalHeader: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
         paddingHorizontal: 20, paddingVertical: 14,
-        borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
+        borderBottomWidth: 1, borderBottomColor: colors.divider,
     },
-    modalTitle: { fontSize: 16, fontWeight: '800', color: '#222' },
+    modalTitle: { fontSize: 16, fontWeight: '800', color: colors.textPrimary },
     optionRow: {
         flexDirection: 'row', alignItems: 'center', gap: 14,
         paddingVertical: 12, paddingHorizontal: 20,
-        borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
+        borderBottomWidth: 1, borderBottomColor: colors.divider,
     },
-    optionText: { fontSize: 14, color: '#555', flex: 1 },
-    optionTextChecked: { color: '#222', fontWeight: '600' },
-    sendBtn: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-        backgroundColor: '#245d5a', borderRadius: 16,
-        paddingVertical: 16, marginTop: 24, gap: 8,
-    },
-    sendBtnText: { fontSize: 16, fontWeight: '800', color: '#fff' },
+    optionText: { fontSize: 14, color: colors.textSecondary, flex: 1 },
+    optionTextChecked: { color: colors.textPrimary, fontWeight: '600' },
 });
