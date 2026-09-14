@@ -1,10 +1,25 @@
 import { AdminAuthContext } from '@/context/AdminAuthContext';
-import { useTheme } from '@/context/ThemeContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, usePathname } from 'expo-router';
 import { useContext, useMemo } from 'react';
-import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+// Hardcoded rather than pulled from ThemeContext, same as the customer
+// drawer (components/SideBarModal.js / LoggedInSideBar.js) — admin has no
+// dark-mode toggle of its own, so if a customer session on the same device
+// had previously switched to dark mode, useTheme() would silently carry
+// that into the admin drawer with no way for an admin to switch it back.
+const COLORS = {
+    background: '#FFFFFF',
+    surfaceMuted: '#EDF6F5',
+    activeSurface: '#E8F4F3',
+    activeIconBg: '#D1EAE7',
+    brand: '#245d5a',
+    textSecondary: '#4A5568',
+    textMuted: '#9BBAB8',
+    divider: '#F0F7F6',
+};
 
 const roleLabel = (role) => ({
     super_admin: 'Super Admin',
@@ -41,9 +56,8 @@ const SUPER_ADMIN_ITEMS = [
 ];
 
 export default function AdminSideBar({ visible, onClose }) {
-    const { colors } = useTheme();
     const insets = useSafeAreaInsets();
-    const styles = useMemo(() => createStyles(colors, insets.top), [colors, insets.top]);
+    const styles = useMemo(() => createStyles(COLORS, insets.top), [insets.top]);
     const { adminRole, adminDisplayName, adminPhone } = useContext(AdminAuthContext);
     const pathname = usePathname();
 
@@ -67,7 +81,7 @@ export default function AdminSideBar({ visible, onClose }) {
                 onPress={() => goTo(item.path)}
             >
                 <View style={[styles.iconBadge, active && styles.activeIconBadge]}>
-                    <Ionicons name={item.icon} size={16} color={colors.brand} />
+                    <Ionicons name={item.icon} size={18} color={COLORS.brand} />
                 </View>
                 <Text style={[styles.linkText, active && styles.activeLinkText]}>{item.label}</Text>
                 {active && <View style={styles.activeBar} />}
@@ -95,7 +109,11 @@ export default function AdminSideBar({ visible, onClose }) {
                     {adminPhone ? <Text style={styles.profilePhone}>+977 {adminPhone}</Text> : null}
                 </View>
 
-                <View style={styles.menu}>
+                <ScrollView
+                    style={styles.menu}
+                    contentContainerStyle={styles.menuContent}
+                    showsVerticalScrollIndicator={false}
+                >
                     {visibleExtras.map(renderItem)}
 
                     {showSuperAdminSection && (
@@ -105,7 +123,7 @@ export default function AdminSideBar({ visible, onClose }) {
                             {SUPER_ADMIN_ITEMS.map(renderItem)}
                         </>
                     )}
-                </View>
+                </ScrollView>
 
                 <View style={styles.bottomSection}>
                     <TouchableOpacity style={styles.updateProfileButton} activeOpacity={0.8} onPress={() => goTo('/updateProfile')}>
@@ -128,7 +146,7 @@ const createStyles = (colors, topInset) => StyleSheet.create({
         bottom: 30,
         width: 300,
         maxWidth: '80%',
-        backgroundColor: colors.surface,
+        backgroundColor: colors.background,
         borderRadius: 28,
         shadowColor: '#000',
         shadowOffset: { width: 4, height: 4 },
@@ -152,46 +170,47 @@ const createStyles = (colors, topInset) => StyleSheet.create({
         overflow: 'hidden',
     },
     avatarImage: { width: '100%', height: '100%' },
-    profileName: { fontSize: 16, fontWeight: '700', color: '#fff' },
+    profileName: { fontSize: 17, fontWeight: '700', color: '#fff' },
     profileRole: { fontSize: 12, color: 'rgba(255,255,255,0.85)', marginTop: 2 },
     profilePhone: { fontSize: 12, color: 'rgba(255,255,255,0.7)', marginTop: 2 },
-    // HomeSewa's real drawer never scrolls — every item is laid out with
-    // space-evenly so it always fits the panel's fixed height instead
-    // (mirrors the same recipe components/SideBarModal.js already uses for
-    // the customer-facing drawer). A ScrollView here would be an easy
-    // default, but it's not what the reference actually does.
+    // Tightly packed like the customer drawer (components/LoggedInSideBar.js)
+    // instead of space-evenly spreading items across the full panel height —
+    // wrapped in a ScrollView since the Super Admin section can push the
+    // total item count past what fits on shorter screens.
     menu: {
         flex: 1,
-        justifyContent: 'space-evenly',
-        paddingHorizontal: 12,
     },
-    sectionDivider: { height: 1, backgroundColor: colors.divider, marginHorizontal: 8 },
+    menuContent: {
+        gap: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+    },
+    sectionDivider: { height: 1, backgroundColor: colors.divider, marginHorizontal: 8, marginVertical: 4 },
     sectionLabel: {
         fontSize: 10, fontWeight: '800', color: colors.textMuted,
         textTransform: 'uppercase', letterSpacing: 0.6,
-        marginLeft: 8,
+        marginLeft: 8, marginBottom: 2,
     },
     linkRow: {
-        flexDirection: 'row', alignItems: 'center', gap: 10,
-        paddingVertical: 3, paddingHorizontal: 8,
-        borderRadius: 14, position: 'relative',
+        flexDirection: 'row', alignItems: 'center', gap: 12,
+        paddingVertical: 6, paddingHorizontal: 8,
+        borderRadius: 16, position: 'relative',
     },
-    activeLinkRow: { backgroundColor: colors.surfaceMuted },
+    activeLinkRow: { backgroundColor: colors.activeSurface },
     iconBadge: {
-        width: 32, height: 32, borderRadius: 10,
+        width: 38, height: 38, borderRadius: 12,
         backgroundColor: colors.surfaceMuted,
         alignItems: 'center', justifyContent: 'center',
     },
-    activeIconBadge: { backgroundColor: colors.background },
-    linkText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, flex: 1 },
+    activeIconBadge: { backgroundColor: colors.activeIconBg },
+    linkText: { fontSize: 15, fontWeight: '600', color: colors.textSecondary, flex: 1 },
     activeLinkText: { color: colors.brand, fontWeight: '700' },
     activeBar: {
-        position: 'absolute', right: 0, top: 10, bottom: 10, width: 3,
+        position: 'absolute', right: 0, top: 10, bottom: 10, width: 4,
         backgroundColor: colors.brand, borderTopLeftRadius: 4, borderBottomLeftRadius: 4,
     },
     bottomSection: {
-        paddingHorizontal: 16, paddingBottom: 20, paddingTop: 10, gap: 12,
-        borderTopWidth: 1, borderTopColor: colors.divider,
+        paddingHorizontal: 16, paddingBottom: 24, paddingTop: 8,
     },
     updateProfileButton: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,

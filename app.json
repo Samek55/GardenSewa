@@ -80,7 +80,10 @@
       [
         "onesignal-expo-plugin",
         {
-          "mode": "development"
+          "mode": "development",
+          "smallIcons": ["./assets/images/adaptive-foreground.png"],
+          "largeIcons": ["./assets/images/adaptive-foreground.png"],
+          "smallIconAccentColor": "#245d5a"
         }
       ]
     ],
