@@ -6,6 +6,15 @@ const OTP_TTL_MINUTES = 5;
 const RESEND_COOLDOWN_SECONDS = 45;
 const MAX_PER_DAY = 8;
 
+// Google Play's reviewer can't receive a real SMS, so 'customer-login' for
+// this one pre-registered number gets a fixed code instead of a random one
+// and skips the SMS send + rate limits — everything else about the OTP
+// (hash, expiry, attempt lockout in checkOtp) is untouched, so this isn't a
+// blanket backdoor, just a fixed code for a fixed number on one purpose.
+// Unset in any environment that hasn't deliberately configured both secrets.
+const REVIEW_PHONE = Deno.env.get('PLAY_REVIEW_PHONE');
+const REVIEW_OTP_CODE = Deno.env.get('PLAY_REVIEW_OTP_CODE');
+
 const sha256 = async (text: string) => {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -57,41 +66,49 @@ export interface OtpIssueResult {
 export async function issueOtp(phone: string, purpose: string, name?: string, scopeKey = ''): Promise<OtpIssueResult> {
   if (!OTP_MESSAGES[purpose]) return { success: false, message: 'Invalid purpose', status: 400 };
 
-  const { count: sentToday } = await supabaseAdmin
-    .from('otp_send_log')
-    .select('id', { count: 'exact', head: true })
-    .eq('phone', phone)
-    .eq('purpose', purpose)
-    .gte('created_at', new Date(Date.now() - 24 * 60 * 60_000).toISOString());
-  if ((sentToday || 0) >= MAX_PER_DAY) {
-    return { success: false, message: 'Too many OTP requests for this number today. Please try again tomorrow.', status: 429 };
-  }
+  const isReviewLogin = purpose === 'customer-login' && !!REVIEW_PHONE && !!REVIEW_OTP_CODE && phone === REVIEW_PHONE;
 
-  const { data: existing } = await supabaseAdmin
-    .from('otp_codes')
-    .select('id, created_at')
-    .eq('phone', phone)
-    .eq('purpose', purpose)
-    .eq('scope_key', scopeKey)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  if (!isReviewLogin) {
+    const { count: sentToday } = await supabaseAdmin
+      .from('otp_send_log')
+      .select('id', { count: 'exact', head: true })
+      .eq('phone', phone)
+      .eq('purpose', purpose)
+      .gte('created_at', new Date(Date.now() - 24 * 60 * 60_000).toISOString());
+    if ((sentToday || 0) >= MAX_PER_DAY) {
+      return { success: false, message: 'Too many OTP requests for this number today. Please try again tomorrow.', status: 429 };
+    }
 
-  if (existing) {
-    const secondsSinceLastSend = (Date.now() - new Date(existing.created_at).getTime()) / 1000;
-    if (secondsSinceLastSend < RESEND_COOLDOWN_SECONDS) {
-      const waitSeconds = Math.ceil(RESEND_COOLDOWN_SECONDS - secondsSinceLastSend);
-      return { success: false, message: `Please wait ${waitSeconds}s before requesting another code.`, status: 429, waitSeconds };
+    const { data: existing } = await supabaseAdmin
+      .from('otp_codes')
+      .select('id, created_at')
+      .eq('phone', phone)
+      .eq('purpose', purpose)
+      .eq('scope_key', scopeKey)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      const secondsSinceLastSend = (Date.now() - new Date(existing.created_at).getTime()) / 1000;
+      if (secondsSinceLastSend < RESEND_COOLDOWN_SECONDS) {
+        const waitSeconds = Math.ceil(RESEND_COOLDOWN_SECONDS - secondsSinceLastSend);
+        return { success: false, message: `Please wait ${waitSeconds}s before requesting another code.`, status: 429, waitSeconds };
+      }
     }
   }
 
-  const code = String(Math.floor(1000 + Math.random() * 9000));
+  const code = isReviewLogin ? REVIEW_OTP_CODE! : String(Math.floor(1000 + Math.random() * 9000));
   const codeHash = await sha256(code);
   const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60_000).toISOString();
 
   await supabaseAdmin.from('otp_codes').delete().eq('phone', phone).eq('purpose', purpose).eq('scope_key', scopeKey);
   const { error } = await supabaseAdmin.from('otp_codes').insert([{ phone, purpose, scope_key: scopeKey, code_hash: codeHash, expires_at: expiresAt }]);
   if (error) throw new Error(error.message);
+
+  if (isReviewLogin) {
+    return { success: true, status: 200 };
+  }
 
   await supabaseAdmin.from('otp_send_log').insert([{ phone, purpose }]);
 
