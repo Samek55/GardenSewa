@@ -9,7 +9,6 @@ import {
     Alert,
     FlatList,
     Image,
-    Linking,
     Modal,
     Pressable,
     ScrollView,
@@ -47,6 +46,7 @@ export default function GardenerApplications() {
     const [actioning, setActioning] = useState(false);
     const [rejectOpen, setRejectOpen] = useState(false);
     const [rejectReason, setRejectReason] = useState('');
+    const [docViewer, setDocViewer] = useState({ visible: false, loading: false, url: null });
 
     const canReview = CAN_REVIEW_ROLES.has(adminRole);
 
@@ -74,11 +74,17 @@ export default function GardenerApplications() {
     }, [load]);
 
     const handleViewId = async (id) => {
+        setDocViewer({ visible: true, loading: true, url: null });
         try {
             const result = await getGardenerDocumentUrl(id);
-            if (!result.success) { Alert.alert('Error', result.message || 'Could not open document'); return; }
-            Linking.openURL(result.url);
+            if (!result.success) {
+                setDocViewer({ visible: false, loading: false, url: null });
+                Alert.alert('Error', result.message || 'Could not open document');
+                return;
+            }
+            setDocViewer({ visible: true, loading: false, url: result.url });
         } catch (error) {
+            setDocViewer({ visible: false, loading: false, url: null });
             Alert.alert('Error', error.message || 'Could not open document');
         }
     };
@@ -235,6 +241,19 @@ export default function GardenerApplications() {
                     </View>
                 </View>
             </Modal>
+
+            <Modal visible={docViewer.visible} transparent animationType="fade" onRequestClose={() => setDocViewer({ visible: false, loading: false, url: null })}>
+                <View style={styles.docViewerOverlay}>
+                    <TouchableOpacity style={styles.docViewerClose} onPress={() => setDocViewer({ visible: false, loading: false, url: null })}>
+                        <Ionicons name="close" size={28} color="#fff" />
+                    </TouchableOpacity>
+                    {docViewer.loading ? (
+                        <ActivityIndicator size="large" color="#fff" />
+                    ) : docViewer.url ? (
+                        <Image source={{ uri: docViewer.url }} style={styles.docViewerImage} resizeMode="contain" />
+                    ) : null}
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -286,6 +305,9 @@ const createStyles = (colors) => StyleSheet.create({
     modalButtonsRow: { flexDirection: 'row', gap: 10, marginTop: 8, alignItems: 'center' },
     closeButton: { paddingVertical: 12, alignItems: 'center', marginTop: 12, marginBottom: 4 },
     closeButtonText: { color: colors.textSecondary, fontWeight: '600' },
+    docViewerOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', alignItems: 'center', justifyContent: 'center' },
+    docViewerImage: { width: '100%', height: '85%' },
+    docViewerClose: { position: 'absolute', top: 48, right: 20, zIndex: 1, padding: 8 },
     reasonCard: { backgroundColor: colors.surface, borderRadius: 18, padding: 20, gap: 10, margin: 24 },
     reasonInput: { borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 10, minHeight: 70, textAlignVertical: 'top', color: colors.textPrimary },
     modalCancelButton: { paddingHorizontal: 16, paddingVertical: 10 },

@@ -60,7 +60,7 @@ const howDidYouKnowOptions = [
 const nullIfEmpty = (v) => (v === '' || v === undefined ? null : v);
 
 const validationSchema = object({
-    full_name: string().required('Full name is required').min(3, 'Name too short'),
+    full_name: string().required('Full name is required').min(3, 'Name too short').matches(/^[A-Za-z\s.'-]+$/, 'Full name must be only text'),
     phone: string().required('Phone number is required').min(10, 'Invalid phone number'),
     foreign_returnee: string().required('This field is required'),
     citizenship_number: string().required('Citizenship number is required'),
@@ -68,8 +68,13 @@ const validationSchema = object({
     email: string().email('Invalid email address'),
     gender: string().required('Gender selection is required'),
     blood_group: string().required('Blood group is required'),
-    emergency_contact_number: string().required('Emergency contact number is required').min(10, 'Invalid phone number'),
+    emergency_contact_number: string().required('Emergency contact number is required').matches(/^\d{10}$/, 'Emergency contact must be 10 digit number'),
     emergency_contact_relation: string().required('Relation is required'),
+    years_experience: string().test(
+        'max-experience',
+        'Years of experience cannot exceed 50',
+        (value) => value === '' || value === undefined || value === null || Number(value) <= 50,
+    ),
     area_of_expertise: array().of(string()).min(1, 'At least 1 expertise is required').max(5, 'Maximum 5 expertise permitted'),
     work_preference: string().required('Work preference is required'),
     languages_known: array().of(string()).min(1, 'At least 1 language is required'),
@@ -83,7 +88,7 @@ const validationSchema = object({
 const REQUIRED_FIELD_ORDER = [
     'full_name', 'phone', 'foreign_returnee', 'citizenship_number', 'issued_district',
     'email', 'gender', 'blood_group', 'emergency_contact_number', 'emergency_contact_relation',
-    'area_of_expertise', 'work_preference', 'languages_known', 'has_driving_license',
+    'years_experience', 'area_of_expertise', 'work_preference', 'languages_known', 'has_driving_license',
     'expected_working_city', 'wants_advance_training', 'how_did_you_know', 'terms',
 ];
 
@@ -498,7 +503,7 @@ export default function JoinProfessional() {
                         placeholder="Enter your full name"
                         placeholderTextColor={'#999'}
                         value={formik.values.full_name}
-                        onChangeText={formik.handleChange('full_name')}
+                        onChangeText={(text) => formik.setFieldValue('full_name', text.replace(/[^A-Za-z\s.'-]/g, ''))}
                     />
                 </View>
 
@@ -748,14 +753,19 @@ export default function JoinProfessional() {
 
                 {/* Years of Experience */}
                 <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Years of Experience</Text>
+                    <Text style={styles.label}>Years of Experience ( Max 50 years )</Text>
                     <TextInput
                         style={styles.textInput}
                         placeholder="Enter years of experience"
                         placeholderTextColor={'#999'}
                         value={formik.values.years_experience}
-                        onChangeText={formik.handleChange('years_experience')}
+                        onChangeText={(text) => {
+                            const digitsOnly = text.replace(/[^0-9]/g, '');
+                            const clamped = digitsOnly === '' ? '' : String(Math.min(Number(digitsOnly), 50));
+                            formik.setFieldValue('years_experience', clamped);
+                        }}
                         keyboardType="numeric"
+                        maxLength={2}
                     />
                 </View>
 

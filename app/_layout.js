@@ -82,12 +82,18 @@ function MainAppContent() {
       ]).catch((e) => console.warn(e));
 
       const startTime = Date.now();
+      const TICK_INTERVAL_MS = 100;
+      let lastTickMs = -1;
 
       const tick = () => {
         const elapsedMs = Date.now() - startTime;
         const remainingMs = Math.max(0, TOTAL_DURATION_MS - elapsedMs);
+        const roundedMs = Math.ceil(remainingMs / TICK_INTERVAL_MS) * TICK_INTERVAL_MS;
 
-        setCountdownDigits(remainingMs.toString().padStart(4, '0'));
+        if (roundedMs !== lastTickMs) {
+          lastTickMs = roundedMs;
+          setCountdownDigits(roundedMs.toString().padStart(4, '0'));
+        }
 
         if (remainingMs > 0) {
           animFrameId = requestAnimationFrame(tick);
@@ -244,5 +250,7 @@ const styles = StyleSheet.create({
     color: '#245d5a',
     letterSpacing: 2,
     fontVariant: ['tabular-nums'],
+    width: 100,
+    textAlign: 'center',
   },
 });
