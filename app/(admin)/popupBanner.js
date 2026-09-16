@@ -62,7 +62,7 @@ const STATIC_PAGES = [
     { label: 'FAQs', path: '/faq' },
     { label: 'Glossary', path: '/glossary' },
     { label: 'Become a Partner', path: '/becomeAPartner' },
-    { label: 'Join as a Professional', path: '/joinasaprofessional' },
+    { label: 'Join as a Gardener', path: '/joinasaprofessional' },
 ];
 const SERVICE_PAGES = services.map((s) => ({ label: s.title, path: `/services/${s.id}` }));
 const BROWSE_PAGES = [...STATIC_PAGES, ...SERVICE_PAGES];

@@ -80,7 +80,7 @@ const SideBarModal = ({ onClose }) => {
                 {renderMenuItem('/(tabs)', 'home-outline', 'Home')}
                 {renderMenuItem('/(tabs)/services', 'grid-outline', 'Services')}
                 {renderMenuItem('/book', 'calendar-outline', 'Book a Service')}
-                {renderMenuItem('/joinasaprofessional', 'person-add-outline', 'Join as a Professional')}
+                {renderMenuItem('/joinasaprofessional', 'person-add-outline', 'Join as a Gardener')}
 
                 <View style={styles.divider} />
 

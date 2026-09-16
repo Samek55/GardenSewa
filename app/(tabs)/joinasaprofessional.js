@@ -24,6 +24,7 @@ import { createGardenerApplication } from '../../api/PostApiGardener';
 import { notifyGardenerApplicationReceived } from '../../api/PostApiNotification';
 import { sendOtp } from '../../api/PostApiOtp';
 import { uploadPrivateDocument, uploadPublicFile } from '../../api/uploadToStorage';
+import { areasByCity } from '../../data/Data';
 import { categories, cityData } from '../../data/servicesList';
 
 // These three lists are not shown on the live gardensewa.com/join form's
@@ -331,6 +332,10 @@ export default function JoinProfessional() {
         validationSchema,
         onSubmit: () => { },
     });
+
+    const availableWorkingAreas = [...new Set(
+        formik.values.expected_working_city.flatMap((city) => areasByCity[city] || [])
+    )];
 
     const formatPhone = (text) => {
         const digitsOnly = (text || '').replace(/[^0-9]/g, '');
@@ -720,28 +725,39 @@ export default function JoinProfessional() {
                     data={yesNoOptions}
                     isOpen={activeDropdown === 'hasTrainingCertificate'}
                     onToggle={() => toggleDropdown('hasTrainingCertificate')}
-                    onSelect={(val) => { formik.setFieldValue('has_training_certificate', val); setActiveDropdown(null); }}
+                    onSelect={(val) => {
+                        formik.setFieldValue('has_training_certificate', val);
+                        if (val === 'No') {
+                            formik.setFieldValue('training_institute_name', '');
+                            setTrainingCertificate(null);
+                        }
+                        setActiveDropdown(null);
+                    }}
                 />
 
-                {/* Institute Name */}
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Name of Institute / Training Center</Text>
-                    <TextInput
-                        style={styles.textInput}
-                        placeholder="Enter institute name"
-                        placeholderTextColor={'#999'}
-                        value={formik.values.training_institute_name}
-                        onChangeText={formik.handleChange('training_institute_name')}
-                    />
-                </View>
+                {formik.values.has_training_certificate === 'Yes' && (
+                    <>
+                        {/* Institute Name */}
+                        <View style={styles.individualContainer}>
+                            <Text style={styles.label}>Name of Institute / Training Center</Text>
+                            <TextInput
+                                style={styles.textInput}
+                                placeholder="Enter institute name"
+                                placeholderTextColor={'#999'}
+                                value={formik.values.training_institute_name}
+                                onChangeText={formik.handleChange('training_institute_name')}
+                            />
+                        </View>
 
-                {/* Training Certificate Upload */}
-                <DocumentPickerField
-                    label="Upload Gardening Training .pdf Certificate"
-                    file={trainingCertificate}
-                    onPick={() => handleDocumentPick('training')}
-                    onRemove={() => setTrainingCertificate(null)}
-                />
+                        {/* Training Certificate Upload */}
+                        <DocumentPickerField
+                            label="Upload Gardening Training .pdf Certificate"
+                            file={trainingCertificate}
+                            onPick={() => handleDocumentPick('training')}
+                            onRemove={() => setTrainingCertificate(null)}
+                        />
+                    </>
+                )}
 
                 {/* Experience Certificate Upload */}
                 <DocumentPickerField
@@ -797,8 +813,9 @@ export default function JoinProfessional() {
 
                 {/* Languages Known */}
                 <MultiSelectDropdown
-                    label="Languages Known"
+                    label="Languages Known ( Max 5 )"
                     required
+                    maxLimit={5}
                     selectedItems={formik.values.languages_known}
                     placeholder="Select languages"
                     data={languageOptions}
@@ -809,15 +826,14 @@ export default function JoinProfessional() {
                 />
 
                 {/* Personal/Office Vehicle */}
-                <MultiSelectDropdown
+                <CustomDropdown
                     label="Personal / Office Vehicle"
-                    selectedItems={formik.values.personal_office_vehicle}
+                    value={formik.values.personal_office_vehicle[0] || ''}
                     placeholder="Select vehicle"
                     data={vehicleOptions}
                     isOpen={activeDropdown === 'vehicle'}
                     onToggle={() => toggleDropdown('vehicle')}
-                    onSelectItem={(val) => formik.setFieldValue('personal_office_vehicle', [...formik.values.personal_office_vehicle, val])}
-                    onRemoveItem={(val) => formik.setFieldValue('personal_office_vehicle', formik.values.personal_office_vehicle.filter((i) => i !== val))}
+                    onSelect={(val) => { formik.setFieldValue('personal_office_vehicle', [val]); setActiveDropdown(null); }}
                 />
 
                 {/* Driving License */}
@@ -835,28 +851,51 @@ export default function JoinProfessional() {
 
                 {/* Expected Working City */}
                 <MultiSelectDropdown
-                    label="Expected Working City"
+                    label="Expected Working City ( Max 3 )"
                     required
+                    maxLimit={3}
                     selectedItems={formik.values.expected_working_city}
                     placeholder="Select cities"
                     data={cityData}
                     isOpen={activeDropdown === 'expectedCity'}
                     onToggle={() => toggleDropdown('expectedCity')}
-                    onSelectItem={(val) => formik.setFieldValue('expected_working_city', [...formik.values.expected_working_city, val])}
-                    onRemoveItem={(val) => formik.setFieldValue('expected_working_city', formik.values.expected_working_city.filter((i) => i !== val))}
+                    onSelectItem={(val) => {
+                        const nextCities = [...formik.values.expected_working_city, val];
+                        formik.setFieldValue('expected_working_city', nextCities);
+                        const nextAreas = new Set(nextCities.flatMap((city) => areasByCity[city] || []));
+                        if (formik.values.working_area && !nextAreas.has(formik.values.working_area)) {
+                            formik.setFieldValue('working_area', '');
+                        }
+                    }}
+                    onRemoveItem={(val) => {
+                        const nextCities = formik.values.expected_working_city.filter((i) => i !== val);
+                        formik.setFieldValue('expected_working_city', nextCities);
+                        const nextAreas = new Set(nextCities.flatMap((city) => areasByCity[city] || []));
+                        if (formik.values.working_area && !nextAreas.has(formik.values.working_area)) {
+                            formik.setFieldValue('working_area', '');
+                        }
+                    }}
                 />
 
                 {/* Working Area */}
-                <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Working Area</Text>
-                    <TextInput
-                        style={styles.textInput}
-                        placeholder="Enter working area"
-                        placeholderTextColor={'#999'}
+                {availableWorkingAreas.length > 0 ? (
+                    <CustomDropdown
+                        label="Working Area"
                         value={formik.values.working_area}
-                        onChangeText={formik.handleChange('working_area')}
+                        placeholder="Choose a working area"
+                        data={availableWorkingAreas}
+                        isOpen={activeDropdown === 'workingArea'}
+                        onToggle={() => toggleDropdown('workingArea')}
+                        onSelect={(val) => { formik.setFieldValue('working_area', val); setActiveDropdown(null); }}
                     />
-                </View>
+                ) : (
+                    <View style={styles.individualContainer}>
+                        <Text style={styles.label}>Working Area</Text>
+                        <Text style={{ color: '#666', fontSize: 12, fontStyle: 'italic', marginTop: 4 }}>
+                            Select an expected working city first.
+                        </Text>
+                    </View>
+                )}
 
                 <Text style={styles.sectionHeader}>Permanent Address</Text>
 
@@ -874,7 +913,19 @@ export default function JoinProfessional() {
                 </View>
                 <View style={styles.individualContainer}>
                     <Text style={styles.label}>Ward</Text>
-                    <TextInput style={styles.textInput} placeholder="Enter ward" placeholderTextColor={'#999'} value={formik.values.ward} onChangeText={formik.handleChange('ward')} />
+                    <TextInput
+                        style={styles.textInput}
+                        placeholder="Enter ward (1-32)"
+                        placeholderTextColor={'#999'}
+                        value={formik.values.ward}
+                        onChangeText={(text) => {
+                            const digitsOnly = text.replace(/[^0-9]/g, '');
+                            const clamped = digitsOnly === '' ? '' : String(Math.min(Number(digitsOnly), 32));
+                            formik.setFieldValue('ward', clamped);
+                        }}
+                        keyboardType="numeric"
+                        maxLength={2}
+                    />
                 </View>
 
                 <Text style={styles.sectionHeader}>Other Details</Text>
@@ -888,7 +939,7 @@ export default function JoinProfessional() {
                     <TextInput style={styles.textInput} placeholder="Enter policy number" placeholderTextColor={'#999'} value={formik.values.insurance_policy_number} onChangeText={formik.handleChange('insurance_policy_number')} />
                 </View>
                 <View style={styles.individualContainer}>
-                    <Text style={styles.label}>Referred By ( Full Name )</Text>
+                    <Text style={styles.label}>Referred GardenSewa App by</Text>
                     <TextInput style={styles.textInput} placeholder="Enter referrer's name" placeholderTextColor={'#999'} value={formik.values.referred_by_name} onChangeText={formik.handleChange('referred_by_name')} />
                 </View>
                 <View style={styles.individualContainer}>
@@ -940,7 +991,7 @@ export default function JoinProfessional() {
                     </Pressable>
                     <Text style={styles.checkboxLabel}>
                         I accept the{' '}
-                        <Text style={styles.hyperlink} onPress={() => router.push('./terms')}>Terms and Conditions</Text>{' '}
+                        <Text style={styles.hyperlink} onPress={() => router.push('/terms')}>Terms and Conditions</Text>{' '}
                         <Text style={styles.asterisk}>*</Text>
                     </Text>
                 </View>

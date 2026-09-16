@@ -493,7 +493,7 @@ export default function Book() {
                         </Pressable>
                         <Text style={styles.checkboxLabel}>
                             I accept the{' '}
-                            <Text style={styles.hyperlink} onPress={() => router.push('./terms')}>
+                            <Text style={styles.hyperlink} onPress={() => router.push('/terms')}>
                                 Terms and Conditions
                             </Text>{' '}
                             <Text style={styles.asterisk}>*</Text>

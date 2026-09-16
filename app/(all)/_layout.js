@@ -8,14 +8,6 @@ export default function AllLayout() {
             }}
         >
             <Stack.Screen
-                name="faq"
-                options={{
-                    title: "Faq",
-                    href: null
-                }}
-            />
-
-            <Stack.Screen
                 name="notifications"
                 options={{
                     title: "Notification",
@@ -23,13 +15,6 @@ export default function AllLayout() {
                 }}
             />
 
-            <Stack.Screen
-                name="joinasaprofessional"
-                options={{
-                    title: "Join as a Professional",
-                    href: null
-                }}
-            />
             <Stack.Screen
                 name="adminLogin"
                 options={{
@@ -41,20 +26,6 @@ export default function AllLayout() {
                 name="customerLogin"
                 options={{
                     title: "Login",
-                    href: null
-                }}
-            />
-            <Stack.Screen
-                name="becomeAPartner"
-                options={{
-                    title: "Become a Partner",
-                    href: null
-                }}
-            />
-            <Stack.Screen
-                name="glossary"
-                options={{
-                    title: "Glossary",
                     href: null
                 }}
             />
@@ -76,13 +47,6 @@ export default function AllLayout() {
                 name="resetPin"
                 options={{
                     title: "Reset Pin",
-                    href: null
-                }}
-            />
-            <Stack.Screen
-                name="favorites"
-                options={{
-                    title: "Favorites",
                     href: null
                 }}
             />

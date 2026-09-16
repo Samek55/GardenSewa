@@ -64,7 +64,12 @@ const TabLayout = () => {
                     )
                 }}
             />
-            
+
+            <Tabs.Screen name="joinasaprofessional" options={{ title: "Join as a Gardener", href: null }} />
+            <Tabs.Screen name="faq" options={{ title: "FAQs", href: null }} />
+            <Tabs.Screen name="glossary" options={{ title: "Glossary", href: null }} />
+            <Tabs.Screen name="becomeAPartner" options={{ title: "Become a Partner", href: null }} />
+            <Tabs.Screen name="favorites" options={{ title: "Favorites", href: null }} />
 
         </Tabs>
     )
