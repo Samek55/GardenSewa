@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
       if (acctError) throw new Error(acctError.message);
 
       const firstName = (gardenerRow.full_name || '').split(' ')[0] || 'Gardener';
-      const text = `Dear ${firstName}, congratulations! Your Garden Sewa Gardener application has been approved.\n\nYour Login Details:\nPhone: ${gardenerRow.phone}\nPIN: ${pin}\n\nDownload the Garden Sewa app and login using the details above.\n\nWelcome to Garden Sewa!\n( www.gardensewa.com )`;
+      const text = `Dear ${firstName}, congratulations! Your Garden Sewa Gardener application has been approved.\n\nYour Login Details:\nPhone: ${gardenerRow.phone}\nPIN: ${pin}\n\nDownload the Garden Sewa app and login using the details above.\n\nWelcome to Garden Sewa!`;
 
       // Awaited deliberately — an un-awaited send here risks the edge runtime
       // tearing down before it completes, silently dropping the applicant's

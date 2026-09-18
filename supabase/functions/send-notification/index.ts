@@ -68,40 +68,6 @@ const PURPOSE_HANDLERS: Record<string, (ctx: Record<string, any>) => Promise<Res
     };
   },
 
-  'lead-unlock-approved': async (ctx) => {
-    const { data: reqRow } = await supabaseAdmin
-      .from('lead_unlock_requests')
-      .select('gardener_phone, booking_id')
-      .eq('id', ctx.requestId)
-      .maybeSingle();
-    if (!reqRow) return null;
-    return {
-      phones: [reqRow.gardener_phone],
-      title: 'Payment Approved',
-      body: `Your payment for Booking #${reqRow.booking_id} has been approved — you can now view the customer's contact details.`,
-      screen: `/booking/${reqRow.booking_id}`,
-      audience: 'gardener_specific',
-      linkId: String(reqRow.booking_id),
-    };
-  },
-
-  'lead-unlock-rejected': async (ctx) => {
-    const { data: reqRow } = await supabaseAdmin
-      .from('lead_unlock_requests')
-      .select('gardener_phone, booking_id')
-      .eq('id', ctx.requestId)
-      .maybeSingle();
-    if (!reqRow) return null;
-    return {
-      phones: [reqRow.gardener_phone],
-      title: 'Payment Not Approved',
-      body: `Your payment proof for Booking #${reqRow.booking_id} could not be verified. Please try again or contact support.`,
-      screen: `/booking/${reqRow.booking_id}`,
-      audience: 'gardener_specific',
-      linkId: String(reqRow.booking_id),
-    };
-  },
-
   'booking-accepted': async (ctx) => {
     const { data: booking } = await supabaseAdmin
       .from('booking')

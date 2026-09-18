@@ -1,8 +1,13 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const TermsAndConditions = () => {
+    const insets = useSafeAreaInsets();
     return (
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.container}>
+        <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={[styles.container, { paddingTop: insets.top + 16 }]}
+        >
 
             <View style={styles.headerTextContainer}>
                 <Text style={styles.headerTitle}>Terms and Conditions</Text>

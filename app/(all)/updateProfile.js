@@ -17,6 +17,7 @@ import {
     View
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { categories, cityData } from '../../data/servicesList';
 
 const ROLE_LABELS = {
@@ -173,6 +174,7 @@ const MultiSelectDropdown = ({ label, selectedItems = [], placeholder, data, isO
 
 const UpdateProfile = () => {
     const { isAdminLoggedIn, adminRole, isAdminAuthLoading, adminLogoutLocal, updateAdminDisplayName } = useContext(AdminAuthContext);
+    const insets = useSafeAreaInsets();
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -315,7 +317,7 @@ const UpdateProfile = () => {
                 enableAutomaticScroll={true}
                 showsVerticalScrollIndicator={false}
             >
-                <View style={styles.profileContainer}>
+                <View style={[styles.profileContainer, { paddingTop: insets.top + 12 }]}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                         <Ionicons name="arrow-back" size={22} color="#fff" />
                     </TouchableOpacity>

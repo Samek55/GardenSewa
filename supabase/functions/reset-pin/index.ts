@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
     }
 
     const firstName = (account.full_name || '').split(' ')[0] || 'User';
-    const text = `Dear ${firstName}, your Garden Sewa PIN has been changed successfully.\n\nIf you did not request this change, please contact us immediately.\n\nThank you for using Garden Sewa\n( www.gardensewa.com )`;
+    const text = `Dear ${firstName}, your Garden Sewa PIN has been changed successfully.\n\nIf you did not request this change, please contact us immediately.\n\nThank you for using Garden Sewa`;
     await sendSms(cleaned, text).catch((e) => console.error('reset-pin confirmation SMS failed:', e));
 
     return json({ success: true });

@@ -42,7 +42,6 @@ const MENU_ITEMS = [
     { path: '/notifications', icon: 'notifications-outline', label: 'Notifications' },
     { path: '/(admin)/popupBanner', icon: 'pricetag-outline', label: 'Popup Banner' },
     { path: '/(admin)/helpboxRequests', icon: 'chatbubble-ellipses-outline', label: 'Help Box' },
-    { path: '/(admin)/leadUnlockRequests', icon: 'cash-outline', label: 'Lead Unlock Requests' },
     { path: '/(admin)/submitBookingForCustomer', icon: 'create-outline', label: 'Submit Booking for Customer', roles: ['bdm', 'call_center'] },
 ];
 
