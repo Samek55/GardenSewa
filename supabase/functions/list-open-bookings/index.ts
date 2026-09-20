@@ -48,12 +48,24 @@ Deno.serve(async (req) => {
       .select(
         'booking_id, full_name, phone, service, city, area, priority, budget, select_shift, ' +
         'starting_date, service_completion_date, work_description, photos, completion_photos, ' +
-        'status, accepted_by_phone, deal_amount, deal_note, created_at'
+        'status, accepted_by_phone, deal_amount, deal_note, visibility, assigned_gardener_phone, ' +
+        'work_started_at, work_start_photos, work_documents, created_at'
       )
       .order('created_at', { ascending: false });
 
     if (!isAdmin) {
-      query = query.or(`status.eq.New / Open,accepted_by_phone.eq.${gardenerPhone}`);
+      // A 'New / Open' row is visible if it's public (or has no visibility
+      // yet, for safety) or if it's private and assigned to this gardener —
+      // otherwise a Private job assigned to one gardener would leak to every
+      // other gardener the same way a Public one does. Their own
+      // already-accepted/completed jobs stay visible regardless of
+      // visibility, same as before.
+      query = query.or(
+        `and(status.eq.New / Open,visibility.eq.public),` +
+        `and(status.eq.New / Open,visibility.is.null),` +
+        `and(status.eq.New / Open,visibility.eq.private,assigned_gardener_phone.eq.${gardenerPhone}),` +
+        `accepted_by_phone.eq.${gardenerPhone}`
+      );
     }
 
     const { data: bookings, error } = await query;
@@ -87,8 +99,13 @@ Deno.serve(async (req) => {
         workDescription: row.work_description,
         photos: row.photos,
         completionPhotos: row.completion_photos,
+        workStartedAt: row.work_started_at,
+        workStartPhotos: row.work_start_photos,
+        workDocuments: row.work_documents,
         status: row.status,
         acceptedByPhone: row.accepted_by_phone,
+        visibility: row.visibility,
+        assignedGardenerPhone: row.assigned_gardener_phone,
         dealAmount: isUnlocked ? row.deal_amount : null,
         dealNote: isUnlocked ? row.deal_note : null,
         unlocked: isUnlocked,

@@ -31,11 +31,17 @@ export default function BookingLayout() {
                     headerShown:false
                 }} 
             />
-            <Stack.Screen 
-                name="editSchedule" 
-                options={{ 
+            <Stack.Screen
+                name="editSchedule"
+                options={{
                     headerShown:false
-                }} 
+                }}
+            />
+            <Stack.Screen
+                name="startWork"
+                options={{
+                    headerShown:false
+                }}
             />
         </Stack>
     );

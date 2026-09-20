@@ -1,6 +1,7 @@
 import { corsHeaders, json } from '../_shared/cors.ts';
 import { supabaseAdmin } from '../_shared/supabaseAdmin.ts';
 import { verifySession } from '../_shared/session.ts';
+import { sendSms } from '../_shared/easyservice.ts';
 
 // Matches HomeSewa's AdminNotifications screen exactly — super_admin only,
 // same as its own AsyncStorage.getItem('adminRole') !== 'super_admin' gate.
@@ -27,7 +28,7 @@ interface Resolved {
   title: string;
   body: string;
   screen?: string;
-  audience: 'admin_reviewers' | 'gardener_specific' | 'customer_specific';
+  audience: 'admin_reviewers' | 'gardener_specific' | 'gardener_all' | 'customer_specific';
   linkId?: string;
 }
 
@@ -96,6 +97,72 @@ const PURPOSE_HANDLERS: Record<string, (ctx: Record<string, any>) => Promise<Res
       title: 'Job Completed',
       body: `Your ${booking.service} service has been marked as completed. Thank you for using Garden Sewa!`,
       audience: 'customer_specific',
+      linkId: String(ctx.bookingId),
+    };
+  },
+
+  // Fired once by publish-booking's caller right after a Draft moves to
+  // 'New / Open' (see 0024_booking_draft_publish_status.sql) — no session
+  // check needed here, same reasoning as booking-accepted/job-completed
+  // above: publish-booking already authorized the action that leads here.
+  'booking-published': async (ctx) => {
+    const { data: booking } = await supabaseAdmin
+      .from('booking')
+      .select('service, city, visibility, assigned_gardener_phone')
+      .eq('booking_id', ctx.bookingId)
+      .maybeSingle();
+    if (!booking) return null;
+
+    if (booking.visibility === 'private') {
+      if (!booking.assigned_gardener_phone) return null;
+      // Best-effort SMS alongside push — HR's spec asks for both on a
+      // Private assignment. Failure here shouldn't block the push send.
+      sendSms(
+        booking.assigned_gardener_phone,
+        `New ${booking.service} job assigned to you on Garden Sewa. Open the app to view it.`
+      ).catch((e) => console.error('booking-published SMS failed:', e));
+
+      return {
+        phones: [booking.assigned_gardener_phone],
+        title: 'New Job Assigned',
+        body: `A ${booking.service} job has been assigned to you.`,
+        audience: 'gardener_specific',
+        linkId: String(ctx.bookingId),
+      };
+    }
+
+    // Public — same service+city matching as resolveBroadcastTarget's
+    // 'professional' audience below, just resolved directly from the
+    // booking row instead of admin-supplied serviceTypes/cities.
+    const { data: accounts } = await supabaseAdmin
+      .from('gardener_account')
+      .select('gardener_id, phone')
+      .eq('status', 'Active');
+    if (!accounts || accounts.length === 0) return null;
+
+    const gardenerIds = accounts.map((a) => a.gardener_id);
+    const { data: gardeners } = await supabaseAdmin
+      .from('gardener')
+      .select('id, area_of_expertise, expected_working_city')
+      .in('id', gardenerIds);
+    type GardenerRow = { id: string; area_of_expertise: string[] | null; expected_working_city: string[] | null };
+    const gardenerById = new Map<string, GardenerRow>((gardeners || []).map((g: GardenerRow) => [g.id, g]));
+
+    const phones = accounts
+      .filter((a) => {
+        const g = gardenerById.get(a.gardener_id);
+        if (!g) return false;
+        return (g.area_of_expertise || []).includes(booking.service) && (g.expected_working_city || []).includes(booking.city);
+      })
+      .map((a) => a.phone)
+      .filter(Boolean);
+    if (phones.length === 0) return null;
+
+    return {
+      phones,
+      title: 'New Job Posted',
+      body: `A new ${booking.service} job is open in ${booking.city}.`,
+      audience: 'gardener_all',
       linkId: String(ctx.bookingId),
     };
   },
@@ -314,7 +381,7 @@ Deno.serve(async (req) => {
     // 'admin_reviewers' can resolve to several admin phones at once, and any
     // matching admin viewer should see it, not just whichever phone happens
     // to be first in the array.
-    const audiencePhone = audience === 'admin_reviewers' ? null : phones[0];
+    const audiencePhone = (audience === 'admin_reviewers' || audience === 'gardener_all') ? null : phones[0];
     const { error } = await supabaseAdmin.from('notifications').insert([{
       title,
       body,

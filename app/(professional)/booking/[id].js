@@ -82,6 +82,7 @@ const IndividualBooking = () => {
         unlocked: false,
         dealAmount: null,
         dealNote: null,
+        workStartedAt: null,
     });
 
     const loadBooking = useCallback(async () => {
@@ -110,6 +111,7 @@ const IndividualBooking = () => {
                 unlocked: found.unlocked,
                 dealAmount: found.dealAmount,
                 dealNote: found.dealNote,
+                workStartedAt: found.workStartedAt,
             });
         } catch (error) {
             Alert.alert('Error', error.message || 'Could not load booking');
@@ -552,13 +554,40 @@ const IndividualBooking = () => {
                     )}
                     {currentStatus === 'New' ? (
                         <View style={styles.actionButtonsContainer}>
-                            <TouchableOpacity style={styles.acceptBtn} activeOpacity={0.85} onPress={handleAcceptOffer}>
-                                <Text style={styles.acceptBtnText}>
-                                    {booking.unlocked ? 'Accept Offer' : 'Pay to View & Accept'}
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.rejectBtn} activeOpacity={0.85} onPress={handleRejectOffer}>
-                                <Text style={styles.rejectBtnText}>Reject</Text>
+                            {booking.unlocked ? (
+                                <>
+                                    <TouchableOpacity style={styles.acceptBtn} activeOpacity={0.85} onPress={handleAcceptOffer}>
+                                        <Text style={styles.acceptBtnText}>Accept</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.rejectBtn} activeOpacity={0.85} onPress={handleRejectOffer}>
+                                        <Text style={styles.rejectBtnText}>Reject</Text>
+                                    </TouchableOpacity>
+                                </>
+                            ) : (
+                                <TouchableOpacity style={styles.acceptBtn} activeOpacity={0.85} onPress={handleAcceptOffer}>
+                                    <Text style={styles.acceptBtnText}>Pay to View</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    ) : currentStatus === 'OnGoing' && !booking.workStartedAt ? (
+                        <View style={styles.actionButtonsContainer}>
+                            <TouchableOpacity
+                                style={styles.acceptBtn}
+                                activeOpacity={0.85}
+                                onPress={() => router.push({
+                                    pathname: '/booking/startWork',
+                                    params: {
+                                        bookingId: booking.id,
+                                        fullName: booking.fullName,
+                                        phone: booking.phone,
+                                        budget: currentBudget,
+                                        startDate: currentStartDate,
+                                        endDate: currentEndDate,
+                                        scopeOfWork: currentScopeOfWork,
+                                    },
+                                })}
+                            >
+                                <Text style={styles.acceptBtnText}>Start Work</Text>
                             </TouchableOpacity>
                         </View>
                     ) : (

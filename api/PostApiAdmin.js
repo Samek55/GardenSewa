@@ -38,6 +38,12 @@ export const updateAdminCities = (id, allowedCities) =>
 export const submitBookingForCustomer = (fields) =>
     invokeEdgeFunction('submit-booking-for-customer', fields, 'Could not submit booking', { requireSession: true });
 
+export const updateDraftBooking = (bookingId, fields) =>
+    invokeEdgeFunction('update-draft-booking', { bookingId, ...fields }, 'Could not update this request', { requireSession: true });
+
+export const publishBooking = (bookingId, visibility, assignedGardenerPhone) =>
+    invokeEdgeFunction('publish-booking', { bookingId, visibility, assignedGardenerPhone }, 'Could not publish this request', { requireSession: true });
+
 export const listHelpboxRequests = () =>
     invokeEdgeFunction('list-helpbox-requests', {}, 'Could not load help requests', { requireSession: true });
 

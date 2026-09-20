@@ -11,6 +11,7 @@ export default function AdminLayout() {
             <Stack.Screen name="sendNotification" />
             <Stack.Screen name="popupBanner" />
             <Stack.Screen name="bookings" />
+            <Stack.Screen name="reviewBooking" />
             <Stack.Screen name="superAdminHistory" />
             <Stack.Screen name="userManagement" />
             <Stack.Screen name="changePin" />

@@ -20,10 +20,10 @@ import {
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 
-import { listOpenBookings } from '../../api/PostApiBookingGardener';
+import { getBookingDocumentUrl, listOpenBookings } from '../../api/PostApiBookingGardener';
 import { AdminAuthContext } from '../../context/AdminAuthContext';
 
-const STATUS_OPTIONS = ['All', 'New / Open', 'Pending', 'Completed', 'Cancelled'];
+const STATUS_OPTIONS = ['All', 'Draft', 'New / Open', 'Pending', 'Completed', 'Cancelled'];
 
 const formatDate = (iso) => {
     if (!iso) return '—';
@@ -37,6 +37,7 @@ const statusColor = (status, colors) => {
     if (status === 'Completed') return colors.success;
     if (status === 'Cancelled') return colors.danger;
     if (status === 'Pending') return colors.warning;
+    if (status === 'Draft') return colors.textSecondary;
     return colors.textPrimary;
 };
 
@@ -91,6 +92,19 @@ export default function Bookings() {
         setRefreshing(false);
     };
 
+    const handleViewDocument = async (bookingId, path) => {
+        try {
+            const result = await getBookingDocumentUrl(bookingId, path);
+            if (!result.success) {
+                Alert.alert('Error', result.message || 'Could not open document');
+                return;
+            }
+            Linking.openURL(result.url);
+        } catch (error) {
+            Alert.alert('Error', error.message || 'Could not open document');
+        }
+    };
+
     const filtered = bookings.filter((b) => {
         if (statusFilter !== 'All' && b.status !== statusFilter) return false;
         if (search.trim()) {
@@ -130,8 +144,15 @@ export default function Bookings() {
             </View>
             <View style={styles.rowRight}>
                 <Text style={styles.date}>{formatDate(item.createdAt)}</Text>
-                <TouchableOpacity style={styles.viewButton} onPress={() => setDetail(item)}>
-                    <Text style={styles.viewButtonText}>View</Text>
+                <TouchableOpacity
+                    style={styles.viewButton}
+                    onPress={() => (
+                        item.status === 'Draft'
+                            ? router.push({ pathname: '/reviewBooking', params: { bookingId: item.bookingId } })
+                            : setDetail(item)
+                    )}
+                >
+                    <Text style={styles.viewButtonText}>{item.status === 'Draft' ? 'Review' : 'View'}</Text>
                     <Ionicons name="reader-outline" size={14} color="#fff" />
                 </TouchableOpacity>
             </View>
@@ -294,6 +315,24 @@ export default function Bookings() {
                                 </>
                             )}
 
+                            {detail?.workDocuments?.length > 0 && (
+                                <>
+                                    <Text style={styles.fieldLabel}>Work Documents</Text>
+                                    <View style={styles.docChipRow}>
+                                        {detail.workDocuments.map((path, index) => (
+                                            <TouchableOpacity
+                                                key={path}
+                                                style={styles.docChip}
+                                                onPress={() => handleViewDocument(detail.bookingId, path)}
+                                            >
+                                                <Ionicons name="document-text-outline" size={16} color={colors.brand} />
+                                                <Text style={styles.docChipText}>Document {index + 1}</Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+                                </>
+                            )}
+
                             <TouchableOpacity style={styles.closeButton} onPress={() => setDetail(null)}>
                                 <Text style={styles.closeButtonText}>Close</Text>
                             </TouchableOpacity>
@@ -359,6 +398,9 @@ const createStyles = (colors) => StyleSheet.create({
     phoneLink: { fontSize: 15, fontWeight: '700', color: colors.brand, marginBottom: 12 },
     fieldLabel: { fontSize: 12, fontWeight: '600', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
     thumb: { width: 70, height: 70, borderRadius: 10, marginRight: 8, backgroundColor: colors.surfaceMuted },
+    docChipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
+    docChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.surfaceMuted, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
+    docChipText: { fontSize: 12, fontWeight: '600', color: colors.brand },
     closeButton: { paddingVertical: 12, alignItems: 'center', marginTop: 16, marginBottom: 8 },
     closeButtonText: { color: colors.textSecondary, fontWeight: '600' },
 });

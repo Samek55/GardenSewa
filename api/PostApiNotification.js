@@ -9,6 +9,9 @@ export const notifyBookingAccepted = (bookingId) =>
 export const notifyJobCompleted = (bookingId) =>
     invokeEdgeFunction('send-notification', { purpose: 'job-completed', bookingId }, 'Could not send notification');
 
+export const notifyBookingPublished = (bookingId) =>
+    invokeEdgeFunction('send-notification', { purpose: 'booking-published', bookingId }, 'Could not send notification');
+
 export const notifyPartnershipApplicationReceived = (organization) =>
     invokeEdgeFunction('send-notification', { purpose: 'partnership-application-received', organization }, 'Could not send notification');
 

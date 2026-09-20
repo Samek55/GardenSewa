@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 
 const STATUS_LABELS = {
+    Draft: 'Under Review',
     'New / Open': 'Awaiting a Gardener',
     Pending: 'Gardener Assigned',
     Completed: 'Completed',
@@ -25,6 +26,7 @@ const STATUS_LABELS = {
 };
 
 const STATUS_COLORS = {
+    Draft: '#92700C',
     'New / Open': '#245d5a',
     Pending: '#2B6CB0',
     Completed: '#15803D',

@@ -16,3 +16,14 @@ export const updateBookingSchedule = (bookingId, code, { budget, startDate, endD
         'Could not update this booking',
         { requireSession: true }
     );
+
+export const startBookingWork = (bookingId, code, { budget, startDate, endDate, workDescription, photos, documents }) =>
+    invokeEdgeFunction(
+        'start-booking-work',
+        { bookingId, code, budget, startDate, endDate, workDescription, photos, documents },
+        'Could not start this job',
+        { requireSession: true }
+    );
+
+export const getBookingDocumentUrl = (bookingId, path) =>
+    invokeEdgeFunction('get-booking-document-url', { bookingId, path }, 'Could not open document', { requireSession: true });

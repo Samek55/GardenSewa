@@ -7,6 +7,8 @@ import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View }
 
 const getStatusBadgeStyle = (status) => {
     switch (status) {
+        case 'Draft':
+            return { bg: '#FEF9E7', text: '#92700C', border: '#D4A017' };
         case 'Pending':
             return { bg: '#EBF8FF', text: '#2B6CB0', border: '#3182CE' };
         case 'Completed':
@@ -19,6 +21,7 @@ const getStatusBadgeStyle = (status) => {
 };
 
 const STATUS_LABELS = {
+    Draft: 'Under Review',
     'New / Open': 'Awaiting a Gardener',
     Pending: 'Gardener Assigned',
     Completed: 'Completed',
