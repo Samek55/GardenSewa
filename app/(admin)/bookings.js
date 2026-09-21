@@ -20,7 +20,10 @@ import {
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 
+import GardenerPicker from '@/components/admin/GardenerPicker';
+import { listGardeners, reassignBooking } from '../../api/PostApiAdmin';
 import { getBookingDocumentUrl, listOpenBookings } from '../../api/PostApiBookingGardener';
+import { notifyBookingPublished, notifyBookingRevoked } from '../../api/PostApiNotification';
 import { AdminAuthContext } from '../../context/AdminAuthContext';
 
 const STATUS_OPTIONS = ['All', 'Draft', 'New / Open', 'Pending', 'Completed', 'Cancelled'];
@@ -56,6 +59,10 @@ export default function Bookings() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [detail, setDetail] = useState(null);
+    const [reassignOpen, setReassignOpen] = useState(false);
+    const [gardeners, setGardeners] = useState([]);
+    const [pickedGardener, setPickedGardener] = useState(null);
+    const [reassigning, setReassigning] = useState(false);
 
     const DetailRow = ({ label, value }) => (
         <View style={styles.detailRow}>
@@ -90,6 +97,43 @@ export default function Bookings() {
         setRefreshing(true);
         await load();
         setRefreshing(false);
+    };
+
+    const openReassign = async () => {
+        setPickedGardener(null);
+        setReassignOpen(true);
+        if (gardeners.length > 0) return;
+        try {
+            const result = await listGardeners();
+            if (result.success) setGardeners(result.gardeners || []);
+        } catch (error) {
+            Alert.alert('Error', error.message || 'Could not load professionals');
+        }
+    };
+
+    const handleConfirmReassign = async () => {
+        if (!pickedGardener) {
+            Alert.alert('Select a Professional', 'Please pick who this job should be reassigned to.');
+            return;
+        }
+        setReassigning(true);
+        try {
+            const result = await reassignBooking(detail.bookingId, pickedGardener.phone);
+            if (!result.success) {
+                Alert.alert('Could Not Reassign', result.message || 'Please try again.');
+                return;
+            }
+            notifyBookingPublished(detail.bookingId).catch((e) => console.error('notify new assignee failed:', e));
+            notifyBookingRevoked(detail.bookingId).catch((e) => console.error('notify old assignee failed:', e));
+            setReassignOpen(false);
+            setDetail(null);
+            await load();
+            Alert.alert('Reassigned', 'The job has been reassigned and both professionals have been notified.');
+        } catch (error) {
+            Alert.alert('Could Not Reassign', error.message || 'Something went wrong. Please try again.');
+        } finally {
+            setReassigning(false);
+        }
     };
 
     const handleViewDocument = async (bookingId, path) => {
@@ -285,7 +329,17 @@ export default function Bookings() {
                             <DetailRow label="Starting Date" value={detail?.startingDate} />
                             <DetailRow label="Completion Date" value={detail?.completionDate} />
                             <DetailRow label="Accepted By" value={detail?.acceptedByPhone} />
+                            {detail?.visibility === 'private' && <DetailRow label="Assigned To" value={detail?.assignedGardenerPhone} />}
                             {detail?.dealAmount != null && <DetailRow label="Deal Amount" value={`NPR ${detail.dealAmount}`} />}
+                            {detail?.rejectionCount > 0 && <DetailRow label="Rejected By" value={`${detail.rejectionCount} professional(s)`} />}
+                            {detail?.status === 'Completed' && (
+                                <DetailRow
+                                    label="Payment"
+                                    value={detail.paymentStatus === 'Paid'
+                                        ? `Paid (self-reported)${detail.paidAt ? ` on ${detail.paidAt.split('T')[0]}` : ''}`
+                                        : 'Pending'}
+                                />
+                            )}
                             {detail?.dealNote ? <DetailRow label="Deal Note" value={detail.dealNote} /> : null}
                             {detail?.workDescription ? <DetailRow label="Description" value={detail.workDescription} /> : null}
 
@@ -333,10 +387,39 @@ export default function Bookings() {
                                 </>
                             )}
 
+                            {detail?.status === 'New / Open' && detail?.visibility === 'private' && (
+                                <TouchableOpacity style={styles.reassignButton} onPress={openReassign}>
+                                    <Ionicons name="swap-horizontal-outline" size={16} color="#fff" />
+                                    <Text style={styles.reassignButtonText}>Reassign</Text>
+                                </TouchableOpacity>
+                            )}
+
                             <TouchableOpacity style={styles.closeButton} onPress={() => setDetail(null)}>
                                 <Text style={styles.closeButtonText}>Close</Text>
                             </TouchableOpacity>
                         </ScrollView>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal visible={reassignOpen} transparent animationType="fade" onRequestClose={() => !reassigning && setReassignOpen(false)}>
+                <View style={[styles.modalOverlay, { justifyContent: 'center' }]}>
+                    <View style={styles.reassignCard}>
+                        <Text style={styles.modalTitle}>Reassign Booking #{detail?.bookingId}</Text>
+                        <GardenerPicker
+                            gardeners={gardeners}
+                            excludePhone={detail?.assignedGardenerPhone}
+                            picked={pickedGardener}
+                            onPick={setPickedGardener}
+                        />
+                        <View style={styles.reassignActions}>
+                            <TouchableOpacity style={styles.reassignCancel} onPress={() => setReassignOpen(false)} disabled={reassigning}>
+                                <Text style={styles.reassignCancelText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.reassignConfirm, reassigning && { opacity: 0.6 }]} onPress={handleConfirmReassign} disabled={reassigning}>
+                                {reassigning ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.reassignConfirmText}>Confirm</Text>}
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </Modal>
@@ -398,6 +481,14 @@ const createStyles = (colors) => StyleSheet.create({
     phoneLink: { fontSize: 15, fontWeight: '700', color: colors.brand, marginBottom: 12 },
     fieldLabel: { fontSize: 12, fontWeight: '600', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
     thumb: { width: 70, height: 70, borderRadius: 10, marginRight: 8, backgroundColor: colors.surfaceMuted },
+    reassignButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: colors.brand, borderRadius: 12, paddingVertical: 12, marginTop: 16 },
+    reassignButtonText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+    reassignCard: { backgroundColor: colors.surface, borderRadius: 18, padding: 16, marginHorizontal: 20 },
+    reassignActions: { flexDirection: 'row', gap: 12, marginTop: 12 },
+    reassignCancel: { flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border },
+    reassignCancelText: { color: colors.textSecondary, fontWeight: '600' },
+    reassignConfirm: { flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 12, backgroundColor: colors.brand },
+    reassignConfirmText: { color: '#fff', fontWeight: '700' },
     docChipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
     docChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.surfaceMuted, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
     docChipText: { fontSize: 12, fontWeight: '600', color: colors.brand },

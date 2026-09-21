@@ -113,6 +113,19 @@ const PURPOSE_HANDLERS: Record<string, (ctx: Record<string, any>) => Promise<Res
       .maybeSingle();
     if (!booking) return null;
 
+    // One-shot claim (see 0028_booking_reassignment.sql): this endpoint has no
+    // session check, so only the first call after a publish/reassign may send —
+    // repeats can't be used to spam the assignee's push and SMS.
+    const { data: claimedBooking } = await supabaseAdmin
+      .from('booking')
+      .update({ publish_notified_at: new Date().toISOString() })
+      .eq('booking_id', ctx.bookingId)
+      .eq('status', 'New / Open')
+      .is('publish_notified_at', null)
+      .select('booking_id')
+      .maybeSingle();
+    if (!claimedBooking) return null;
+
     if (booking.visibility === 'private') {
       if (!booking.assigned_gardener_phone) return null;
       // Best-effort SMS alongside push — HR's spec asks for both on a
@@ -134,28 +147,7 @@ const PURPOSE_HANDLERS: Record<string, (ctx: Record<string, any>) => Promise<Res
     // Public — same service+city matching as resolveBroadcastTarget's
     // 'professional' audience below, just resolved directly from the
     // booking row instead of admin-supplied serviceTypes/cities.
-    const { data: accounts } = await supabaseAdmin
-      .from('gardener_account')
-      .select('gardener_id, phone')
-      .eq('status', 'Active');
-    if (!accounts || accounts.length === 0) return null;
-
-    const gardenerIds = accounts.map((a) => a.gardener_id);
-    const { data: gardeners } = await supabaseAdmin
-      .from('gardener')
-      .select('id, area_of_expertise, expected_working_city')
-      .in('id', gardenerIds);
-    type GardenerRow = { id: string; area_of_expertise: string[] | null; expected_working_city: string[] | null };
-    const gardenerById = new Map<string, GardenerRow>((gardeners || []).map((g: GardenerRow) => [g.id, g]));
-
-    const phones = accounts
-      .filter((a) => {
-        const g = gardenerById.get(a.gardener_id);
-        if (!g) return false;
-        return (g.area_of_expertise || []).includes(booking.service) && (g.expected_working_city || []).includes(booking.city);
-      })
-      .map((a) => a.phone)
-      .filter(Boolean);
+    const phones = await matchingGardenerPhones(booking.service, booking.city);
     if (phones.length === 0) return null;
 
     return {
@@ -166,7 +158,103 @@ const PURPOSE_HANDLERS: Record<string, (ctx: Record<string, any>) => Promise<Res
       linkId: String(ctx.bookingId),
     };
   },
+
+  // Fired by the client right after reassign-booking takes a Private job off a
+  // professional (see 0028_booking_reassignment.sql). Same session-less
+  // one-shot claim pattern as booking-reopened below.
+  'booking-revoked': async (ctx) => {
+    const { data: booking } = await supabaseAdmin
+      .from('booking')
+      .select('service')
+      .eq('booking_id', ctx.bookingId)
+      .maybeSingle();
+    if (!booking) return null;
+
+    const { data: claimed } = await supabaseAdmin
+      .from('booking_assignment_history')
+      .update({ notified_at: new Date().toISOString() })
+      .eq('booking_id', ctx.bookingId)
+      .is('notified_at', null)
+      .select('gardener_phone');
+    if (!claimed || claimed.length === 0) return null;
+
+    return {
+      phones: claimed.map((c) => c.gardener_phone),
+      title: 'Job Reassigned',
+      body: `A ${booking.service} job is no longer assigned to you.`,
+      audience: 'gardener_specific',
+      linkId: String(ctx.bookingId),
+    };
+  },
+
+  // Fired by the client right after reject-booking records a rejection (see
+  // 0027_booking_rejections.sql). This endpoint has no session check, so it
+  // atomically claims the not-yet-notified rejection rows first: each real
+  // rejection can trigger exactly one re-notify, and a repeated/forged call
+  // finds nothing to claim and sends nothing.
+  'booking-reopened': async (ctx) => {
+    const { data: booking } = await supabaseAdmin
+      .from('booking')
+      .select('service, city, status, visibility')
+      .eq('booking_id', ctx.bookingId)
+      .maybeSingle();
+    if (!booking || booking.status !== 'New / Open' || booking.visibility === 'private') return null;
+
+    const { data: claimed } = await supabaseAdmin
+      .from('booking_rejections')
+      .update({ renotified_at: new Date().toISOString() })
+      .eq('booking_id', ctx.bookingId)
+      .is('renotified_at', null)
+      .select('gardener_phone');
+    if (!claimed || claimed.length === 0) return null;
+
+    const { data: allRejections } = await supabaseAdmin
+      .from('booking_rejections')
+      .select('gardener_phone')
+      .eq('booking_id', ctx.bookingId);
+    const rejectorPhones = (allRejections || []).map((r) => r.gardener_phone);
+
+    const phones = await matchingGardenerPhones(booking.service, booking.city, rejectorPhones);
+    if (phones.length === 0) return null;
+
+    return {
+      phones,
+      title: 'Job Still Open',
+      body: `A ${booking.service} job in ${booking.city} is still open.`,
+      audience: 'gardener_all',
+      linkId: String(ctx.bookingId),
+    };
+  },
 };
+
+// Active gardeners whose expertise includes the job's service and whose
+// working cities include its city — minus anyone in excludePhones (e.g.
+// professionals who already rejected the job).
+async function matchingGardenerPhones(service: string, city: string, excludePhones: string[] = []): Promise<string[]> {
+  const { data: accounts } = await supabaseAdmin
+    .from('gardener_account')
+    .select('gardener_id, phone')
+    .eq('status', 'Active');
+  if (!accounts || accounts.length === 0) return [];
+
+  const gardenerIds = accounts.map((a) => a.gardener_id);
+  const { data: gardeners } = await supabaseAdmin
+    .from('gardener')
+    .select('id, area_of_expertise, expected_working_city')
+    .in('id', gardenerIds);
+  type GardenerRow = { id: string; area_of_expertise: string[] | null; expected_working_city: string[] | null };
+  const gardenerById = new Map<string, GardenerRow>((gardeners || []).map((g: GardenerRow) => [g.id, g]));
+
+  const excluded = new Set(excludePhones);
+  return accounts
+    .filter((a) => {
+      const g = gardenerById.get(a.gardener_id);
+      if (!g || excluded.has(a.phone)) return false;
+      return (g.area_of_expertise || []).includes(service) && (g.expected_working_city || []).includes(city);
+    })
+    .map((a) => a.phone)
+    .filter(Boolean);
+}
 
 // Resolves the OneSignal targeting shape + notifications-log audience for
 // each of HomeSewa's five broadcast tabs. Returns null if there's nothing to

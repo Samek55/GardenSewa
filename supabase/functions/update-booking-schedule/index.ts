@@ -2,6 +2,7 @@ import { corsHeaders, json } from '../_shared/cors.ts';
 import { supabaseAdmin, cleanPhone } from '../_shared/supabaseAdmin.ts';
 import { verifySession } from '../_shared/session.ts';
 import { checkOtp } from '../_shared/otp.ts';
+import { parsePlainAmount } from '../_shared/amount.ts';
 
 // The gardener's "Edit Schedule & Budget" screen (editSchedule.js) used to be
 // entirely client-side theater: a locally-generated fake OTP and a route-param
@@ -55,10 +56,12 @@ Deno.serve(async (req) => {
       return json({ success: false, message: otpResult.message || 'Incorrect OTP' }, otpResult.status);
     }
 
+    const newAmount = parsePlainAmount(budget);
     const { error } = await supabaseAdmin
       .from('booking')
       .update({
         budget: String(budget).trim(),
+        ...(newAmount !== null ? { deal_amount: newAmount } : {}),
         starting_date: startDate,
         service_completion_date: endDate || null,
         work_description: workDescription ? String(workDescription).trim() : null,

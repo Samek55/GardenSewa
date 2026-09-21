@@ -1,4 +1,5 @@
 import { listBookingMessages, listMyBookings, listRatingsForBooking, sendBookingMessage, submitRating } from '@/api/PostApiBookingCustomer';
+import PaymentQrCard from '@/components/PaymentQrCard';
 import { AuthContext } from '@/context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -252,6 +253,17 @@ const MyBookingDetail = () => {
                                 {sending ? <ActivityIndicator size="small" color="#fff" /> : <Ionicons name="send" size={18} color="#fff" />}
                             </TouchableOpacity>
                         </View>
+                    </View>
+                )}
+
+                {isCompleted && (
+                    <View style={styles.card}>
+                        <Text style={styles.sectionTitle}>Payment</Text>
+                        {booking.paymentStatus === 'Paid' ? (
+                            <Text style={styles.pendingText}>Payment received — thank you!</Text>
+                        ) : (
+                            <PaymentQrCard amount={booking.dealAmount} />
+                        )}
                     </View>
                 )}
 

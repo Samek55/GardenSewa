@@ -19,8 +19,9 @@ import {
     View,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { acceptBooking, completeBooking, listOpenBookings } from '../../../api/PostApiBookingGardener';
-import { notifyBookingAccepted, notifyJobCompleted } from '../../../api/PostApiNotification';
+import { acceptBooking, completeBooking, listOpenBookings, markBookingPaid, rejectBooking } from '../../../api/PostApiBookingGardener';
+import PaymentQrCard from '../../../components/PaymentQrCard';
+import { notifyBookingAccepted, notifyBookingReopened, notifyJobCompleted } from '../../../api/PostApiNotification';
 import { sendOtp } from '../../../api/PostApiOtp';
 import { uploadPublicFile } from '../../../api/uploadToStorage';
 
@@ -83,6 +84,8 @@ const IndividualBooking = () => {
         dealAmount: null,
         dealNote: null,
         workStartedAt: null,
+        paymentStatus: 'Pending',
+        visibility: null,
     });
 
     const loadBooking = useCallback(async () => {
@@ -112,6 +115,8 @@ const IndividualBooking = () => {
                 dealAmount: found.dealAmount,
                 dealNote: found.dealNote,
                 workStartedAt: found.workStartedAt,
+                paymentStatus: found.paymentStatus,
+                visibility: found.visibility,
             });
         } catch (error) {
             Alert.alert('Error', error.message || 'Could not load booking');
@@ -153,6 +158,7 @@ const IndividualBooking = () => {
     const [completionPhotos, setCompletionPhotos] = useState([]);
     const [sendingOtp, setSendingOtp] = useState(false);
     const [completing, setCompleting] = useState(false);
+    const [markingPaid, setMarkingPaid] = useState(false);
 
     // Synced from the fetched booking, since currentStatus/currentBudget/etc
     // started life as static useState initial values before the real fetch resolved.
@@ -311,12 +317,37 @@ const IndividualBooking = () => {
             setCurrentStatus('Completed');
             setIsOtpModalVisible(false);
             notifyJobCompleted(booking.id).catch((e) => console.error('notify completion failed:', e));
-            Alert.alert('Job Completed', `Booking for ${booking.fullName} has been marked as completed.`);
+            await loadBooking();
+            Alert.alert('Job Completed', `Booking for ${booking.fullName} has been marked as completed. Please collect the payment shown below.`);
         } catch (error) {
             Alert.alert('Error', error.message || 'Could not complete this job. Please try again.');
         } finally {
             setCompleting(false);
         }
+    };
+
+    const handleMarkPaid = () => {
+        Alert.alert('Mark as Paid?', 'Confirm the customer has paid for this job.', [
+            { text: 'Cancel', style: 'cancel' },
+            {
+                text: 'Yes, Paid',
+                onPress: async () => {
+                    setMarkingPaid(true);
+                    try {
+                        const result = await markBookingPaid(booking.id);
+                        if (!result.success) {
+                            Alert.alert('Could Not Update', result.message || 'Please try again.');
+                            return;
+                        }
+                        await loadBooking();
+                    } catch (error) {
+                        Alert.alert('Could Not Update', error.message || 'Something went wrong. Please try again.');
+                    } finally {
+                        setMarkingPaid(false);
+                    }
+                },
+            },
+        ]);
     };
 
     const handleOpenMap = async () => {
@@ -383,13 +414,32 @@ const IndividualBooking = () => {
         }
     };
 
-    // No reject-tracking table exists yet (see Phase 2 backend notes) — passing
-    // on a job just leaves this screen without recording anything server-side,
-    // rather than faking a status change that wouldn't reflect reality.
+    // Records the rejection server-side (the job disappears from this
+    // gardener's list) and re-notifies the other matching professionals. Only
+    // offered on Public jobs — a Private job's assignee never rejects, an admin
+    // revokes it instead.
     const handleRejectOffer = () => {
         Alert.alert('Pass on this job?', 'It will stay open for other gardeners to accept.', [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Yes, Pass', style: 'destructive', onPress: () => router.back() },
+            {
+                text: 'Yes, Pass',
+                style: 'destructive',
+                onPress: async () => {
+                    try {
+                        const result = await rejectBooking(booking.id);
+                        if (!result.success) {
+                            Alert.alert('Could Not Reject', result.message || 'Please try again.');
+                            return;
+                        }
+                        notifyBookingReopened(booking.id).catch((e) => console.error('notify reopen failed:', e));
+                        Alert.alert('Thank You', "Thanks for letting us know. We'll offer this job to other gardeners.", [
+                            { text: 'OK', onPress: () => router.back() },
+                        ]);
+                    } catch (error) {
+                        Alert.alert('Could Not Reject', error.message || 'Something went wrong. Please try again.');
+                    }
+                },
+            },
         ]);
     };
 
@@ -559,9 +609,11 @@ const IndividualBooking = () => {
                                     <TouchableOpacity style={styles.acceptBtn} activeOpacity={0.85} onPress={handleAcceptOffer}>
                                         <Text style={styles.acceptBtnText}>Accept</Text>
                                     </TouchableOpacity>
-                                    <TouchableOpacity style={styles.rejectBtn} activeOpacity={0.85} onPress={handleRejectOffer}>
-                                        <Text style={styles.rejectBtnText}>Reject</Text>
-                                    </TouchableOpacity>
+                                    {booking.visibility !== 'private' && (
+                                        <TouchableOpacity style={styles.rejectBtn} activeOpacity={0.85} onPress={handleRejectOffer}>
+                                            <Text style={styles.rejectBtnText}>Reject</Text>
+                                        </TouchableOpacity>
+                                    )}
                                 </>
                             ) : (
                                 <TouchableOpacity style={styles.acceptBtn} activeOpacity={0.85} onPress={handleAcceptOffer}>
@@ -617,10 +669,31 @@ const IndividualBooking = () => {
                             <View style={styles.divider} />
 
                             {currentStatus === 'Completed' ? (
-                                <View style={styles.completedBanner}>
-                                    <Ionicons name="checkmark-circle" size={20} color="#15803D" />
-                                    <Text style={styles.completedBannerText}>This job has been marked completed.</Text>
-                                </View>
+                                <>
+                                    <View style={styles.completedBanner}>
+                                        <Ionicons name="checkmark-circle" size={20} color="#15803D" />
+                                        <Text style={styles.completedBannerText}>This job has been marked completed.</Text>
+                                    </View>
+
+                                    {booking.paymentStatus === 'Paid' ? (
+                                        <View style={[styles.completedBanner, { marginTop: 12 }]}>
+                                            <Ionicons name="cash-outline" size={20} color="#15803D" />
+                                            <Text style={styles.completedBannerText}>Payment marked as received.</Text>
+                                        </View>
+                                    ) : (
+                                        <View style={{ marginTop: 16 }}>
+                                            <PaymentQrCard amount={booking.dealAmount} />
+                                            <TouchableOpacity
+                                                style={[styles.submitButton, { marginTop: 14 }, markingPaid && styles.submitButtonDisabled]}
+                                                activeOpacity={0.85}
+                                                onPress={handleMarkPaid}
+                                                disabled={markingPaid}
+                                            >
+                                                {markingPaid ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitButtonText}>Mark as Paid</Text>}
+                                            </TouchableOpacity>
+                                        </View>
+                                    )}
+                                </>
                             ) : (
                                 <>
                                     <Text style={styles.sectionHeading}>Mark Job as Completed</Text>

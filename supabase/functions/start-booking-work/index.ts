@@ -2,6 +2,7 @@ import { corsHeaders, json } from '../_shared/cors.ts';
 import { supabaseAdmin, cleanPhone } from '../_shared/supabaseAdmin.ts';
 import { verifySession } from '../_shared/session.ts';
 import { checkOtp } from '../_shared/otp.ts';
+import { parsePlainAmount } from '../_shared/amount.ts';
 
 // The "Start Work" milestone (HR spec Function 4) — sits between accept-booking
 // (New / Open -> Pending) and the already-existing Update/Finalize actions
@@ -63,10 +64,12 @@ Deno.serve(async (req) => {
     // Atomic CAS — same double guard as accept-booking/complete-booking,
     // plus .is('work_started_at', null) so a retried/duplicate call can't
     // re-stamp an already-started job.
+    const newAmount = parsePlainAmount(budget);
     const { data: started, error } = await supabaseAdmin
       .from('booking')
       .update({
         budget: String(budget).trim(),
+        ...(newAmount !== null ? { deal_amount: newAmount } : {}),
         starting_date: startDate,
         service_completion_date: endDate || null,
         work_description: workDescription ? String(workDescription).trim() : null,

@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
         'booking_id, full_name, phone, service, city, area, priority, budget, select_shift, ' +
         'starting_date, service_completion_date, work_description, photos, completion_photos, ' +
         'status, accepted_by_phone, deal_amount, deal_note, visibility, assigned_gardener_phone, ' +
-        'work_started_at, work_start_photos, work_documents, created_at'
+        'work_started_at, work_start_photos, work_documents, payment_status, paid_at, created_at'
       )
       .order('created_at', { ascending: false });
 
@@ -71,7 +71,23 @@ Deno.serve(async (req) => {
     const { data: bookings, error } = await query;
     if (error) throw new Error(error.message);
 
-    const rows = bookings || [];
+    let rows = bookings || [];
+
+    // A gardener never sees a job they rejected again (see reject-booking); an
+    // admin instead gets a per-job rejection count to spot jobs nobody wants.
+    const rejectionCounts = new Map<number, number>();
+    if (rows.length > 0) {
+      let rejQuery = supabaseAdmin.from('booking_rejections').select('booking_id, gardener_phone').in('booking_id', rows.map((r) => r.booking_id));
+      if (!isAdmin) rejQuery = rejQuery.eq('gardener_phone', gardenerPhone);
+      const { data: rejections } = await rejQuery;
+      if (isAdmin) {
+        for (const r of rejections || []) rejectionCounts.set(r.booking_id, (rejectionCounts.get(r.booking_id) || 0) + 1);
+      } else {
+        const rejectedIds = new Set((rejections || []).map((r) => r.booking_id));
+        rows = rows.filter((r) => !rejectedIds.has(r.booking_id));
+      }
+    }
+
     let unlockedIds = new Set<number>();
     if (!isAdmin && rows.length > 0) {
       const { data: unlocks } = await supabaseAdmin
@@ -102,6 +118,9 @@ Deno.serve(async (req) => {
         workStartedAt: row.work_started_at,
         workStartPhotos: row.work_start_photos,
         workDocuments: row.work_documents,
+        paymentStatus: row.payment_status,
+        rejectionCount: rejectionCounts.get(row.booking_id) || 0,
+        paidAt: row.paid_at,
         status: row.status,
         acceptedByPhone: row.accepted_by_phone,
         visibility: row.visibility,

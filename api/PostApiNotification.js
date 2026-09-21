@@ -6,8 +6,14 @@ export const notifyGardenerApplicationReceived = (applicantName) =>
 export const notifyBookingAccepted = (bookingId) =>
     invokeEdgeFunction('send-notification', { purpose: 'booking-accepted', bookingId }, 'Could not send notification');
 
+export const notifyBookingReopened = (bookingId) =>
+    invokeEdgeFunction('send-notification', { purpose: 'booking-reopened', bookingId }, 'Could not send notification');
+
 export const notifyJobCompleted = (bookingId) =>
     invokeEdgeFunction('send-notification', { purpose: 'job-completed', bookingId }, 'Could not send notification');
+
+export const notifyBookingRevoked = (bookingId) =>
+    invokeEdgeFunction('send-notification', { purpose: 'booking-revoked', bookingId }, 'Could not send notification');
 
 export const notifyBookingPublished = (bookingId) =>
     invokeEdgeFunction('send-notification', { purpose: 'booking-published', bookingId }, 'Could not send notification');

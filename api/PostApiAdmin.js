@@ -76,3 +76,6 @@ export const toggleCustomerStatus = (id, status) =>
 
 export const changePin = (currentPin, newPin) =>
     invokeEdgeFunction('change-pin', { currentPin, newPin }, 'Could not change PIN', { requireSession: true });
+
+export const reassignBooking = (bookingId, newGardenerPhone) =>
+    invokeEdgeFunction('reassign-booking', { bookingId, newGardenerPhone }, 'Could not reassign this job', { requireSession: true });

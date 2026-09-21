@@ -17,6 +17,9 @@ export const updateBookingSchedule = (bookingId, code, { budget, startDate, endD
         { requireSession: true }
     );
 
+export const markBookingPaid = (bookingId) =>
+    invokeEdgeFunction('mark-booking-paid', { bookingId }, 'Could not update payment status', { requireSession: true });
+
 export const startBookingWork = (bookingId, code, { budget, startDate, endDate, workDescription, photos, documents }) =>
     invokeEdgeFunction(
         'start-booking-work',
@@ -27,3 +30,6 @@ export const startBookingWork = (bookingId, code, { budget, startDate, endDate, 
 
 export const getBookingDocumentUrl = (bookingId, path) =>
     invokeEdgeFunction('get-booking-document-url', { bookingId, path }, 'Could not open document', { requireSession: true });
+
+export const rejectBooking = (bookingId) =>
+    invokeEdgeFunction('reject-booking', { bookingId }, 'Could not reject this job', { requireSession: true });

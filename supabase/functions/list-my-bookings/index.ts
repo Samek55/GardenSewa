@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
       .select(
         'booking_id, service, city, area, priority, budget, select_shift, starting_date, ' +
         'service_completion_date, work_description, photos, completion_photos, status, ' +
-        'accepted_by_phone, deal_amount, deal_note, created_at'
+        'accepted_by_phone, deal_amount, deal_note, payment_status, created_at'
       )
       .eq('phone', cleaned)
       .order('created_at', { ascending: false });
@@ -58,6 +58,7 @@ Deno.serve(async (req) => {
       gardenerName: row.accepted_by_phone ? (gardenerNames[row.accepted_by_phone] || null) : null,
       dealAmount: row.deal_amount,
       dealNote: row.deal_note,
+      paymentStatus: row.payment_status,
       createdAt: row.created_at,
     }));
 
