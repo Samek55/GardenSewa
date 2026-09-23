@@ -339,10 +339,10 @@ export default function PartnerBook() {
                 Array.isArray(errors[firstError]) ? errors[firstError][0] : errors[firstError]
             );
         }
-        else if (selectedCertificates.length == 0) {
+        else if (selectedCertificates.length === 0) {
             Alert.alert("Validation Error", "Select at least one certificate.")
 
-        } else if (selectedCompanyImages.length == 0) {
+        } else if (selectedCompanyImages.length === 0) {
 
             Alert.alert("Validation Error", "Select at least one company image.")
 

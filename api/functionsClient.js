@@ -6,12 +6,17 @@ import { supabase } from '../lib/supabase';
 // (e.g. { success: false, message: '...' }) on error.context — read it instead of
 // discarding it, since callers need that message, not just a generic error.
 //
-// requireSession: true attaches the logged-in admin's session token (see
-// supabase/migrations/0004_admin_roles_and_customer.sql) as the
+// requireSession: true attaches the logged-in admin's/gardener's session token
+// (see supabase/migrations/0004_admin_roles_and_customer.sql) as the
 // x-admin-session-token header — never Authorization, which Supabase's
 // gateway already consumes for the anon-key JWT check before function code
 // runs. Only pass this for functions that actually verify the token
 // server-side (everything except admin-login itself).
+//
+// requireCustomerSession: true does the same for a logged-in customer's
+// token (see 0029_customer_sessions.sql) as x-customer-session-token —
+// separate header/table from the admin one since a customer session is a
+// much lighter-weight thing (no role, no lockout) than an admin/gardener one.
 const INVOKE_TIMEOUT_MS = 15000;
 
 export async function invokeEdgeFunction(name, body, fallbackMessage, options) {
@@ -19,6 +24,9 @@ export async function invokeEdgeFunction(name, body, fallbackMessage, options) {
     if (options?.requireSession) {
         const token = await AsyncStorage.getItem('adminSessionToken');
         if (token) headers = { 'x-admin-session-token': token };
+    } else if (options?.requireCustomerSession) {
+        const token = await AsyncStorage.getItem('customerSessionToken');
+        if (token) headers = { 'x-customer-session-token': token };
     }
 
     const timeout = new Promise((_, reject) =>

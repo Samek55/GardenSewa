@@ -36,62 +36,9 @@ const formatPhone = (text) => {
     return digitsOnly;
 };
 
-const CustomDropdown = ({ label, value, placeholder, data, isOpen, onToggle, onSelect }) => {
-    const [query, setQuery] = useState('');
-    const filteredData = data.filter((item) =>
-        (item.name || item.title || item).toLowerCase().includes(query.toLowerCase())
-    );
-
-    return (
-        <View style={styles.individualContainer}>
-            <Text style={styles.label}>{label}</Text>
-            <TouchableOpacity style={styles.dropdownTrigger} activeOpacity={0.8} onPress={onToggle}>
-                <Text style={[styles.triggerText, !value && styles.placeholderText]}>
-                    {value || placeholder}
-                </Text>
-                <Ionicons name={isOpen ? 'chevron-up' : 'chevron-down'} size={20} color="#666" />
-            </TouchableOpacity>
-
-            {isOpen && (
-                <View style={styles.dropdownContainer}>
-                    <View style={styles.searchBarContainer}>
-                        <TextInput
-                            style={styles.searchInput}
-                            placeholder={`Search ${label.toLowerCase()}...`}
-                            placeholderTextColor="#999"
-                            value={query}
-                            onChangeText={setQuery}
-                        />
-                        {query.length > 0 && (
-                            <TouchableOpacity onPress={() => setQuery('')}>
-                                <Ionicons name="close-circle" size={18} color="#999" />
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                    <ScrollView style={styles.itemsList} nestedScrollEnabled>
-                        {filteredData.length > 0 ? filteredData.map((item, idx) => {
-                            const itemLabel = item.name || item.title || item;
-                            return (
-                                <TouchableOpacity
-                                    key={item.id || idx}
-                                    style={styles.dropdownItem}
-                                    onPress={() => { onSelect(itemLabel); setQuery(''); }}
-                                >
-                                    <Text style={styles.dropdownItemText}>{itemLabel}</Text>
-                                </TouchableOpacity>
-                            );
-                        }) : (
-                            <View style={styles.noResultsContainer}>
-                                <Text style={styles.noResultsText}>No items found</Text>
-                            </View>
-                        )}
-                    </ScrollView>
-                </View>
-            )}
-        </View>
-    );
-};
-
+// Note: this file used to also define a single-select CustomDropdown here,
+// but nothing in the form actually rendered it (every select field ended up
+// using MultiSelectDropdown or a plain field) — removed as dead code.
 const MultiSelectDropdown = ({ label, selectedItems = [], placeholder, data, isOpen, onToggle, onSelectItem, onRemoveItem, maxLimit = 5 }) => {
     const [query, setQuery] = useState('');
     const filteredData = data.filter((item) =>

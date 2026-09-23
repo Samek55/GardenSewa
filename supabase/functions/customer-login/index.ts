@@ -2,18 +2,17 @@ import { corsHeaders, json } from '../_shared/cors.ts';
 import { supabaseAdmin, cleanPhone } from '../_shared/supabaseAdmin.ts';
 import { checkOtp } from '../_shared/otp.ts';
 
-// Garden Sewa's customer identity model deliberately mirrors HomeSewa's real
-// one, not the heavier PIN+session pattern used for admin/gardener accounts:
-// HomeSewa has no customer login table or session token at all — a customer
-// is just a phone number, verified by OTP, remembered locally on the device
-// (see BookingOtp.tsx's AsyncStorage.setItem('customerPhone', ...)), with the
-// `customers` row itself auto-created by a database trigger on booking
-// insert, not a login endpoint. Garden Sewa has no booking table yet to hook
-// that trigger to, so this function does the same upsert directly instead —
-// same end state (an OTP-verified phone becomes a `customer` row), just
-// reached via an explicit call rather than a side effect of another insert.
-// No session token is issued; the client stores the verified phone/name
-// itself via AuthContext, same as HomeSewa's local-only "logged in" state.
+// Garden Sewa's customer identity model started out mirroring HomeSewa's:
+// no session table, just an OTP-verified phone remembered locally on the
+// device via AuthContext. That left list-my-bookings, submit-rating, and
+// send-booking-message trusting a bare client-claimed phone with nothing
+// behind it — anyone who knew a customer's number could read their full
+// booking history. This now also mints an opaque, DB-backed session token
+// (see 0029_customer_sessions.sql) right after the OTP check succeeds, same
+// pattern as admin-login's admin_sessions, so those endpoints have something
+// real to verify the claimed phone against instead of just trusting it.
+const SESSION_DAYS = 30;
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
@@ -48,7 +47,15 @@ Deno.serve(async (req) => {
       await supabaseAdmin.from('customer').insert([{ phone: cleaned, full_name: trimmedName || null }]);
     }
 
-    return json({ verified: true, customer: { phone: cleaned, fullName: trimmedName || existing?.full_name || null } });
+    const sessionToken = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60_000).toISOString();
+    await supabaseAdmin.from('customer_sessions').insert([{ token: sessionToken, phone: cleaned, expires_at: expiresAt }]);
+
+    return json({
+      verified: true,
+      sessionToken,
+      customer: { phone: cleaned, fullName: trimmedName || existing?.full_name || null },
+    });
   } catch (e) {
     console.error('customer-login error:', e);
     return json({ verified: false, message: 'Login failed' }, 500);

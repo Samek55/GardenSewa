@@ -134,6 +134,21 @@ const IndividualBooking = () => {
     const [currentStartDate, setCurrentStartDate] = useState(booking.startDate);
     const [currentEndDate, setCurrentEndDate] = useState(booking.endDate);
     const [currentScopeOfWork, setCurrentScopeOfWork] = useState(booking.specialRequest);
+    // Mirrors of the four state values above, read by the shouldEditSchedule
+    // effect below as a fallback for whichever of updatedBudget/startDate/
+    // endDate/scopeOfWork isn't present. Kept as refs rather than adding the
+    // state itself to that effect's deps: these are legitimately fallback-only
+    // reads (not something that should re-trigger the navigation), and
+    // current* changes on every fresh booking fetch, not just when this
+    // specific edit flow is actually active.
+    const currentBudgetRef = useRef(currentBudget);
+    const currentStartDateRef = useRef(currentStartDate);
+    const currentEndDateRef = useRef(currentEndDate);
+    const currentScopeOfWorkRef = useRef(currentScopeOfWork);
+    useEffect(() => { currentBudgetRef.current = currentBudget; }, [currentBudget]);
+    useEffect(() => { currentStartDateRef.current = currentStartDate; }, [currentStartDate]);
+    useEffect(() => { currentEndDateRef.current = currentEndDate; }, [currentEndDate]);
+    useEffect(() => { currentScopeOfWorkRef.current = currentScopeOfWork; }, [currentScopeOfWork]);
 
     const [currentStatus, setCurrentStatus] = useState(booking.workStatus);
     const [selectedStatus, setSelectedStatus] = useState(booking.workStatus);
@@ -194,14 +209,14 @@ const IndividualBooking = () => {
                     bookingId: booking.id,
                     fullName: booking.fullName,
                     phone: booking.phone,
-                    budget: updatedBudget || currentBudget,
-                    startDate: updatedStartDate || currentStartDate,
-                    endDate: updatedEndDate || currentEndDate,
-                    scopeOfWork: updatedScopeOfWork || currentScopeOfWork,
+                    budget: updatedBudget || currentBudgetRef.current,
+                    startDate: updatedStartDate || currentStartDateRef.current,
+                    endDate: updatedEndDate || currentEndDateRef.current,
+                    scopeOfWork: updatedScopeOfWork || currentScopeOfWorkRef.current,
                 },
             });
         }
-    }, [updatedStatus, shouldEditSchedule, updatedBudget, updatedStartDate, updatedEndDate, updatedScopeOfWork]);
+    }, [updatedStatus, shouldEditSchedule, updatedBudget, updatedStartDate, updatedEndDate, updatedScopeOfWork, booking.id, booking.fullName, booking.phone]);
 
     useEffect(() => {
         let interval = null;
@@ -830,7 +845,7 @@ const IndividualBooking = () => {
                         </View>
 
                         <Text style={styles.confirmSubtext}>
-                            Changing status requires customer authorization. {'\n'}An SMS OTP will be sent to the customer's registered number.
+                            Changing status requires customer authorization. {'\n'}An SMS OTP will be sent to the customer&apos;s registered number.
                         </Text>
 
                         <View style={styles.modalActionButtons}>

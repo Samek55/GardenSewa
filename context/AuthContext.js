@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useEffect, useState } from 'react';
+import { invokeEdgeFunction } from '../api/functionsClient';
 
 export const AuthContext = createContext();
 
@@ -12,7 +13,6 @@ export const AuthProvider = ({ children }) => {
         const loadAuthState = async () => {
             try {
                 const storedUser = await AsyncStorage.getItem('@auth_user');
-                const storedToken = await AsyncStorage.getItem('@auth_token');
 
                 if (storedUser) {
                     setUser(JSON.parse(storedUser));
@@ -28,13 +28,19 @@ export const AuthProvider = ({ children }) => {
         loadAuthState();
     }, []);
 
-    const login = async (userData, token = 'dummy-auth-token') => {
+    // sessionToken is the token customer-login mints after a real OTP check
+    // (see 0029_customer_sessions.sql) — stored under the key
+    // api/functionsClient.js reads for requireCustomerSession calls, so
+    // list-my-bookings/submit-rating/send-booking-message/list-booking-messages
+    // can verify this customer's identity server-side instead of trusting
+    // whatever phone the client claims.
+    const login = async (userData, sessionToken) => {
         try {
             setUser(userData);
             setIsLoggedIn(true);
 
             await AsyncStorage.setItem('@auth_user', JSON.stringify(userData));
-            await AsyncStorage.setItem('@auth_token', token);
+            if (sessionToken) await AsyncStorage.setItem('customerSessionToken', sessionToken);
         } catch (error) {
             console.error('Failed to save auth state:', error);
         }
@@ -45,8 +51,12 @@ export const AuthProvider = ({ children }) => {
             setUser(null);
             setIsLoggedIn(false);
 
+            // Best-effort — actually revokes the token server-side, but a
+            // failed call (offline, etc.) shouldn't block logging out locally.
+            invokeEdgeFunction('customer-logout', {}, 'Logout failed', { requireCustomerSession: true }).catch(() => { });
+
             await AsyncStorage.removeItem('@auth_user');
-            await AsyncStorage.removeItem('@auth_token');
+            await AsyncStorage.removeItem('customerSessionToken');
         } catch (error) {
             console.error('Failed to clear auth state:', error);
         }

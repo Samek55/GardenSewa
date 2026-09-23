@@ -308,7 +308,7 @@ const ResetPin = () => {
                                                 <Text style={styles.resendBtnText}>
                                                     {isSending ? "Sending..." : (
                                                         <>
-                                                            Didn't get code?{" "}
+                                                            Didn&apos;t get code?{" "}
                                                             <Text style={styles.resendBtnBold}>Resend Code</Text>
                                                         </>
                                                     )}

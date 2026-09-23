@@ -4,7 +4,6 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 const PairServiceCard = ({ id, imageSource, title, description, cardWidth }) => {
 
     const router = useRouter()
-    console.log()
 
     return (
         <Pressable

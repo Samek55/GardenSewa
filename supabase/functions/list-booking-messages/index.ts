@@ -1,12 +1,16 @@
 import { corsHeaders, json } from '../_shared/cors.ts';
 import { supabaseAdmin, cleanPhone } from '../_shared/supabaseAdmin.ts';
-import { verifySession } from '../_shared/session.ts';
+import { verifySession, verifyCustomerSession } from '../_shared/session.ts';
 
+// Customer side is now session-verified (see 0029_customer_sessions.sql) —
+// it used to trust a client-claimed viewerPhone with nothing behind it,
+// which let anyone who knew a booking id and its customer's number read that
+// booking's chat.
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const { bookingId, viewerRole, viewerPhone } = await req.json();
+    const { bookingId, viewerRole } = await req.json();
     if (!bookingId || !['customer', 'gardener'].includes(viewerRole)) {
       return json({ success: false, message: 'bookingId and a valid viewerRole are required' }, 400);
     }
@@ -32,8 +36,9 @@ Deno.serve(async (req) => {
         return json({ success: false, message: 'Not authorized to view this chat.' }, 403);
       }
     } else {
-      const cleaned = cleanPhone(viewerPhone);
-      if (!cleaned || cleaned !== cleanPhone(booking.phone)) {
+      const session = await verifyCustomerSession(req);
+      if (!session) return json({ success: false, message: 'Please log in again.' }, 401);
+      if (cleanPhone(session.phone) !== cleanPhone(booking.phone)) {
         return json({ success: false, message: 'Not authorized to view this chat.' }, 403);
       }
     }

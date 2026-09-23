@@ -40,10 +40,12 @@ export default function Index() {
     const [isAdVisible, setIsAdVisible] = useState(false);
     const [activeBanner, setActiveBanner] = useState(null);
     const [phone, setPhone] = useState('');
-    const [activeTopIndex, setActiveTopIndex] = useState(0);
 
     const flatListRef = useRef(null);
     const intervalRef = useRef(null);
+    // Auto-scroll only ever needs its own last value to compute the next one —
+    // nothing renders it, so a ref avoids a re-render every 2s for no reason.
+    const activeTopIndexRef = useRef(0);
 
     const { isLoggedIn, isLoading: isCustomerAuthLoading } = useContext(AuthContext);
     const { isAdminLoggedIn, adminRole, adminPhone, isAdminAuthLoading } = useContext(AdminAuthContext);
@@ -89,13 +91,11 @@ export default function Index() {
 
         const startAutoScroll = () => {
             intervalRef.current = setInterval(() => {
-                setActiveTopIndex((prevIndex) => {
-                    const nextIndex = (prevIndex + 1) % filteredServicesTop.length;
-                    flatListRef.current?.scrollToIndex({
-                        index: nextIndex,
-                        animated: true,
-                    });
-                    return nextIndex;
+                const nextIndex = (activeTopIndexRef.current + 1) % filteredServicesTop.length;
+                activeTopIndexRef.current = nextIndex;
+                flatListRef.current?.scrollToIndex({
+                    index: nextIndex,
+                    animated: true,
                 });
             }, 2000);
         };

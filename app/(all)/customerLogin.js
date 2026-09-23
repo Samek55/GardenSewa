@@ -127,7 +127,7 @@ const CustomerLogin = () => {
                 OneSignal.login(result.customer.phone);
                 OneSignal.User.addTag("role", "customer");
             }
-            await login({ phone: result.customer.phone, name: result.customer.fullName });
+            await login({ phone: result.customer.phone, name: result.customer.fullName }, result.sessionToken);
             router.replace("/(tabs)");
         } catch (error) {
             Alert.alert("Verification Failed", error.message || "Something went wrong. Please try again.");

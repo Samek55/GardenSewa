@@ -147,6 +147,10 @@ export default function Book() {
         if (params?.serviceName) {
             formik.setFieldValue('service', params.serviceName);
         }
+        // formik is a fresh object every render (useFormik doesn't memoize it),
+        // so listing it here would re-run this on every render instead of only
+        // when the incoming param actually changes.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [params?.serviceName]);
 
     const handleImagePick = async () => {

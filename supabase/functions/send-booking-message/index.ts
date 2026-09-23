@@ -1,17 +1,19 @@
 import { corsHeaders, json } from '../_shared/cors.ts';
 import { supabaseAdmin, cleanPhone } from '../_shared/supabaseAdmin.ts';
-import { verifySession } from '../_shared/session.ts';
+import { verifySession, verifyCustomerSession } from '../_shared/session.ts';
 
-// Same trust model as submit-rating: gardener side session-verified, customer
-// side trusts the claimed phone (no session exists for customers in this
-// app). Only allowed once a booking has actually been accepted — chatting
-// about an unclaimed "New / Open" job makes no sense, there's no
+// Both sides are now session-verified: gardener via admin_sessions,
+// customer via customer_sessions (see 0029_customer_sessions.sql) — customers
+// used to just claim a phone with nothing behind it, which let anyone who
+// knew a booking id and its customer's number send messages as that
+// customer. Only allowed once a booking has actually been accepted —
+// chatting about an unclaimed "New / Open" job makes no sense, there's no
 // relationship yet.
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const { bookingId, senderRole, senderPhone, body } = await req.json();
+    const { bookingId, senderRole, body } = await req.json();
     if (!bookingId || !['customer', 'gardener'].includes(senderRole) || !body?.trim()) {
       return json({ success: false, message: 'bookingId, a valid senderRole, and a message body are required' }, 400);
     }
@@ -43,11 +45,12 @@ Deno.serve(async (req) => {
       }
       actualSenderPhone = account.phone;
     } else {
-      const cleaned = cleanPhone(senderPhone);
-      if (!cleaned || cleaned !== cleanPhone(booking.phone)) {
+      const session = await verifyCustomerSession(req);
+      if (!session) return json({ success: false, message: 'Please log in again.' }, 401);
+      if (cleanPhone(session.phone) !== cleanPhone(booking.phone)) {
         return json({ success: false, message: 'Not authorized to message on this booking.' }, 403);
       }
-      actualSenderPhone = cleaned;
+      actualSenderPhone = cleanPhone(session.phone);
     }
 
     const { error } = await supabaseAdmin.from('booking_messages').insert([{

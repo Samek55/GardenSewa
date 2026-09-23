@@ -1,22 +1,24 @@
 import { corsHeaders, json } from '../_shared/cors.ts';
-import { supabaseAdmin, cleanPhone } from '../_shared/supabaseAdmin.ts';
+import { supabaseAdmin } from '../_shared/supabaseAdmin.ts';
+import { verifyCustomerSession } from '../_shared/session.ts';
 
-// Customer-facing "My Bookings" list. No session to check against — same
-// real limitation as submit-rating/send-booking-message/list-booking-messages
-// (customers have no session token in this app's model, see
-// 0010_ratings_and_messages.sql) — so this trusts the phone the client
-// claims, exactly like those. Never exposes another customer's bookings: the
-// query is always scoped to the one phone passed in, and there is nothing
-// masked here the way list-open-bookings masks a booking from other
-// gardeners, since a customer is always allowed to see their own submission
-// in full.
+// Customer-facing "My Bookings" list. Used to trust a bare client-claimed
+// `phone` with nothing behind it — anyone who knew a customer's number could
+// pull their entire booking history (address, budget, schedule, work
+// description, photos, payment status) with a single call. Now requires the
+// session customer-login mints (see 0029_customer_sessions.sql) and scopes
+// the query to the phone that session actually proved, never the one the
+// client claims. There is nothing masked here the way list-open-bookings
+// masks a booking from other gardeners, since a customer is always allowed
+// to see their own submission in full — the fix is who can prove they're
+// that customer, not what they see once they have.
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const { phone } = await req.json();
-    const cleaned = cleanPhone(phone);
-    if (!cleaned) return json({ success: false, message: 'phone is required' }, 400);
+    const session = await verifyCustomerSession(req);
+    if (!session) return json({ success: false, message: 'Please log in again.' }, 401);
+    const cleaned = session.phone;
 
     const { data: bookings, error } = await supabaseAdmin
       .from('booking')

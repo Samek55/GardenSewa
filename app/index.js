@@ -27,6 +27,7 @@ export default function Index() {
                         router.replace('/onBoarding');
                     }
                 } catch (e) {
+                    console.error('Failed to read onboarding flag:', e);
                     router.replace('/(tabs)');
                 }
             }
@@ -37,7 +38,9 @@ export default function Index() {
         return () => {
             isMounted = false;
         };
-    }, []);
+        // router is a stable reference from expo-router, so listing it here
+        // doesn't change this effect's mount-only behavior.
+    }, [router]);
 
     return <View style={{ flex: 1, backgroundColor: '#ffffff' }} />;
 }

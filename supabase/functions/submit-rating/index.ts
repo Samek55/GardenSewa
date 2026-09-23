@@ -1,19 +1,19 @@
 import { corsHeaders, json } from '../_shared/cors.ts';
 import { supabaseAdmin, cleanPhone } from '../_shared/supabaseAdmin.ts';
-import { verifySession } from '../_shared/session.ts';
+import { verifySession, verifyCustomerSession } from '../_shared/session.ts';
 
-// Two-way rating on a completed booking. The gardener side is
-// session-verified (real auth exists); the customer side trusts the phone
-// the client claims, same real limitation HomeSewa has for its equivalent —
-// customers have no session token in this app's model (see
-// 0010_ratings_and_messages.sql's comment). Only ratings on a Completed
-// booking are accepted, and unique(booking_id, rater_role) blocks a second
-// submission from either side.
+// Two-way rating on a completed booking. Both sides are now session-verified:
+// gardener via admin_sessions, customer via customer_sessions (see
+// 0029_customer_sessions.sql) — the customer side used to just trust the
+// phone the client claimed, which let anyone who knew a booking id and its
+// customer's number leave a rating as that customer. Only ratings on a
+// Completed booking are accepted, and unique(booking_id, rater_role) blocks a
+// second submission from either side.
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const { bookingId, raterRole, raterPhone, rating, comment } = await req.json();
+    const { bookingId, raterRole, rating, comment } = await req.json();
     if (!bookingId || !['customer', 'gardener'].includes(raterRole) || !rating || rating < 1 || rating > 5) {
       return json({ success: false, message: 'bookingId, a valid raterRole, and a 1-5 rating are required' }, 400);
     }
@@ -47,11 +47,12 @@ Deno.serve(async (req) => {
       actualRaterPhone = account.phone;
       ratedPhone = booking.phone;
     } else {
-      const cleaned = cleanPhone(raterPhone);
-      if (!cleaned || cleaned !== cleanPhone(booking.phone)) {
+      const session = await verifyCustomerSession(req);
+      if (!session) return json({ success: false, message: 'Please log in again.' }, 401);
+      if (cleanPhone(session.phone) !== cleanPhone(booking.phone)) {
         return json({ success: false, message: 'Not authorized to rate this booking.' }, 403);
       }
-      actualRaterPhone = cleaned;
+      actualRaterPhone = cleanPhone(session.phone);
       ratedPhone = booking.accepted_by_phone;
     }
 

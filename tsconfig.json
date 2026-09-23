@@ -13,5 +13,12 @@
     "expo-env.d.ts",
     "app/index.js",
     "app/_layout.js"
-  ]
+  ],
+  // supabase/functions/** runs on Deno (Deno.*, npm:/https: imports, no
+  // Node/RN module resolution) — it is never meant to type-check under this
+  // app's tsconfig and was drowning `tsc --noEmit` in ~150 false positives
+  // (Cannot find name 'Deno', bad import extensions, etc.) that masked real
+  // errors in the actual app code. Edge functions are checked by `supabase
+  // functions deploy` / the Deno CLI instead.
+  "exclude": ["supabase/functions/**"]
 }

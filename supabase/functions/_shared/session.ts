@@ -29,3 +29,25 @@ export async function verifySession(req: Request): Promise<AdminSession | null> 
 
   return { adminId: data.admin_id, gardenerAccountId: data.gardener_account_id, role: data.role };
 }
+
+// Same shape/reasoning as verifySession above, but for the separate,
+// lightweight customer_sessions table (see 0029_customer_sessions.sql) —
+// customers were previously identified purely by a client-claimed phone
+// string with nothing behind it. Reads the `x-customer-session-token`
+// header (never Authorization, same reason as verifySession) and returns the
+// phone that OTP verification actually proved at customer-login, or null if
+// the token is missing, unknown, or expired.
+export async function verifyCustomerSession(req: Request): Promise<{ phone: string } | null> {
+  const token = req.headers.get('x-customer-session-token');
+  if (!token) return null;
+
+  const { data } = await supabaseAdmin
+    .from('customer_sessions')
+    .select('phone, expires_at')
+    .eq('token', token)
+    .maybeSingle();
+
+  if (!data || new Date(data.expires_at) < new Date()) return null;
+
+  return { phone: data.phone };
+}

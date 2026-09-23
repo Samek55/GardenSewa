@@ -8,7 +8,7 @@ const FavoritesProfessional = () => {
         {/* Title Section */}
         <Text style={styles.title}>Favorites</Text>
         <Text style={styles.subtitle}>
-          Professionals you'd like to book again
+          Professionals you&apos;d like to book again
         </Text>
 
         {/* Membership Status Card */}
@@ -31,7 +31,7 @@ const FavoritesProfessional = () => {
 
         {/* People Who've Worked For You Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionHeader}>PEOPLE WHO'VE WORKED FOR YOU</Text>
+          <Text style={styles.sectionHeader}>PEOPLE WHO&apos;VE WORKED FOR YOU</Text>
           <Text style={styles.emptyText}>No completed bookings yet.</Text>
         </View>
       </ScrollView>

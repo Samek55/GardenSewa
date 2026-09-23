@@ -9,7 +9,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { Asset } from 'expo-asset';
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
-import { memo, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Alert, Image, Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { OneSignal } from '@/lib/oneSignal';
 
@@ -25,29 +25,29 @@ if (OneSignal && process.env.EXPO_PUBLIC_ONESIGNAL_APP_ID) {
 
 const TOTAL_DURATION_MS = 3000;
 
-const SplashOverlay = memo(({ countdownDigits }) => (
-  <View style={styles.splashOverlay}>
-    <View style={styles.centerContent}>
-      <Image
-        source={require('@/assets/images/splash-icon-actual.png')}
-        style={styles.splashImage}
-        resizeMode="contain"
-      />
-      <Text style={styles.timerText}>{countdownDigits}</Text>
+function SplashOverlay() {
+  return (
+    <View style={styles.splashOverlay}>
+      <View style={styles.centerContent}>
+        <Image
+          source={require('@/assets/images/splash-icon-actual.png')}
+          style={styles.splashImage}
+          resizeMode="contain"
+        />
+      </View>
     </View>
-  </View>
-));
+  );
+}
 
 function MainAppContent() {
   const [isAppReady, setIsAppReady] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [countdownDigits, setCountdownDigits] = useState("3000");
 
   const { isLoggedIn } = useContext(AuthContext);
   const { isAdminLoggedIn, adminRole } = useContext(AdminAuthContext);
 
   useEffect(() => {
-    let animFrameId;
+    let timeoutId;
 
     async function prepareApp() {
       SplashScreen.hideAsync().catch(() => { });
@@ -81,34 +81,13 @@ function MainAppContent() {
         require('@/assets/images/bookings/101_1.jpg'),
       ]).catch((e) => console.warn(e));
 
-      const startTime = Date.now();
-      const TICK_INTERVAL_MS = 100;
-      let lastTickMs = -1;
-
-      const tick = () => {
-        const elapsedMs = Date.now() - startTime;
-        const remainingMs = Math.max(0, TOTAL_DURATION_MS - elapsedMs);
-        const roundedMs = Math.ceil(remainingMs / TICK_INTERVAL_MS) * TICK_INTERVAL_MS;
-
-        if (roundedMs !== lastTickMs) {
-          lastTickMs = roundedMs;
-          setCountdownDigits(roundedMs.toString().padStart(4, '0'));
-        }
-
-        if (remainingMs > 0) {
-          animFrameId = requestAnimationFrame(tick);
-        } else {
-          setIsAppReady(true);
-        }
-      };
-
-      animFrameId = requestAnimationFrame(tick);
+      timeoutId = setTimeout(() => setIsAppReady(true), TOTAL_DURATION_MS);
     }
 
     prepareApp();
 
     return () => {
-      if (animFrameId) cancelAnimationFrame(animFrameId);
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, []);
 
@@ -210,7 +189,7 @@ function MainAppContent() {
         )
       )}
 
-      {!isAppReady && <SplashOverlay countdownDigits={countdownDigits} />}
+      {!isAppReady && <SplashOverlay />}
     </View>
   );
 }
@@ -243,14 +222,5 @@ const styles = StyleSheet.create({
     width: 160,
     height: 160,
     marginBottom: 16,
-  },
-  timerText: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#245d5a',
-    letterSpacing: 2,
-    fontVariant: ['tabular-nums'],
-    width: 100,
-    textAlign: 'center',
   },
 });
