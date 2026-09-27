@@ -1,8 +1,10 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  BackHandler,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,16 +16,21 @@ import {
   View,
 } from "react-native";
 import { OneSignal } from "../../lib/oneSignal";
-import SuccessAfterVerification from "../../components/SuccessModal";
 import { submitHelpbox } from "../../api/PostApiHelpbox";
 import { sendOtp, verifyOtp } from "../../api/PostApiOtp";
+
+const SUCCESS_MESSAGES = {
+  booking: "Your service booking has been submitted successfully. We'll contact you shortly.",
+  helpbox: "Thank you! Our team will call you back shortly.",
+};
+const DEFAULT_SUCCESS_MESSAGE = "Your request has been submitted successfully.";
 
 const PhoneVerification = () => {
   const router = useRouter();
 
   const { phone, requestType, otpPurpose } = useLocalSearchParams();
 
-  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -49,6 +56,17 @@ const PhoneVerification = () => {
     }
     return () => clearInterval(timer);
   }, [seconds]);
+
+  // Once submitted, hardware back should go home rather than back to the
+  // (already-submitted) form behind this screen.
+  useEffect(() => {
+    if (!isSubmitted) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      router.replace("/(tabs)/");
+      return true;
+    });
+    return () => sub.remove();
+  }, [isSubmitted, router]);
 
   const handleOtpChange = (text, index) => {
     const cleaned = text.replace(/[^0-9]/g, "");
@@ -112,7 +130,7 @@ const PhoneVerification = () => {
           OneSignal.login(phone);
           OneSignal.User.addTag("role", "customer");
         }
-        setIsOpenModal(true);
+        setIsSubmitted(true);
       } else {
         Alert.alert("Verification Failed", result.message || "Incorrect OTP");
         setOtp(["", "", "", ""]);
@@ -125,11 +143,8 @@ const PhoneVerification = () => {
     }
   };
 
-  const handleClearForm = () => {
-    setOtp(["", "", "", ""]);
-    setIsOpenModal(false);
-    inputRefs[0].current?.focus();
-    router.replace('/(tabs)/');
+  const handleGoHome = () => {
+    router.replace("/(tabs)/");
   };
 
   return (
@@ -161,74 +176,86 @@ const PhoneVerification = () => {
               },
             ]}
           >
-            <Text style={styles.signInTitle}>Phone Verification</Text>
-            <Text style={styles.instructionText}>{requestType} Request Received</Text>
-            <Text style={styles.instructionText}>Awaiting Confirmation!</Text>
-
-            <Text style={styles.instructionText}>
-              Enter the 4-digit OTP code sent to{" "}
-              <Text style={styles.phoneHighlightText}>
-                {phone || "your registered number"}
-              </Text>
-            </Text>
-
-            {/* Centered PIN row matching resetPin style */}
-            <View style={styles.pinInputsGroupRow}>
-              {otp.map((digit, index) => (
-                <TextInput
-                  key={index}
-                  ref={inputRefs[index]}
-                  style={styles.singlePinBox}
-                  value={digit}
-                  onChangeText={(text) => handleOtpChange(text, index)}
-                  onKeyPress={(e) => handleKeyPress(e, index)}
-                  keyboardType="number-pad"
-                  maxLength={1}
-                  textAlign="center"
-                />
-              ))}
-            </View>
-
-            <View style={styles.resendContainer}>
-              {canResend ? (
-                <TouchableOpacity onPress={handleResend} style={styles.resendButton} disabled={isResending}>
-                  <Text style={styles.resendBtnText}>
-                    {isResending ? "Sending..." : " Didn't get code? Resend Code"}
-                  </Text>
-                </TouchableOpacity>
-              ) : (
-                <Text style={styles.resendText}>
-                  Resend Code in <Text style={styles.timerHighlight}>{seconds}s</Text>
+            {isSubmitted ? (
+              <View style={styles.successContainer}>
+                <View style={styles.successIconCircle}>
+                  <Ionicons name="checkmark-done" size={56} color="#2C5E5A" />
+                </View>
+                <Text style={styles.successTitle}>Successfully Submitted!</Text>
+                <Text style={styles.instructionText}>
+                  {SUCCESS_MESSAGES[otpPurpose] || DEFAULT_SUCCESS_MESSAGE}
                 </Text>
-              )}
-            </View>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={styles.homeButton}
+                  onPress={handleGoHome}
+                  accessibilityRole="button"
+                  accessibilityLabel="Go to home"
+                >
+                  <Ionicons name="home" size={22} color="#FFF" />
+                  <Text style={styles.loginButtonText}>Home</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <>
+                <Text style={styles.signInTitle}>Phone Verification</Text>
+                <Text style={styles.instructionText}>{requestType} Request Received</Text>
+                <Text style={styles.instructionText}>Awaiting Confirmation!</Text>
 
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.loginSubmitButton}
-              onPress={handleSubmit}
-              disabled={isVerifying}
-            >
-              {isVerifying ? (
-                <ActivityIndicator color="#FFF" />
-              ) : (
-                <Text style={styles.loginButtonText}>Submit</Text>
-              )}
-            </TouchableOpacity>
+                <Text style={styles.instructionText}>
+                  Enter the 4-digit OTP code sent to{" "}
+                  <Text style={styles.phoneHighlightText}>
+                    {phone || "your registered number"}
+                  </Text>
+                </Text>
+
+                {/* Centered PIN row matching resetPin style */}
+                <View style={styles.pinInputsGroupRow}>
+                  {otp.map((digit, index) => (
+                    <TextInput
+                      key={index}
+                      ref={inputRefs[index]}
+                      style={styles.singlePinBox}
+                      value={digit}
+                      onChangeText={(text) => handleOtpChange(text, index)}
+                      onKeyPress={(e) => handleKeyPress(e, index)}
+                      keyboardType="number-pad"
+                      maxLength={1}
+                      textAlign="center"
+                    />
+                  ))}
+                </View>
+
+                <View style={styles.resendContainer}>
+                  {canResend ? (
+                    <TouchableOpacity onPress={handleResend} style={styles.resendButton} disabled={isResending}>
+                      <Text style={styles.resendBtnText}>
+                        {isResending ? "Sending..." : " Didn't get code? Resend Code"}
+                      </Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <Text style={styles.resendText}>
+                      Resend Code in <Text style={styles.timerHighlight}>{seconds}s</Text>
+                    </Text>
+                  )}
+                </View>
+
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={styles.loginSubmitButton}
+                  onPress={handleSubmit}
+                  disabled={isVerifying}
+                >
+                  {isVerifying ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <Text style={styles.loginButtonText}>Submit</Text>
+                  )}
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </ScrollView>
-
-        <SuccessAfterVerification
-          visible={isOpenModal}
-          onClose={() => setIsOpenModal(false)}
-          onClear={handleClearForm}
-          title={otpPurpose === "helpbox" ? "Request Received!" : undefined}
-          subtitle={
-            otpPurpose === "helpbox"
-              ? "Thank you! Our team will call you back shortly."
-              : undefined
-          }
-        />
       </KeyboardAvoidingView>
     </View>
   );
@@ -319,6 +346,37 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     justifyContent: "center",
     alignItems: "center",
+  },
+  successContainer: {
+    alignItems: "center",
+    gap: 16,
+    marginTop: 40,
+  },
+  successIconCircle: {
+    width: 104,
+    height: 104,
+    borderRadius: 52,
+    backgroundColor: "#E8F4F1",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  successTitle: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: "#1D1B1B",
+    textAlign: "center",
+  },
+  homeButton: {
+    flexDirection: "row",
+    gap: 8,
+    backgroundColor: "#2C5E5A",
+    paddingHorizontal: 32,
+    height: 52,
+    borderRadius: 26,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 16,
   },
   loginButtonText: {
     color: "#FFF",

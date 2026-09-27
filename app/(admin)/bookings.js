@@ -1,8 +1,8 @@
 import Header4Admin from '@/components/admin/Header4Admin';
 import { useTheme } from '@/context/ThemeContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router } from 'expo-router';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -49,7 +49,9 @@ export default function Bookings() {
     const styles = useMemo(() => createStyles(colors), [colors]);
     const { adminRole } = useContext(AdminAuthContext);
 
-    const [statusFilter, setStatusFilter] = useState('New / Open');
+    // Every new submission lands in Draft until reviewed and published (see
+    // 0024_booking_draft_publish_status.sql), so that's what admins need first.
+    const [statusFilter, setStatusFilter] = useState('Draft');
     const [filterOpen, setFilterOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
     const [search, setSearch] = useState('');
@@ -88,10 +90,20 @@ export default function Bookings() {
         }
     }, []);
 
-    useEffect(() => {
-        setLoading(true);
-        load().finally(() => setLoading(false));
-    }, [load]);
+    // Reload on every focus, not just mount — reviewBooking publishes and then
+    // router.back()s here, and a stale list would still show it as Draft.
+    const hasLoaded = useRef(false);
+    useFocusEffect(
+        useCallback(() => {
+            if (hasLoaded.current) {
+                load();
+                return;
+            }
+            hasLoaded.current = true;
+            setLoading(true);
+            load().finally(() => setLoading(false));
+        }, [load])
+    );
 
     const handleRefresh = async () => {
         setRefreshing(true);

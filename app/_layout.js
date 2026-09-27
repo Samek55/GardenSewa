@@ -24,17 +24,31 @@ if (OneSignal && process.env.EXPO_PUBLIC_ONESIGNAL_APP_ID) {
 }
 
 const TOTAL_DURATION_MS = 3000;
+// Upper bound on waiting for the overlay's logo before hiding the native
+// splash anyway, so a failed image load can't leave it up forever.
+const NATIVE_SPLASH_FALLBACK_MS = 1000;
 
+let nativeSplashHidden = false;
+const hideNativeSplash = () => {
+  if (nativeSplashHidden) return;
+  nativeSplashHidden = true;
+  SplashScreen.hideAsync().catch(() => { });
+};
+
+// Must match the native splash (app.json's expo-splash-screen: same image,
+// 160 wide, contain, white, dead centre) pixel-for-pixel, so the hand-off
+// from native to this overlay is invisible. The native splash is only
+// hidden once this logo has actually drawn — hiding it earlier shows a
+// blank white frame before the image decodes.
 function SplashOverlay() {
   return (
     <View style={styles.splashOverlay}>
-      <View style={styles.centerContent}>
-        <Image
-          source={require('@/assets/images/splash-icon-actual.png')}
-          style={styles.splashImage}
-          resizeMode="contain"
-        />
-      </View>
+      <Image
+        source={require('@/assets/images/splash-icon-actual.png')}
+        style={styles.splashImage}
+        resizeMode="contain"
+        onLoadEnd={hideNativeSplash}
+      />
     </View>
   );
 }
@@ -49,8 +63,9 @@ function MainAppContent() {
   useEffect(() => {
     let timeoutId;
 
+    const fallbackId = setTimeout(hideNativeSplash, NATIVE_SPLASH_FALLBACK_MS);
+
     async function prepareApp() {
-      SplashScreen.hideAsync().catch(() => { });
 
       Asset.loadAsync([
         require('@/assets/images/home/hero.jpg'),
@@ -87,6 +102,7 @@ function MainAppContent() {
     prepareApp();
 
     return () => {
+      clearTimeout(fallbackId);
       if (timeoutId) clearTimeout(timeoutId);
     };
   }, []);
@@ -214,13 +230,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 99999,
   },
-  centerContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   splashImage: {
     width: 160,
     height: 160,
-    marginBottom: 16,
   },
 });

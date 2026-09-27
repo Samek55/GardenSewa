@@ -70,17 +70,26 @@ export default function Index() {
 
         let timer;
         (async () => {
-            const lastShownRaw = await AsyncStorage.getItem(LAST_PROMO_AD_SHOWN_KEY);
-            const lastShown = lastShownRaw ? Number(lastShownRaw) : 0;
-            if (Date.now() - lastShown < PROMO_AD_COOLDOWN_MS) return;
-
             const result = await fetchActivePopupBanner(userType, adminPhone).catch(() => null);
             if (!result?.success || !result.banner) return;
+
+            // The 24h cooldown is per banner: a newly published (or re-saved)
+            // banner shows right away instead of waiting out a cooldown some
+            // earlier banner started on this device.
+            let lastShown = null;
+            try {
+                lastShown = JSON.parse(await AsyncStorage.getItem(LAST_PROMO_AD_SHOWN_KEY));
+            } catch {
+                // Old format (bare timestamp) or unreadable — treat as never shown.
+            }
+            const bannerKey = `${result.banner.id}:${result.banner.updated_at || ''}`;
+            if (lastShown?.key === bannerKey && Date.now() - lastShown.at < PROMO_AD_COOLDOWN_MS) return;
 
             timer = setTimeout(async () => {
                 setActiveBanner(result.banner);
                 setIsAdVisible(true);
-                await AsyncStorage.setItem(LAST_PROMO_AD_SHOWN_KEY, String(Date.now()));
+                await AsyncStorage.setItem(LAST_PROMO_AD_SHOWN_KEY, JSON.stringify({ key: bannerKey, at: Date.now() }))
+                    .catch(() => {});
             }, 500);
         })();
         return () => clearTimeout(timer);

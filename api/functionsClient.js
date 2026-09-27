@@ -19,6 +19,30 @@ import { supabase } from '../lib/supabase';
 // much lighter-weight thing (no role, no lockout) than an admin/gardener one.
 const INVOKE_TIMEOUT_MS = 15000;
 
+// Set by AdminAuthContext — called when a session-gated call comes back 401
+// and session-status confirms the token itself is dead (expired, or the
+// account was disabled), so the app signs out instead of looking logged in.
+// A 401 alone isn't enough: many functions also answer a valid session with
+// the wrong role with the same 401 "Please log in again."
+let onAdminSessionEnded = null;
+let checkingSession = false;
+export const setAdminSessionEndedHandler = (handler) => {
+    onAdminSessionEnded = handler;
+};
+
+async function checkAdminSessionEnded(headers) {
+    if (!onAdminSessionEnded || checkingSession) return;
+    checkingSession = true;
+    try {
+        const { data } = await supabase.functions.invoke('session-status', { body: {}, headers });
+        if (data && data.valid === false) await onAdminSessionEnded();
+    } catch {
+        // Network trouble etc. — don't sign anyone out on a guess.
+    } finally {
+        checkingSession = false;
+    }
+}
+
 export async function invokeEdgeFunction(name, body, fallbackMessage, options) {
     let headers;
     if (options?.requireSession) {
@@ -39,6 +63,9 @@ export async function invokeEdgeFunction(name, body, fallbackMessage, options) {
     ]);
     if (!error) return data;
     if (error instanceof FunctionsHttpError) {
+        if (options?.requireSession && headers && error.context?.status === 401) {
+            checkAdminSessionEnded(headers);
+        }
         try {
             return await error.context.json();
         } catch {

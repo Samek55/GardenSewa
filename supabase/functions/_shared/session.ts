@@ -14,7 +14,8 @@ export interface AdminSession {
 // Reads the session token from the `x-admin-session-token` header — never
 // Authorization, which Supabase's gateway already consumes for the anon-key
 // JWT check before function code ever runs. Returns null if the token is
-// missing, unknown, or expired; callers should treat that as "not logged in."
+// missing, unknown, or expired, or its account has since been disabled;
+// callers should treat that as "not logged in."
 export async function verifySession(req: Request): Promise<AdminSession | null> {
   const token = req.headers.get('x-admin-session-token');
   if (!token) return null;
@@ -26,6 +27,21 @@ export async function verifySession(req: Request): Promise<AdminSession | null> 
     .maybeSingle();
 
   if (!data || new Date(data.expires_at) < new Date()) return null;
+
+  // toggle-*-status already deletes a disabled account's sessions; this also
+  // covers any session that outlived that (e.g. disabled before that existed).
+  // Only a status actually read back as non-Active rejects — a failed lookup
+  // must never sign every user out.
+  const { data: owner, error: ownerError } = await supabaseAdmin
+    .from(data.admin_id ? 'admin' : 'gardener_account')
+    .select('status')
+    .eq('id', data.admin_id ?? data.gardener_account_id)
+    .maybeSingle();
+  if (ownerError) console.error('verifySession status lookup failed:', ownerError);
+  if (owner && owner.status !== 'Active') {
+    await supabaseAdmin.from('admin_sessions').delete().eq('token', token);
+    return null;
+  }
 
   return { adminId: data.admin_id, gardenerAccountId: data.gardener_account_id, role: data.role };
 }

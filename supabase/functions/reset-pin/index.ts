@@ -4,6 +4,7 @@ import { hash } from 'npm:bcrypt-ts@5';
 import { corsHeaders, json } from '../_shared/cors.ts';
 import { supabaseAdmin, cleanPhone } from '../_shared/supabaseAdmin.ts';
 import { checkOtp } from '../_shared/otp.ts';
+import { resolveLoginAccount } from '../_shared/loginAccount.ts';
 import { sendSms } from '../_shared/easyservice.ts';
 
 // "Forgot PIN" only — the one flow GardenSewa's UI actually has a reachable
@@ -25,22 +26,9 @@ Deno.serve(async (req) => {
       return json({ success: false, message: 'Invalid request' }, 400);
     }
 
-    const { data: adminRow } = await supabaseAdmin
-      .from('admin')
-      .select('id, full_name')
-      .eq('phone', cleaned)
-      .maybeSingle();
-
-    const isGardener = !adminRow;
-    let account: { id: string; full_name: string } | null | undefined = adminRow;
-    if (isGardener) {
-      const { data: gardenerRow } = await supabaseAdmin
-        .from('gardener_account')
-        .select('id, full_name')
-        .eq('phone', cleaned)
-        .maybeSingle();
-      account = gardenerRow;
-    }
+    // Same account admin-login would pick, so the PIN reset is the one the
+    // user actually logs in with.
+    const { account, isGardener } = await resolveLoginAccount(cleaned, 'id, full_name');
 
     if (!account) {
       return json({ success: false, message: 'This phone number is not registered.' }, 404);

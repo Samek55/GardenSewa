@@ -1,5 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import { createContext, useEffect, useState } from 'react';
+import { Alert } from 'react-native';
+import { setAdminSessionEndedHandler } from '../api/functionsClient';
 import { OneSignal } from '../lib/oneSignal';
 
 export const AdminAuthContext = createContext();
@@ -76,6 +79,18 @@ export const AdminAuthProvider = ({ children }) => {
             OneSignal.logout();
         }
     };
+
+    // The server has dropped this session — usually because a Super Admin
+    // disabled the account. Signing back in shows why (admin-login's
+    // "Account Disabled" message), so this just gets them there.
+    useEffect(() => {
+        setAdminSessionEndedHandler(async () => {
+            await adminLogoutLocal();
+            router.replace('/adminLogin');
+            Alert.alert('Signed Out', 'Your session has ended. Please log in again.');
+        });
+        return () => setAdminSessionEndedHandler(null);
+    }, []);
 
     return (
         <AdminAuthContext.Provider

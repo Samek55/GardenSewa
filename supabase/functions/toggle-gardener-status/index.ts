@@ -23,6 +23,11 @@ Deno.serve(async (req) => {
     const { error } = await supabaseAdmin.from('gardener_account').update({ status }).eq('id', id);
     if (error) throw new Error(error.message);
 
+    // Sign them out everywhere now rather than when the 30-day session expires.
+    if (status === 'Inactive') {
+      await supabaseAdmin.from('admin_sessions').delete().eq('gardener_account_id', id);
+    }
+
     return json({ success: true });
   } catch (e) {
     console.error('toggle-gardener-status error:', e);

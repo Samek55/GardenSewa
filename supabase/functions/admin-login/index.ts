@@ -6,6 +6,7 @@
 import { compare } from 'npm:bcrypt-ts@5';
 import { corsHeaders, json } from '../_shared/cors.ts';
 import { supabaseAdmin, cleanPhone } from '../_shared/supabaseAdmin.ts';
+import { resolveLoginAccount } from '../_shared/loginAccount.ts';
 
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MINUTES = 15;
@@ -14,8 +15,8 @@ const SESSION_DAYS = 30;
 // Shared login for both back-office accounts (admin table) and approved
 // gardeners (gardener_account) — same unification HomeSewa's own admin-login
 // does across its admin/professional tables, so the app only ever needs one
-// login screen. Falls through to gardener_account only when the phone isn't
-// a back-office account, exactly mirroring HomeSewa's isProfessional branch.
+// login screen. Falls through to gardener_account when the phone has no
+// Active back-office account (see resolveLoginAccount).
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
@@ -26,23 +27,10 @@ Deno.serve(async (req) => {
       return json({ success: false, message: 'Invalid phone or PIN' }, 400);
     }
 
-    const { data: adminRow } = await supabaseAdmin
-      .from('admin')
-      .select('id, full_name, status, pin_hash, role, failed_attempts, locked_until')
-      .eq('phone', cleaned)
-      .maybeSingle();
-
-    const isGardener = !adminRow;
-    let account: any = adminRow;
-
-    if (isGardener) {
-      const { data: gardenerRow } = await supabaseAdmin
-        .from('gardener_account')
-        .select('id, full_name, status, pin_hash, failed_attempts, locked_until')
-        .eq('phone', cleaned)
-        .maybeSingle();
-      account = gardenerRow;
-    }
+    const { account, isGardener } = await resolveLoginAccount(
+      cleaned,
+      'id, full_name, pin_hash, failed_attempts, locked_until',
+    );
 
     if (!account) {
       return json({ success: false, message: 'Invalid phone or PIN' }, 401);
@@ -69,8 +57,14 @@ Deno.serve(async (req) => {
     // Correct PIN — reset the lockout counter.
     await supabaseAdmin.from(table).update({ failed_attempts: 0, locked_until: null }).eq('id', account.id);
 
+    // Only a Super Admin can re-enable (toggle-admin-status /
+    // toggle-gardener-status), so point them at the team rather than retrying.
     if (account.status !== 'Active') {
-      return json({ success: false, message: `Account status: ${account.status}` });
+      return json({
+        success: false,
+        accountDisabled: true,
+        message: 'Your account has been disabled. Please contact the Garden Sewa team at 9852024365 to enable it again.',
+      });
     }
 
     const sessionToken = crypto.randomUUID();

@@ -87,6 +87,14 @@ const AdminLogin = () => {
         try {
             const result = await adminLoginRequest(rawPhone, fullPin);
 
+            if (result.accountDisabled) {
+                Alert.alert("Account Disabled", result.message, [
+                    { text: "Contact Team", onPress: () => router.push("/contact") },
+                    { text: "OK", style: "cancel" },
+                ]);
+                return;
+            }
+
             if (!result.success) {
                 Alert.alert(
                     "Access Denied",

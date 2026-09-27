@@ -23,6 +23,13 @@ Deno.serve(async (req) => {
     const { error } = await supabaseAdmin.from('admin').update({ status }).eq('id', id);
     if (error) throw new Error(error.message);
 
+    // Disabling must take effect now, not when the 30-day session expires —
+    // and signing them out is what lets someone who's also a professional
+    // log back in as that account (see resolveLoginAccount).
+    if (status === 'Inactive') {
+      await supabaseAdmin.from('admin_sessions').delete().eq('admin_id', id);
+    }
+
     return json({ success: true });
   } catch (e) {
     console.error('toggle-admin-status error:', e);

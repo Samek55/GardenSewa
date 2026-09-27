@@ -2,6 +2,7 @@ import { corsHeaders, json } from '../_shared/cors.ts';
 import { supabaseAdmin, cleanPhone } from '../_shared/supabaseAdmin.ts';
 import { verifySession } from '../_shared/session.ts';
 import { issueOtp } from '../_shared/otp.ts';
+import { notifyStaffOfBooking } from '../_shared/staffAlerts.ts';
 
 // HR's ask: a customer with a keypad phone or who isn't comfortable with a
 // smartphone can call in and have a BDM submit the request for them. Same
@@ -60,6 +61,8 @@ Deno.serve(async (req) => {
       .select('booking_id')
       .single();
     if (error) throw new Error(error.message);
+
+    await notifyStaffOfBooking({ booking_id: booking.booking_id, full_name: fullName, service, area, phone: cleanedCustomerPhone });
 
     // Confirmation goes to the BDM's own phone, never the customer's — this
     // is the whole point of the flow (see 0011_bdm_booking_submission.sql).

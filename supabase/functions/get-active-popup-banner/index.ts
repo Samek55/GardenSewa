@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
       .from('popup_banners')
       .select(
         'id, title, message, image_url, button_text, button_link, ' +
-        'close_countdown_enabled, close_countdown_seconds, start_date, end_date, ' +
+        'close_countdown_enabled, close_countdown_seconds, start_date, end_date, updated_at, ' +
         'target_user_types, target_professions'
       )
       .eq('is_active', true)

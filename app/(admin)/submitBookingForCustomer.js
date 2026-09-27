@@ -1,5 +1,6 @@
 import AdminButton from '@/components/admin/AdminButton';
 import Header4Admin from '@/components/admin/Header4Admin';
+import SelectField from '@/components/admin/SelectField';
 import { useTheme } from '@/context/ThemeContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
@@ -7,8 +8,6 @@ import { useContext, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
-    FlatList,
-    Modal,
     ScrollView,
     StyleSheet,
     Text,
@@ -45,44 +44,6 @@ export default function SubmitBookingForCustomer() {
     const [otp, setOtp] = useState(['', '', '', '']);
     const [verifying, setVerifying] = useState(false);
 
-    // A compact "pick one" field — book.js has its own richer version of this,
-    // but it's defined inline there and not exported; this screen's needs
-    // (single-select from a short list, no search) are simple enough not to
-    // warrant pulling that apart just to share it.
-    const SelectField = ({ label, required, value, placeholder, options, onSelect, getLabel = (o) => o }) => {
-        const [open, setOpen] = useState(false);
-        return (
-            <View style={styles.field}>
-                <Text style={styles.label}>{label}{required && <Text style={styles.asterisk}> *</Text>}</Text>
-                <TouchableOpacity style={styles.selectTrigger} onPress={() => setOpen(true)}>
-                    <Text style={[styles.selectTriggerText, !value && styles.placeholderText]}>
-                        {value ? getLabel(value) : placeholder}
-                    </Text>
-                    <Ionicons name="chevron-down" size={18} color={colors.textSecondary} />
-                </TouchableOpacity>
-                <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-                    <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setOpen(false)}>
-                        <View style={styles.modalCard}>
-                            <Text style={styles.modalTitle}>{label}</Text>
-                            <FlatList
-                                data={options}
-                                keyExtractor={(item, i) => String(item.id ?? item ?? i)}
-                                style={{ maxHeight: 350 }}
-                                renderItem={({ item }) => (
-                                    <TouchableOpacity
-                                        style={styles.optionRow}
-                                        onPress={() => { onSelect(item); setOpen(false); }}
-                                    >
-                                        <Text style={styles.optionText}>{getLabel(item)}</Text>
-                                    </TouchableOpacity>
-                                )}
-                            />
-                        </View>
-                    </TouchableOpacity>
-                </Modal>
-            </View>
-        );
-    };
 
     // Same reasoning as manageStaff.js's fix — adminRole is null until
     // AdminAuthContext finishes reading AsyncStorage, so checking it before
@@ -244,7 +205,7 @@ export default function SubmitBookingForCustomer() {
                 <SelectField
                     label="Service" required
                     value={form.service} placeholder="Select a service"
-                    options={categories} getLabel={(o) => o.title}
+                    options={categories} getLabel={(o) => o.title} searchable
                     onSelect={(o) => set('service')(o.title)}
                 />
 
@@ -258,8 +219,8 @@ export default function SubmitBookingForCustomer() {
                 <SelectField
                     label="Area" required
                     value={form.area} placeholder={form.city ? 'Select area' : 'Select a city first'}
-                    options={availableAreas.map((a, i) => ({ id: i, name: a }))} getLabel={(o) => o.name}
-                    onSelect={(o) => set('area')(o.name)}
+                    options={availableAreas} searchable
+                    onSelect={set('area')}
                 />
 
                 <SelectField
@@ -338,11 +299,6 @@ const createStyles = (colors) => StyleSheet.create({
     selectTrigger: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 12 },
     selectTriggerText: { fontSize: 14, color: colors.textPrimary },
     placeholderText: { color: colors.textMuted },
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 24 },
-    modalCard: { backgroundColor: colors.surface, borderRadius: 18, padding: 16 },
-    modalTitle: { fontSize: 16, fontWeight: '700', marginBottom: 10, color: colors.textPrimary },
-    optionRow: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.divider },
-    optionText: { fontSize: 14, color: colors.textSecondary },
     submitButton: { marginTop: 12, marginBottom: 30 },
     otpCard: { backgroundColor: colors.surface, margin: 16, borderRadius: 18, padding: 20 },
     otpTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary, marginBottom: 8 },
